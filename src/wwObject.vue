@@ -1,5 +1,7 @@
 <template>
-	<div v-html="text">
+	<div>
+		<div v-html="text">
+		</div>
 	</div>
 </template>
 
