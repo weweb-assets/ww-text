@@ -19,30 +19,7 @@ export default {
   },
   methods: {},
   computed: {},
-  created: function() {
-    const wwObjectName = "ww-text";
-    const wwEnableMetrics = false;
-
-    wwLib.wwObject.registerContentType(
-      wwObjectName,
-      {
-        type: wwObjectName,
-        data: {
-          text: {
-            fr_FR: "Nouveau texte"
-          },
-          tag: "div", //h1, quote, code, ...
-          align: "",
-          font: "",
-          size: "",
-          color: "",
-          classes: [],
-          children: []
-        }
-      },
-      wwEnableMetrics
-    );
-  },
+  created: function() {},
   mounted: function() {
     this.text = wwLib.wwLang.getText(this.wwObject.content.data.text);
 
