@@ -12,7 +12,14 @@ import Vue from 'vue'
 export default {
 	name: 'ww-text',
 	props: {
-		wwObject: Object
+		wwObject: {
+			type: Object,
+			default: {}
+		},
+		wwAttrs: {
+			type: Object,
+			default: {}
+		}
 	},
 	data() {
 		return {
