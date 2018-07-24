@@ -1,6 +1,10 @@
 <template>
 	<div>
-		<conponent :is="wwObject.content.data.tag" v-html="text">
+		<conponent :is="wwObject.content.data.tag" class="ww-text-content">
+			<span v-for="(t, index) in splitedText()" :key="index" v-if="t.trim() != ''">
+				<span v-html="t" v-if="!isWwObject(t)"></span>
+				<wwObject v-if="isWwObject(t) && getWwObject(t)" v-bind:ww-object="getWwObject(t)"></wwObject>
+			</span>
 		</conponent>
 	</div>
 </template>
@@ -26,7 +30,28 @@ export default {
 			text: ''
 		};
 	},
-	methods: {},
+	methods: {
+		splitedText() {
+			return this.text.split(/\[\[|\]\]/);
+		},
+		isWwObject(text) {
+			return text.indexOf("wwObject=") == 0;
+		},
+		getWwObject(text) {
+			let index = text.replace('wwObject=', '');
+			try {
+				index = parseInt(index);
+			}
+			catch (e) {
+				console.log('wwObject in text Error', t);
+				return null;
+			}
+			if (this.wwObject.data && this.wwObject.data.children && this.wwObject.data.children[index]) {
+				return this.wwObject.data.children[index];
+			}
+			return null;
+		}
+	},
 	computed: {},
 	created: function () {
 
@@ -37,6 +62,7 @@ export default {
 		this.wwObject.content.data.tag = this.wwObject.content.data.tag || 'div';
 
 		this.wwObject.content.data.tag = 'h2';
+
 
 		wwLib.wwElementsStyle.applyAllStyles({
 			wwObject: this.wwObject,
@@ -64,5 +90,10 @@ h4 {
   -webkit-margin-start: 0;
   -webkit-margin-end: 0;
   margin: 0;
+}
+
+.ww-text-content .ww-object-directive-wrapper,
+.ww-text-content .ww-object-directive {
+  display: inline-block;
 }
 </style>
