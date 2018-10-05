@@ -70,6 +70,8 @@ export default {
 			element: this.$el
 		});
 
+		this.$emit('ww-loaded', this);
+
 		const self = this;
 		wwLib.$on("wwLang:changed", function (l) {
 			self.text = wwLib.wwLang.getText(self.wwObject.content.data.text);
