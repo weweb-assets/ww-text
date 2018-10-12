@@ -16,10 +16,7 @@ import Vue from 'vue'
 export default {
 	name: 'ww-text',
 	props: {
-		wwObject: {
-			type: Object,
-			default: {}
-		},
+		wwObjectRef: Object,
 		wwAttrs: {
 			type: Object,
 			default: {}
@@ -27,8 +24,21 @@ export default {
 	},
 	data() {
 		return {
-			text: ''
 		};
+	},
+	computed: {
+		wwObject() {
+			//return this.wwObjectRef.wwGet();
+			return this.$store.state.wwObjects[this.wwObjectRef.uniqueId];
+		},
+		text() {
+			return wwLib.wwLang.getText(this.wwObject.content.data.text);
+		}
+	},
+	watch: {
+		wwObject() {
+			this.text = wwLib.wwLang.getText(this.wwObject.content.data.text);
+		}
 	},
 	methods: {
 		splitedText() {
@@ -52,12 +62,11 @@ export default {
 			return null;
 		}
 	},
-	computed: {},
 	created: function () {
-
 	},
 	mounted: function () {
-		this.text = wwLib.wwLang.getText(this.wwObject.content.data.text);
+
+		//this.text = wwLib.wwLang.getText(this.wwObject.content.data.text);
 
 		this.wwObject.content.data.tag = this.wwObject.content.data.tag || 'div';
 
