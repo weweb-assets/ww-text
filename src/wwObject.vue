@@ -16,7 +16,7 @@ import Vue from 'vue'
 export default {
 	name: 'ww-text',
 	props: {
-		wwObjectRef: Object,
+		wwObject: Object,
 		wwAttrs: {
 			type: Object,
 			default: {}
@@ -27,18 +27,11 @@ export default {
 		};
 	},
 	computed: {
-		wwObject() {
-			//return this.wwObjectRef.wwGet();
-			return this.$store.state.wwObjects[this.wwObjectRef.uniqueId];
-		},
 		text() {
 			return wwLib.wwLang.getText(this.wwObject.content.data.text);
 		}
 	},
 	watch: {
-		wwObject() {
-			this.text = wwLib.wwLang.getText(this.wwObject.content.data.text);
-		}
 	},
 	methods: {
 		splitedText() {
