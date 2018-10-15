@@ -1,4 +1,4 @@
-import wwObject from './wwObject.vue'
+import wwObject from './wwObjectText.vue'
 
 const name = "ww-text";
 const wwEnableMetrics = false;
