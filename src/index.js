@@ -1,7 +1,7 @@
-import wwObject from './wwObjectText.vue'
+import wwObject from './wwObjectButton.vue'
 
-const name = "ww-text";
-const wwEnableMetrics = false;
+const name = "ww-button";
+const wwEnableMetrics = true;
 
 const addComponent = function () {
     if (window.vm) {
@@ -12,15 +12,15 @@ const addComponent = function () {
                 type: name,
                 data: {
                     text: {
-                        fr_FR: "Nouveau texte"
+                        fr_FR: "Nouveau bouton",
+                        en_GB: "New Button"
                     },
-                    tag: "div", //h1, quote, code, ...
-                    align: "",
-                    font: "",
-                    size: "",
-                    color: "",
-                    classes: [],
-                    children: []
+                    color: '#FFFFFF',
+                    borderColor: '#FFFFFF',
+                    backgroundColor: '#FFFFFF',
+                    font: '',
+                    classes: ["ww-class-btn-bg-none", "ww-class-btn-padding-small", "ww-class-btn-border-small", "ww-class-btn-format-round-small", "ww-class-font-size-small"],
+                    fullWidth: false
                 }
             },
             wwEnableMetrics
