@@ -24,10 +24,12 @@ export default {
     },
     data() {
         return {
-            wwObject: this.wwObjectCtrl.get(),
         };
     },
     computed: {
+        wwObject() {
+            return this.wwObjectCtrl.get();
+        },
         text() {
             return wwLib.wwLang.getText(this.wwObject.content.data.text);
         }
@@ -63,9 +65,6 @@ export default {
         //this.text = wwLib.wwLang.getText(this.wwObject.content.data.text);
 
         this.wwObject.content.data.tag = this.wwObject.content.data.tag || 'div';
-
-        this.wwObject.content.data.tag = 'h2';
-
 
         wwLib.wwElementsStyle.applyAllStyles({
             wwObject: this.wwObject,
