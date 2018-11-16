@@ -6,9 +6,8 @@ const wwEnableMetrics = false;
 const addComponent = function () {
     if (window.vm) {
 
-        wwLib.wwObject.registerContentType(
-            name,
-            {
+        wwLib.wwObject.register({
+            content: {
                 type: name,
                 data: {
                     text: {
@@ -23,8 +22,12 @@ const addComponent = function () {
                     children: []
                 }
             },
-            wwEnableMetrics
-        );
+            enableMetrics: wwEnableMetrics,
+            /* wwManager:start */
+            cmsOptions: {
+            }
+            /* wwManager:end */
+        });
 
         window.vm.addComponent(name, wwObject);
 

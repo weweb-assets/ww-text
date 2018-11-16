@@ -5,6 +5,12 @@
                 <span v-html="t" v-if="!isWwObject(t)"></span>
                 <wwObject v-if="isWwObject(t) && getWwObject(t)" v-bind:ww-object="getWwObject(t)"></wwObject>
             </span>
+
+            <!--
+            <span v-if="isTextEmpty()" class="no-text">
+                <i>Type a text...</i>
+            </span>
+            -->
         </conponent>
     </div>
 </template>
@@ -39,6 +45,9 @@ export default {
     methods: {
         splitedText() {
             return this.text.split(/\[\[|\]\]/);
+        },
+        isTextEmpty() {
+            return this.text.trim() == "";
         },
         isWwObject(text) {
             return text.indexOf("wwObject=") == 0;
@@ -99,5 +108,9 @@ h4 {
 .ww-text-content .ww-object-directive-wrapper,
 .ww-text-content .ww-object-directive {
   display: inline-block;
+}
+
+.no-text {
+  color: grey;
 }
 </style>
