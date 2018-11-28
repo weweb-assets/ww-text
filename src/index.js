@@ -1,7 +1,6 @@
 import wwObject from './wwObjectText.vue'
 
 const name = "ww-text";
-const wwEnableMetrics = false;
 
 const addComponent = function () {
     if (window.vm) {
@@ -22,7 +21,11 @@ const addComponent = function () {
                     children: []
                 }
             },
-            enableMetrics: wwEnableMetrics,
+            upsales: {
+                wwAnalytics: {
+                    click: false
+                }
+            },
             /* wwManager:start */
             cmsOptions: {
             }
