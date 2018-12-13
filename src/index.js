@@ -28,6 +28,12 @@ const addComponent = function () {
             },
             /* wwManager:start */
             cmsOptions: {
+                wwObjectMenu: {
+                    disabled: true
+                },
+                wwObjectHover: {
+                    hoverClass: 'getHoverTag'
+                }
             }
             /* wwManager:end */
         });
