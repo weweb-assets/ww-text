@@ -1,23 +1,3 @@
-<!--
-<template>
-    <conponent :is="wwObject.content.data.tag" @click="click($event)" class="ww-text-content" :contenteditable="wwObjectCtrl.getSectionCtrl().getEditMode() == 'CONTENT' && focus">
-        <!--
-            <span v-for="(t, index) in splitedText()" :key="index" v-if="t.trim() != ''">
-                <span v-html="t" v-if="!isWwObject(t)"></span>
-                <wwObject v-if="isWwObject(t) && getWwObject(t)" v-bind:ww-object="getWwObject(t)"></wwObject>
-            </span>
-        -->
-        <!--<component v-for="t in splitedText" :key="t.id" v-if="t.text.trim() != ''" :is="getType(t.text)" :ww-object="getWwObject(t.text)"></component>-->
-        <!--
-            <span v-if="isTextEmpty()" class="no-text">
-                <i>Type a text...</i>
-            </span>
-        -->
-    <!--
-    </conponent>
-</template>
--->
-
 
 <script>
 import Vue from 'vue'
@@ -90,6 +70,9 @@ export default {
                             vn
                         )
                     }
+                    else if (node.nodeName.toLowerCase() == 'script') {
+                        continue;
+                    }
                     else {
                         let vn = createVNodes(node.childNodes);
 
@@ -127,8 +110,6 @@ export default {
                 createVNodes(childNodes)
             )
 
-
-
             return root;
         }
 
@@ -140,9 +121,8 @@ export default {
             default: {}
         }
     },
-    data() {
+    data: function () {
         return {
-            //text: '',
             /* wwManager:start */
             focus: false,
             textBar: null,
@@ -154,23 +134,6 @@ export default {
         wwObject() {
             return this.wwObjectCtrl.get();
         },
-        /*
-        splitedText() {
-
-            console.log('resplit')
-            let splited = this.text.split(/\[\[|\]\]/);
-
-            let result = [];
-            for (let t of splited) {
-                result.push({
-                    text: t,
-                    id: wwLib.wwUtils.getUniqueId()
-                })
-            }
-
-            return result;
-        },
-        */
         editing() {
             return this.wwObjectCtrl.getSectionCtrl().getEditMode() == 'CONTENT' && this.focus
         }
@@ -213,8 +176,6 @@ export default {
     },
     methods: {
         getTextFromDom() {
-
-
 
             function getText(node, newNode, isChild) {
 
@@ -350,7 +311,7 @@ export default {
                         this.addLink()
                         break;
                     case 'add':
-
+                        this.addWwObject();
                         break;
                     case 'exec':
                         this.exec(action, value)
@@ -669,18 +630,37 @@ export default {
             }
 
             this.textSelection = this.getSelection();
-        }
+        },
+
+        addWwObject() {
+            const newWwObject = wwLib.wwObject.getDefault({ type: 'ww-button' });
+
+            //Find first empty index in current wwObject children
+            let index = 0;
+            while (this.wwObject.data.children[index]) {
+                index++;
+            }
+            console.log(index);
+
+            this.wwObject.data.children[index] = newWwObject;
+
+            this.replaceSelectionWithHtml('[[wwObject=' + index + ']]');
+
+            let newText = this.getTextFromDom();
+
+            this.clearRender = true;
+
+            wwLib.wwLang.setText(this.wwObject.content.data.text, newText);
+
+
+
+
+        },
         /* wwManager:end */
     },
     created: function () {
     },
     mounted: function () {
-
-
-
-        //this.text = wwLib.wwLang.getText(this.wwObject.content.data.text);
-
-        //this.wwObject.content.data.tag = this.wwObject.content.data.tag || 'div';
 
         wwLib.wwElementsStyle.applyAllStyles({
             wwObject: this.wwObject,
@@ -698,7 +678,6 @@ export default {
             }
 
             self.text = wwLib.wwLang.getText(self.wwObject.content.data.text);
-
 
         });
 
