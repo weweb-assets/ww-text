@@ -63,7 +63,8 @@ export default {
                             node.nodeName.toLowerCase(),
                             {
                                 props: {
-                                    wwObject: self.wwObject.data.children[node.attributes['data-ww-object-id'].nodeValue]
+                                    wwObject: self.wwObject.data.children[node.attributes['data-ww-object-id'].nodeValue],
+                                    inText: true,
                                 },
                                 attrs: attributes
                             },
@@ -105,7 +106,10 @@ export default {
                 },
                 attrs: {
                     contenteditable: this.editing
-                }
+                },
+                on: {
+                    click: this.click
+                },
             },
                 createVNodes(childNodes)
             )
@@ -167,8 +171,6 @@ export default {
                 wwLib.wwLang.setText(this.wwObject.content.data.text, newText);
                 this.wwObjectCtrl.update(this.wwObject);
 
-                console.log(this.wwObjectCtrl.get())
-
 
             }
         }
@@ -193,7 +195,7 @@ export default {
                         newNode.append(node.childNodes[i].cloneNode(false))
                         //Nothing.
                     }
-                    else if (node.childNodes[i].classList && node.childNodes[i].classList.contains('ww-object-directive')) {
+                    else if (node.childNodes[i].classList && node.childNodes[i].classList.contains('ww-object')) {
                         //console.log(document.createTextNode('[[wwObject=' + node.childNodes[i].attributes['data-ww-object-id'].nodeValue + ']]'))
                         newNode.append(document.createTextNode('[[wwObject=' + node.childNodes[i].attributes['data-ww-object-id'].nodeValue + ']]'))
                         //node.childNodes[i] = 
@@ -412,6 +414,7 @@ export default {
                     this.setColor(value);
                     break;
                 case 'align':
+                    //this.setStyle('text-align', value);
                     this.setAlign(value);
                     break;
                 case 'font':
@@ -651,6 +654,7 @@ export default {
             this.clearRender = true;
 
             wwLib.wwLang.setText(this.wwObject.content.data.text, newText);
+            this.wwObjectCtrl.update(this.wwObject);
 
 
 
@@ -709,13 +713,21 @@ export default {
     -webkit-line-break: after-white-space;
 }
 
-.ww-text-content .ww-object-directive-wrapper,
-.ww-text-content .ww-object-directive {
+.ww-text-content .ww-object-wrapper,
+.ww-text-content .ww-object {
     display: inline-block;
+}
+
+.ww-text-content .ww-object {
+    margin: 1px;
 }
 
 .no-text {
     color: grey;
+}
+
+.no-select {
+    user-select: none;
 }
 
 /*=============================================m_ÔÔ_m=============================================\
