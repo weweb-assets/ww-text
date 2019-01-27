@@ -142,7 +142,7 @@ export default {
             return this.wwObjectCtrl.get();
         },
         editing() {
-            return this.wwObjectCtrl.getSectionCtrl().getEditMode() == 'CONTENT' && this.focus
+            return this.wwObjectCtrl.getSectionCtrl() && this.wwObjectCtrl.getSectionCtrl().getEditMode() == 'CONTENT' && this.focus
         }
     },
     watch: {
@@ -332,6 +332,9 @@ export default {
                         break;
                     case 'reset':
                         this.reset()
+                        break;
+                    case 'other':
+                        this.edit()
                         break;
                     default:
 
@@ -663,6 +666,98 @@ export default {
 
 
         },
+
+        async edit() {
+            wwLib.wwObjectHover.setLock(this);
+
+            wwLib.wwPopups.addStory('WWTEXT_EDIT', {
+                title: {
+                    en_GB: 'Edit Text',
+                    fr_FR: 'Editer le texte'
+                },
+                type: 'wwPopupList',
+                buttons: null,
+                storyData: {
+                    list: {
+                        EDIT_ANIM: {
+                            separator: {
+                                en_GB: 'Interaction',
+                                fr_FR: 'Interaction'
+                            },
+                            title: {
+                                en_GB: 'Animation',
+                                fr_FR: 'Animation'
+                            },
+                            desc: {
+                                en_GB: 'Change animation',
+                                fr_FR: 'Choisir l\'animation à l\'apparition du texte'
+                            },
+                            icon: 'wwi wwi-anim',
+                            shortcut: 'a',
+                            next: 'ANIMATION'
+                        },
+                        /*
+                            EDIT_IMAGE_HOVER: {
+                                title: {
+                                    en_GB: 'Hover effect',
+                                    fr_FR: 'Effet au survol'
+                                },
+                                desc: {
+                                    en_GB: 'Choose animation when cursor is above the image',
+                                    fr_FR: 'Choisir l\'animation lors du survol de la souris'
+                                },
+                                icon: 'wwi wwi-hover',
+                                shortcut: 'o',
+                                next: 'IMAGE_HOVER'
+                            },
+                        */
+                        EDIT_HIDE: {
+                            separator: {
+                                en_GB: 'More',
+                                fr_FR: 'Plus'
+                            },
+                            title: {
+                                en_GB: 'Show / Hide',
+                                fr_FR: 'Montrer / Cacher'
+                            },
+                            icon: 'wwi wwi-hidden',
+                            shortcut: 'h',
+                            next: null,
+                            result: {
+                                hidden: true
+                            }
+                        },
+                        EDIT_CHANGE: {
+                            title: {
+                                en_GB: 'Change object type',
+                                fr_FR: 'Changer le type d\'objet'
+                            },
+                            icon: 'wwi wwi-switch',
+                            shortcut: 't',
+                            next: 'SELECT_WWOBJECT'
+                        },
+                    }
+                }
+            })
+
+            let options = {
+                firstPage: 'WWTEXT_EDIT',
+                data: {
+                    wwObject: this.wwObject
+                }
+            }
+
+            try {
+                const result = await wwLib.wwPopups.open(options);
+
+                this.wwObjectCtrl.globalEdit(result);
+
+            } catch (error) {
+                console.log(error);
+            }
+
+            wwLib.wwObjectHover.removeLock();
+        }
         /* wwManager:end */
     },
     created: function () {
