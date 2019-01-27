@@ -58,6 +58,9 @@ export default {
                         for (let a of node.attributes) {
                             attributes[a.nodeName] = a.nodeValue;
                         }
+                        for (let key in self.wwAttrs) {
+                            attributes[key] = self.wwAttrs[key];
+                        }
 
                         vNode = createVNode(
                             node.nodeName.toLowerCase(),
@@ -666,11 +669,13 @@ export default {
     },
     mounted: function () {
 
+        /*
         wwLib.wwElementsStyle.applyAllStyles({
             wwObject: this.wwObject,
             lastWwObject: null,
             element: this.$el
         });
+        */
 
         this.$emit('ww-loaded', this);
 
@@ -740,6 +745,11 @@ h4 {
     font-size: inherit;
     font-weight: inherit;
     margin: 0;
+}
+
+.ww-object {
+    vertical-align: middle;
+    // line-height: 0 !important;
 }
 </style>
 
