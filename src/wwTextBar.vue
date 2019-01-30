@@ -169,15 +169,18 @@
                     <span class="fa fa-eraser"></span>
                 </div>
                 -->
-                <div class="item-placeholder"></div>
-                <div class="item-placeholder separator"></div>
-                <div class="item separator" @click="action('reset')">
-                    <span class="wwi wwi-delete"></span>
-                </div>
-                <div class="item" @click="action('add')">
+                <div class="item separator" @click="action('add')">
                     <span class="wwi wwi-add"></span>
                 </div>
-                <div class="item" @click="action('other')">
+                <div class="item orange" :class="{'separator':!c_isInLayout}" @click="action('reset')">R</div>
+                <div v-if="c_isInLayout" class="item separator red" @click="action('delete')">
+                    <span class="wwi wwi-delete"></span>
+                </div>
+                <div v-if="!c_isInLayout" class="item-placeholder"></div>
+                <div class="item blue" @click="action('margins')">
+                    <span class="wwi wwi-edit-margin"></span>
+                </div>
+                <div class="item green" @click="action('other')">
                     <span class="wwi wwi-edit-other"></span>
                 </div>
             </div>
@@ -212,6 +215,9 @@ export default {
         };
     },
     computed: {
+        c_isInLayout() {
+            return wwLib.wwUtils.getParentLayout(this.options.context.$el.parentElement);
+        }
     },
     watch: {
     },
@@ -394,6 +400,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+$ww-red: #e02a4d;
+$ww-green: #49b9b3;
+$ww-orange: #ef811a;
+$ww-blue: #2e85c2;
+
 .ww-text-bar {
     position: absolute;
     z-index: 50;
@@ -465,7 +476,7 @@ export default {
                 font-size: 24px;
                 color: black;
                 position: relative;
-                transition: background-color 0.3s ease;
+                transition: background-color 0.3s ease, color 0.3s ease;
                 min-width: 44px;
                 cursor: pointer;
 
@@ -482,6 +493,35 @@ export default {
 
                 &:hover {
                     background-color: #e4e4e4;
+                }
+
+                &.red {
+                    color: $ww-red;
+                    &:hover {
+                        background-color: $ww-red;
+                        color: white;
+                    }
+                }
+                &.green {
+                    color: $ww-green;
+                    &:hover {
+                        background-color: $ww-green;
+                        color: white;
+                    }
+                }
+                &.orange {
+                    color: $ww-orange;
+                    &:hover {
+                        background-color: $ww-orange;
+                        color: white;
+                    }
+                }
+                &.blue {
+                    color: $ww-blue;
+                    &:hover {
+                        background-color: $ww-blue;
+                        color: white;
+                    }
                 }
 
                 &.input {

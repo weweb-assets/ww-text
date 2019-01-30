@@ -264,7 +264,16 @@ export default {
             if (this.wwObjectCtrl.getSectionCtrl().getEditMode() == 'CONTENT') {
                 event.preventDefault();
                 event.stopPropagation();
+
+                wwLib.wwObjectEditors.add(this.textBar);
+                wwLib.wwObjectMargins.close();
+
+                document.removeEventListener('selectionchange', this.updateSelection);
+                document.addEventListener('selectionchange', this.updateSelection);
+
             }
+
+
 
         },
 
@@ -335,6 +344,12 @@ export default {
                         break;
                     case 'other':
                         this.edit()
+                        break;
+                    case 'delete':
+                        this.remove();
+                        break;
+                    case 'margins':
+                        this.margins();
                         break;
                     default:
 
@@ -418,6 +433,7 @@ export default {
                     break;
                 case 'color':
                     this.setColor(value);
+
                     break;
                 case 'align':
                     //this.setStyle('text-align', value);
@@ -551,7 +567,7 @@ export default {
             }
         },
 
-        setColor(value) {
+        async setColor(value) {
 
 
             if (!this.textSelection || this.textSelection.toString().length == 0) {
@@ -560,7 +576,21 @@ export default {
 
             switch (value) {
                 case 'more':
-                    console.log('OPEN MORE !');
+
+                    let options = {
+                        firstPage: 'COLOR_PICKER'
+                    }
+
+                    try {
+                        const result = await wwLib.wwPopups.open(options)
+
+                        if (typeof (result.color)) {
+                            this.setColor(result.color)
+                        }
+                    } catch (error) {
+
+                    }
+
                     break;
                 default:
                     document.execCommand('foreColor', false, value);
@@ -667,6 +697,18 @@ export default {
 
         },
 
+        remove() {
+            wwLib.wwObjectEditors.close(this.textBar);
+            this.wwObjectCtrl.context.remove();
+        },
+
+        margins() {
+            wwLib.wwObjectHover.setMain(this.wwObjectCtrl.context);
+            wwLib.wwObjectHover.setLock(this.wwObjectCtrl.context);
+            wwLib.wwObjectEditors.close(this.textBar);
+            wwLib.wwObjectMargins.set(this.wwObjectCtrl.context);
+        },
+
         async edit() {
             wwLib.wwObjectHover.setLock(this);
 
@@ -675,67 +717,10 @@ export default {
                     en_GB: 'Edit Text',
                     fr_FR: 'Editer le texte'
                 },
-                type: 'wwPopupList',
+                type: 'wwPopupEditWwObject',
                 buttons: null,
                 storyData: {
                     list: {
-                        EDIT_ANIM: {
-                            separator: {
-                                en_GB: 'Interaction',
-                                fr_FR: 'Interaction'
-                            },
-                            title: {
-                                en_GB: 'Animation',
-                                fr_FR: 'Animation'
-                            },
-                            desc: {
-                                en_GB: 'Change animation',
-                                fr_FR: 'Choisir l\'animation à l\'apparition du texte'
-                            },
-                            icon: 'wwi wwi-anim',
-                            shortcut: 'a',
-                            next: 'ANIMATION'
-                        },
-                        /*
-                            EDIT_IMAGE_HOVER: {
-                                title: {
-                                    en_GB: 'Hover effect',
-                                    fr_FR: 'Effet au survol'
-                                },
-                                desc: {
-                                    en_GB: 'Choose animation when cursor is above the image',
-                                    fr_FR: 'Choisir l\'animation lors du survol de la souris'
-                                },
-                                icon: 'wwi wwi-hover',
-                                shortcut: 'o',
-                                next: 'IMAGE_HOVER'
-                            },
-                        */
-                        EDIT_HIDE: {
-                            separator: {
-                                en_GB: 'More',
-                                fr_FR: 'Plus'
-                            },
-                            title: {
-                                en_GB: 'Show / Hide',
-                                fr_FR: 'Montrer / Cacher'
-                            },
-                            icon: 'wwi wwi-hidden',
-                            shortcut: 'h',
-                            next: null,
-                            result: {
-                                hidden: true
-                            }
-                        },
-                        EDIT_CHANGE: {
-                            title: {
-                                en_GB: 'Change object type',
-                                fr_FR: 'Changer le type d\'objet'
-                            },
-                            icon: 'wwi wwi-switch',
-                            shortcut: 't',
-                            next: 'SELECT_WWOBJECT'
-                        },
                     }
                 }
             })
