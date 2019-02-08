@@ -338,7 +338,8 @@ export default {
 
             if (dist > Math.pow(this.minDragDist, 2)) {
                 this.dragging = true;
-                window.addEventListener('click', this.preventClick, true);
+                wwLib.getManagerWindow().addEventListener('click', this.preventClick, true);
+                wwLib.getFrontWindow().addEventListener('click', this.preventClick, true);
                 return true;
             }
 
@@ -360,8 +361,11 @@ export default {
             this.dragStartPoint = this.getEventPosition(event);
             this.dragStartPosition = this.getCurrentPosition();
 
-            window.addEventListener('mousemove', this.drag);
-            window.addEventListener('mouseup', this.stopDrag);
+            wwLib.getManagerWindow().addEventListener('mousemove', this.drag);
+            wwLib.getManagerWindow().addEventListener('mouseup', this.stopDrag);
+
+            wwLib.getFrontWindow().addEventListener('mousemove', this.drag);
+            wwLib.getFrontWindow().addEventListener('mouseup', this.stopDrag);
         },
         drag(event) {
             if (this.isDragging(event)) {
@@ -378,9 +382,13 @@ export default {
             this.dragging = false;
 
             document.body.classList.remove('no-select');
-            window.removeEventListener('mousemove', this.drag);
-            window.removeEventListener('mouseup', this.stopDrag);
-            window.removeEventListener('click', this.preventClick, true);
+            wwLib.getManagerWindow().removeEventListener('mousemove', this.drag);
+            wwLib.getManagerWindow().removeEventListener('mouseup', this.stopDrag);
+            wwLib.getManagerWindow().removeEventListener('click', this.preventClick, true);
+
+            wwLib.getFrontWindow().removeEventListener('mousemove', this.drag);
+            wwLib.getFrontWindow().removeEventListener('mouseup', this.stopDrag);
+            wwLib.getFrontWindow().removeEventListener('click', this.preventClick, true);
         }
 
     },
@@ -395,6 +403,15 @@ export default {
             this.show = true;
         })
 
+    },
+    beforeDestroy() {
+        wwLib.getManagerWindow().removeEventListener('mousemove', this.drag);
+        wwLib.getManagerWindow().removeEventListener('mouseup', this.stopDrag);
+        wwLib.getManagerWindow().removeEventListener('click', this.preventClick, true);
+
+        wwLib.getFrontWindow().removeEventListener('mousemove', this.drag);
+        wwLib.getFrontWindow().removeEventListener('mouseup', this.stopDrag);
+        wwLib.getFrontWindow().removeEventListener('click', this.preventClick, true);
     }
 };
 </script>

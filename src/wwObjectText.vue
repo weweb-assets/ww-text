@@ -36,7 +36,7 @@ export default {
 
             let content = document.createElement('div');
 
-            content.innerHTML = wwLib.wwLang.getText(this.wwObject.content.data.text).replace(wwObjRegex, '<ww-object data-ww-object-id="$1"></ww-object>');
+            content.innerHTML = wwLib.wwLang.getText(this.wwObject.content.data.text).replace(wwObjRegex, '<ww-object data-ww-object-id="$1"></ww-object>') || '<br/>';
 
             const childNodes = content.childNodes;
 
@@ -155,6 +155,8 @@ export default {
                     wwLib.wwObjectEditors.add(this.textBar);
                     wwLib.wwObjectMargins.close();
 
+                    wwLib.wwObjectHover.setLock(this);
+
                     document.removeEventListener('selectionchange', this.updateSelection);
                     document.addEventListener('selectionchange', this.updateSelection);
                 }
@@ -163,11 +165,12 @@ export default {
 
             //Just Unfocused
             if (!newFocus && oldFocus) {
-
                 document.removeEventListener('selectionchange', this.updateSelection);
                 wwLib.wwObjectEditors.close(this.textBar);
 
                 let newText = this.getTextFromDom();
+
+                wwLib.wwObjectHover.removeLock();
 
                 this.clearRender = true;
 
@@ -222,6 +225,8 @@ export default {
 
             let t = getText(a, newNode)
 
+            console.log(t);
+
             return t;
 
         },
@@ -261,7 +266,7 @@ export default {
         /* wwManager:start */
         _click(event) {
 
-            if (this.wwObjectCtrl.getSectionCtrl().getEditMode() == 'CONTENT') {
+            if (this.wwObjectCtrl.getSectionCtrl() && this.wwObjectCtrl.getSectionCtrl().getEditMode() == 'CONTENT') {
                 event.preventDefault();
                 event.stopPropagation();
 
@@ -745,9 +750,9 @@ export default {
         }
         /* wwManager:end */
     },
-    created: function () {
+    created() {
     },
-    mounted: function () {
+    mounted() {
 
         /*
         wwLib.wwElementsStyle.applyAllStyles({
@@ -786,6 +791,9 @@ export default {
             }
         });
         /* wwManager:end */
+    },
+    beforeDestroy() {
+        wwLib.wwObjectEditors.close(this.textBar);
     }
 };
 </script>
@@ -796,6 +804,7 @@ export default {
     width: 100%;
     overflow-wrap: break-word;
     -webkit-line-break: after-white-space;
+    outline: none;
 }
 
 .ww-text-content .ww-object-wrapper,
