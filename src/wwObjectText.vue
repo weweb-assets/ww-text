@@ -790,6 +790,8 @@ export default {
                 self.focus = false;
             }
         });
+
+        wwLib.wwAsyncScripts.loadAsset('manager', 'ww-text');
         /* wwManager:end */
     },
     beforeDestroy() {

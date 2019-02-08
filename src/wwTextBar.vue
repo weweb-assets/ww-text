@@ -217,7 +217,7 @@ export default {
     computed: {
         c_isInLayout() {
             return wwLib.wwUtils.getParentLayout(this.options.context.$el.parentElement);
-        }
+        },
     },
     watch: {
     },
@@ -279,13 +279,16 @@ export default {
             let width = this.$el.getBoundingClientRect().width;
             let height = this.$el.getBoundingClientRect().height;
 
-            const scrollX = (window.pageXOffset || document.documentElement.scrollLeft) - (document.documentElement.clientLeft || 0);
-            const scrollY = (window.pageYOffset || document.documentElement.scrollTop) - (document.documentElement.clientTop || 0);
+            const w = wwLib.getFrontWindow();
+            const d = wwLib.getFrontDocument();
 
-            let top = this.options.context.$el.getBoundingClientRect().y + scrollY;
-            let left = this.options.context.$el.getBoundingClientRect().x + scrollX;
+            //const scrollX = (w.pageXOffset || d.documentElement.scrollLeft) - (d.documentElement.clientLeft || 0);
+            //const scrollY = (w.pageYOffset || d.documentElement.scrollTop) - (d.documentElement.clientTop || 0);
 
-            const innerWidth = (window.innerWidth || d.documentElement.clientWidth || d.getElementsByTagName('body')[0].clientWidth) - 40
+            let top = this.options.context.$el.getBoundingClientRect().y //+ scrollY;
+            let left = this.options.context.$el.getBoundingClientRect().x// + scrollX;
+
+            const innerWidth = (w.innerWidth || d.documentElement.clientWidth || d.getElementsByTagName('body')[0].clientWidth) - 40
 
             if (left + width > innerWidth) {
                 left -= ((left + width) - innerWidth);
@@ -349,9 +352,12 @@ export default {
             if (this.moved) {
                 return;
             }
+
+            const iframePos = wwLib.getManagerDocument().querySelector('.iframe').getBoundingClientRect();
+
             this.position = {
-                top: this.getOrignialPosition().top + 'px',
-                left: this.getOrignialPosition().left + 'px'
+                top: this.getOrignialPosition().top + iframePos.top + 'px',
+                left: this.getOrignialPosition().left + iframePos.left + 'px'
             }
 
             requestAnimationFrame(this.updatePosition);
