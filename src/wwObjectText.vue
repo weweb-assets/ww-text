@@ -7,7 +7,7 @@ import wwTextBar from './wwTextBar.vue';
 /* wwManager:end */
 
 export default {
-    name: 'ww-text',
+    name: '__COMPONENT_NAME__',
     components: {
     },
     render(createVNode) {
