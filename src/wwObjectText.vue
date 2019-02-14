@@ -268,8 +268,6 @@ export default {
 
             let t = getText(a, newNode)
 
-            console.log(t);
-
             return t;
 
         },
