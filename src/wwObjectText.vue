@@ -166,70 +166,14 @@ export default {
             //Just Unfocused
             if (!newFocus && oldFocus) {
                 document.removeEventListener('selectionchange', this.updateSelection);
-                wwLib.wwObjectEditors.close(this.textBar);
 
-                let newText = this.getTextFromDom();
-
-                wwLib.wwObjectHover.removeLock();
-
-                this.clearRender = true;
-
-                wwLib.wwLang.setText(this.wwObject.content.data.text, newText);
-                this.wwObjectCtrl.update(this.wwObject);
-
+                this.saveText();
 
             }
         }
         /* wwManager:end */
     },
     methods: {
-        getTextFromDom() {
-
-            function getText(node, newNode, isChild) {
-
-                if (!node) {
-                    return;
-                }
-
-                for (let i = 0; i < node.childNodes.length; i++) {
-
-                    if (!node.childNodes[i] || !node.childNodes[i].nodeName) {
-                        continue;
-                    }
-
-                    if (node.childNodes[i].nodeName.toLowerCase() == '#text') {
-                        newNode.append(node.childNodes[i].cloneNode(false))
-                        //Nothing.
-                    }
-                    else if (node.childNodes[i].classList && node.childNodes[i].classList.contains('ww-object')) {
-                        //console.log(document.createTextNode('[[wwObject=' + node.childNodes[i].attributes['data-ww-object-id'].nodeValue + ']]'))
-                        newNode.append(document.createTextNode('[[wwObject=' + node.childNodes[i].attributes['data-ww-object-id'].nodeValue + ']]'))
-                        //node.childNodes[i] = 
-                    }
-                    else {
-                        newNode.append(node.childNodes[i].cloneNode(false))
-                        getText(node.childNodes[i], newNode.childNodes[newNode.childNodes.length - 1], true);
-                    }
-
-                }
-
-                if (!isChild) {
-                    return newNode.innerHTML;
-                }
-
-            }
-
-            const a = this.$el.cloneNode(true);
-            const newNode = document.createElement('div');
-
-
-            let t = getText(a, newNode)
-
-            console.log(t);
-
-            return t;
-
-        },
 
         isTextEmpty() {
             return this.text.trim() == "";
@@ -280,6 +224,67 @@ export default {
 
 
 
+        },
+
+        getTextFromDom() {
+
+            function getText(node, newNode, isChild) {
+
+                if (!node) {
+                    return;
+                }
+
+                for (let i = 0; i < node.childNodes.length; i++) {
+
+                    if (!node.childNodes[i] || !node.childNodes[i].nodeName) {
+                        continue;
+                    }
+
+                    if (node.childNodes[i].nodeName.toLowerCase() == '#text') {
+                        newNode.append(node.childNodes[i].cloneNode(false))
+                        //Nothing.
+                    }
+                    else if (node.childNodes[i].classList && node.childNodes[i].classList.contains('ww-object')) {
+                        //console.log(document.createTextNode('[[wwObject=' + node.childNodes[i].attributes['data-ww-object-id'].nodeValue + ']]'))
+                        newNode.append(document.createTextNode('[[wwObject=' + node.childNodes[i].attributes['data-ww-object-id'].nodeValue + ']]'))
+                        //node.childNodes[i] = 
+                    }
+                    else {
+                        newNode.append(node.childNodes[i].cloneNode(false))
+                        getText(node.childNodes[i], newNode.childNodes[newNode.childNodes.length - 1], true);
+                    }
+
+                }
+
+                if (!isChild) {
+                    return newNode.innerHTML;
+                }
+
+            }
+
+            const a = this.$el.cloneNode(true);
+            const newNode = document.createElement('div');
+
+
+            let t = getText(a, newNode)
+
+            console.log(t);
+
+            return t;
+
+        },
+
+        async saveText() {
+            wwLib.wwObjectEditors.close(this.textBar);
+
+            let newText = this.getTextFromDom();
+
+            wwLib.wwObjectHover.removeLock();
+
+            this.clearRender = true;
+
+            wwLib.wwLang.setText(this.wwObject.content.data.text, newText);
+            await this.wwObjectCtrl.update(this.wwObject);
         },
 
         getSelection() {
@@ -684,7 +689,6 @@ export default {
             while (this.wwObject.data.children[index]) {
                 index++;
             }
-            console.log(index);
 
             this.wwObject.data.children[index] = newWwObject;
 
@@ -747,20 +751,16 @@ export default {
             }
 
             wwLib.wwObjectHover.removeLock();
+        },
+
+        async beforeSave() {
+            await this.saveText();
         }
         /* wwManager:end */
     },
     created() {
     },
     mounted() {
-
-        /*
-        wwLib.wwElementsStyle.applyAllStyles({
-            wwObject: this.wwObject,
-            lastWwObject: null,
-            element: this.$el
-        });
-        */
 
         this.$emit('ww-loaded', this);
 
@@ -791,10 +791,18 @@ export default {
             }
         });
 
-        wwLib.wwAsyncScripts.loadAsset('manager', 'ww-text');
+
+
+        wwLib.wwAsyncScripts.loadAsset({
+            target: 'manager',
+            name: 'ww-text',
+        });
         /* wwManager:end */
     },
     beforeDestroy() {
+
+        this.saveText();
+
         wwLib.wwObjectEditors.close(this.textBar);
     }
 };
