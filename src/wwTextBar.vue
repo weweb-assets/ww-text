@@ -150,6 +150,7 @@
                 <div class="item separator" @click="action('link')">
                     <span class="wwi wwi-link-external"></span>
                 </div>
+                <div class="item-placeholder separator"></div>
 
                 <div class="item" @click="action('exec:insertOrderedList')">
                     <span class="fa fa-list-ol"></span>
@@ -169,13 +170,16 @@
                     <span class="fa fa-eraser"></span>
                 </div>
                 -->
+                <div class="item-placeholder separator"></div>
                 <div class="item separator" @click="action('add')">
                     <span class="wwi wwi-add"></span>
                 </div>
-                <div class="item orange" :class="{'separator':!c_isInLayout}" @click="action('reset')">R</div>
-                <div v-if="c_isInLayout" class="item separator red" @click="action('delete')">
+
+                <!-- <div class="item orange" :class="{'separator':!c_isInLayout}" @click="action('reset')">R</div> -->
+                <!-- <div v-if="c_isInLayout" class="item separator red" @click="action('delete')">
                     <span class="wwi wwi-delete"></span>
-                </div>
+                </div>-->
+                <!-- 
                 <div v-if="!c_isInLayout" class="item-placeholder"></div>
                 <div class="item blue" @click="action('margins')">
                     <span class="wwi wwi-edit-margin"></span>
@@ -183,6 +187,7 @@
                 <div class="item green" @click="action('other')">
                     <span class="wwi wwi-edit-other"></span>
                 </div>
+                -->
             </div>
         </div>
     </div>
@@ -433,8 +438,8 @@ $ww-blue: #2e85c2;
     z-index: 50;
     top: 0;
     left: 0;
-    opacity: 0;
-    transform: translateY(-70%);
+    opacity: 1;
+    transform: translateY(-110%);
     background-color: #fafafa;
     display: flex;
     border-radius: 6px;
@@ -443,8 +448,8 @@ $ww-blue: #2e85c2;
         opacity 0.2s ease;
 
     &.show {
-        opacity: 1;
-        transform: translateY(-110%);
+        // opacity: 1;
+        // transform: translateY(-110%);
     }
 
     .handle {

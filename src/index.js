@@ -30,7 +30,17 @@ const addComponent = function () {
             /* wwManager:start */
             cmsOptions: {
                 wwObjectMenu: {
-                    disabled: true
+                    items: [
+                        {
+                            name: 'OPTIONS',
+                            text: {
+                                en_GB: 'Options...',
+                                fr_FR: 'Options...'
+                            },
+                            icon: 'wwi wwi-edit-other',
+                            action: 'edit'
+                        }
+                    ]
                 },
                 wwObjectHover: {
                     hoverClass: 'getHoverTag'

@@ -126,14 +126,14 @@ export default {
         wwAttrs: {
             type: Object,
             default: {}
-        }
+        },
     },
     data: function () {
         return {
             /* wwManager:start */
-            focus: false,
             textBar: null,
             textSelection: null,
+            focus: false,
             /* wwManager:end */
         };
     },
@@ -146,32 +146,6 @@ export default {
         }
     },
     watch: {
-        /* wwManager:start */
-        focus(newFocus, oldFocus) {
-
-            //Just Focused
-            if (newFocus && !oldFocus) {
-                if (this.wwObjectCtrl.getSectionCtrl().getEditMode() == 'CONTENT') {
-                    wwLib.wwObjectEditors.add(this.textBar);
-                    wwLib.wwObjectMargins.close();
-
-                    wwLib.wwObjectHover.setLock(this);
-
-                    document.removeEventListener('selectionchange', this.updateSelection);
-                    document.addEventListener('selectionchange', this.updateSelection);
-                }
-            }
-
-
-            //Just Unfocused
-            if (!newFocus && oldFocus) {
-                document.removeEventListener('selectionchange', this.updateSelection);
-
-                this.saveText();
-
-            }
-        }
-        /* wwManager:end */
     },
     methods: {
 
@@ -209,6 +183,7 @@ export default {
 
         /* wwManager:start */
         _click(event) {
+            /*
 
             if (this.wwObjectCtrl.getSectionCtrl() && this.wwObjectCtrl.getSectionCtrl().getEditMode() == 'CONTENT') {
                 event.preventDefault();
@@ -222,7 +197,7 @@ export default {
 
             }
 
-
+*/
 
         },
 
@@ -751,6 +726,42 @@ export default {
             wwLib.wwObjectHover.removeLock();
         },
 
+        setFocus(focusId) {
+            const oldFocus = this.focus;
+            this.focus = focusId == this.$parent._uid
+            if (this.focus) {
+                wwLib.wwObjectEditors.add(this.textBar);
+                wwLib.wwObjectMargins.close();
+
+
+                document.removeEventListener('selectionchange', this.updateSelection);
+                document.addEventListener('selectionchange', this.updateSelection);
+
+                const self = this;
+                setTimeout(function () {
+                    wwLib.wwObjectHover.removeLock();
+                    wwLib.wwObjectHover.setMain(self.$parent);
+                    wwLib.wwObjectHover.setLock(self.$parent);
+
+                    if (self.$el.classList.contains('ww-text-content')) {
+                        self.$el.focus();
+                    }
+                    else if (self.$el.querySelector('.ww-text-content')) {
+                        self.$el.querySelector('.ww-text-content').focus();
+                    }
+                    else {
+                        console.log('no focus...');
+                    }
+                }, 50);
+            }
+            else if (oldFocus) {
+                wwLib.wwObjectEditors.close(this.textBar);
+                document.removeEventListener('selectionchange', this.updateSelection);
+
+                this.saveText();
+            }
+        },
+
         async beforeSave() {
             await this.saveText();
         }
@@ -791,16 +802,7 @@ export default {
             component: wwTextBar
         }
 
-        wwLib.$on('wwFocus:changed', function (focus) {
-            if (self.$parent._uid == focus._uid) {
-                self.focus = true;
-            }
-            else {
-                self.focus = false;
-            }
-        });
-
-
+        wwLib.$on('wwFocus', this.setFocus);
 
         wwLib.wwAsyncScripts.loadAsset({
             target: 'manager',
@@ -811,6 +813,7 @@ export default {
     beforeDestroy() {
 
         this.saveText();
+        wwLib.$off('wwFocus', this.setFocus);
 
         wwLib.wwObjectEditors.close(this.textBar);
     }
