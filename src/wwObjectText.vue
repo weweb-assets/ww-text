@@ -773,6 +773,17 @@ export default {
 
         });
 
+        this.$el.addEventListener('paste', function (e) {
+
+            e.preventDefault();
+
+            // get text representation of clipboard
+            var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+
+            // insert text manually
+            document.execCommand("insertHTML", false, text);
+        })
+
         /* wwManager:start */
         this.textBar = {
             context: this,
