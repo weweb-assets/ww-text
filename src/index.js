@@ -11,7 +11,7 @@ const addComponent = function () {
                 type: name,
                 data: {
                     text: {
-                        fr_FR: "Nouveau texte"
+                        fr: "Nouveau texte"
                     },
                     tag: "div", //h1, quote, code, ...
                     align: "",
@@ -34,8 +34,8 @@ const addComponent = function () {
                         {
                             name: 'OPTIONS',
                             text: {
-                                en_GB: 'Options...',
-                                fr_FR: 'Options...'
+                                en: 'Options...',
+                                fr: 'Options...'
                             },
                             icon: 'wwi wwi-edit-other',
                             action: 'edit'

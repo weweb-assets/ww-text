@@ -696,8 +696,8 @@ export default {
 
             wwLib.wwPopups.addStory('WWTEXT_EDIT', {
                 title: {
-                    en_GB: 'Edit Text',
-                    fr_FR: 'Editer le texte'
+                    en: 'Edit Text',
+                    fr: 'Editer le texte'
                 },
                 type: 'wwPopupEditWwObject',
                 buttons: null,
