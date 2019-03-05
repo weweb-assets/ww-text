@@ -197,7 +197,7 @@ export default {
 
             }
 
-*/
+            */
 
         },
 
@@ -780,7 +780,8 @@ export default {
                 wwLib.wwLang.setText(self.wwObject.content.data.text, self.$el.innerHTML, lang.old);
             }
 
-            self.text = wwLib.wwLang.getText(self.wwObject.content.data.text);
+            //self.text = wwLib.wwLang.getText(self.wwObject.content.data.text);
+            self.$forceUpdate();
 
         });
 
