@@ -1,9 +1,11 @@
 <template>
     <div class="ww-text-bar" :class="{'show': show}" :style="position" @click="focus()">
-        <div class="handle" @mousedown="startDrag($event)">
-            <div></div>
-            <div></div>
-            <div></div>
+        <div class="handle-container" @mousedown="startDrag($event)">
+            <div class="handle">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
         </div>
         <div class="content">
             <div class="line">
@@ -87,11 +89,7 @@
                     <span class="wwi wwi-font"></span>
 
                     <div class="subitems">
-                        <div class="item font" @click="action('style:font:Arial, Helvetica, sans-serif')" style="font-family:Arial, Helvetica, sans-serif">Arial</div>
-                        <div class="item font" @click="action('style:font:Courier New, Courier, monospace')" style="font-family:Courier New, Courier, monospace">Courier New</div>
-                        <div class="item font" @click="action('style:font:Impact, Charcoal, sans-serif')" style="font-family:Impact, Charcoal, sans-serif">Impact</div>
-                        <div class="item font" @click="action('style:font:Times New Roman, Times, serif')" style="font-family:Times New Roman, Times, serif">Times New Roman</div>
-                        <div class="item font" @click="action('style:font:Trebuchet MS, Helvetica, sans-serif')" style="font-family:Trebuchet MS, Helvetica, sans-serif">Trebuchet MS</div>
+                        <div class="item font" v-for="font in c_fonts" :key="font.name" @click="action('style:font:' + getFont(font))" :style="'font-family:' + getFont(font)">{{font.name}}</div>
                         <div class="item font" @click="action('style:font:' + getDefaultFont().split(',')[0])" :style="{'font-family':getDefaultFont().split(',')[0]}">- Default -
                             <br>
                             {{ getDefaultFont().split(',')[0] }}
@@ -174,6 +172,10 @@
                 <div class="item separator" @click="action('add')">
                     <span class="wwi wwi-add"></span>
                 </div>
+                <div class="item-placeholder separator"></div>
+                <div class="item orange separator" @click="action('openMenu', $event)">
+                    <span class="wwi wwi-edit-other"></span>
+                </div>
 
                 <!-- <div class="item orange" :class="{'separator':!c_isInLayout}" @click="action('reset')">R</div> -->
                 <!-- <div v-if="c_isInLayout" class="item separator red" @click="action('delete')">
@@ -217,12 +219,17 @@ export default {
             moved: false,
             customSize: 1.5,
             defaultFont: '',
+            stopRequestAnimation: false,
         };
     },
     computed: {
         c_isInLayout() {
             return wwLib.wwUtils.getParentLayout(this.options.context.$el.parentElement);
         },
+        c_fonts() {
+            let fonts = wwLib.wwWebsiteData.getInfo().fonts || {};
+            return fonts.list || [];
+        }
     },
     watch: {
     },
@@ -233,8 +240,8 @@ export default {
             this.options.context.reselect();
         },
 
-        action(action) {
-            this.options.context.wwTextBarAction(action);
+        action(action, event) {
+            this.options.context.wwTextBarAction(action, event);
         },
 
         checkEnterSize(event) {
@@ -261,6 +268,10 @@ export default {
                     return ['fa', 'fa-paragraph'];
                     break;
             }
+        },
+
+        getFont(font) {
+            return font.name + ', ' + (font.genericName || 'sans-serif');
         },
 
         getDefaultFont() {
@@ -290,14 +301,23 @@ export default {
             //const scrollX = (w.pageXOffset || d.documentElement.scrollLeft) - (d.documentElement.clientLeft || 0);
             //const scrollY = (w.pageYOffset || d.documentElement.scrollTop) - (d.documentElement.clientTop || 0);
 
-            let top = this.options.context.$el.getBoundingClientRect().y //+ scrollY;
+            let top = this.options.context.$el.getBoundingClientRect().y - height - 5; //+ scrollY;
             let left = this.options.context.$el.getBoundingClientRect().x// + scrollX;
+
+            if (top < 0) {
+                top = this.options.context.$el.getBoundingClientRect().y + this.options.context.$el.getBoundingClientRect().height + 5;
+            }
 
             const innerWidth = (w.innerWidth || d.documentElement.clientWidth || d.getElementsByTagName('body')[0].clientWidth) - 40
 
             if (left + width > innerWidth) {
                 left -= ((left + width) - innerWidth);
             }
+
+            console.log({
+                top: top,
+                left: left
+            });
 
             return {
                 top: top,
@@ -354,6 +374,10 @@ export default {
             return false;
         },
         updatePosition() {
+            if (this.stopRequestAnimation) {
+                return;
+            }
+
             if (this.moved) {
                 return;
             }
@@ -416,6 +440,8 @@ export default {
 
     },
     beforeDestroy() {
+        this.stopRequestAnimation = true;
+
         wwLib.getManagerWindow().removeEventListener('mousemove', this.drag);
         wwLib.getManagerWindow().removeEventListener('mouseup', this.stopDrag);
         wwLib.getManagerWindow().removeEventListener('click', this.preventClick, true);
@@ -439,7 +465,6 @@ $ww-blue: #2e85c2;
     top: 0;
     left: 0;
     opacity: 1;
-    transform: translateY(-110%);
     background-color: #fafafa;
     display: flex;
     border-radius: 6px;
@@ -451,40 +476,43 @@ $ww-blue: #2e85c2;
         // opacity: 1;
         // transform: translateY(-110%);
     }
-
-    .handle {
-        display: flex;
-        justify-content: center;
-        width: 30px;
-        color: black;
-        position: relative;
-        cursor: grab;
+    .handle-container {
         cursor: move;
-        flex-direction: column;
-        margin: 30px 0;
+        cursor: grab;
 
-        div {
-            flex-basis: 33.33%;
+        .handle {
+            display: flex;
+            justify-content: center;
+            width: 30px;
+            color: black;
             position: relative;
+            flex-direction: column;
+            margin: 30px 0;
+            height: 28px;
 
-            &::after,
-            &::before {
-                content: "";
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                width: 4px;
-                height: 4px;
-                border-radius: 100%;
-                background-color: #bdbdbd;
-            }
+            div {
+                flex-basis: 33.33%;
+                position: relative;
 
-            &::after {
-                transform: translate(-5px, -50%);
-            }
+                &::after,
+                &::before {
+                    content: "";
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    width: 4px;
+                    height: 4px;
+                    border-radius: 100%;
+                    background-color: #bdbdbd;
+                }
 
-            &::before {
-                transform: translate(5px, -50%);
+                &::after {
+                    transform: translate(-5px, -50%);
+                }
+
+                &::before {
+                    transform: translate(5px, -50%);
+                }
             }
         }
     }

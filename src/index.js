@@ -30,6 +30,7 @@ const addComponent = function () {
             /* wwManager:start */
             cmsOptions: {
                 wwObjectMenu: {
+                    noClickMenu: true,
                     items: [
                         {
                             name: 'OPTIONS',

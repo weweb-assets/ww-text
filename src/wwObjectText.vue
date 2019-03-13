@@ -55,12 +55,15 @@ export default {
 
 
                         let attributes = {};
+
                         for (let a of node.attributes) {
                             attributes[a.nodeName] = a.nodeValue;
                         }
                         for (let key in self.wwAttrs) {
                             attributes[key] = self.wwAttrs[key];
                         }
+
+                        attributes.wwInsideWwObject = "ww-text";
 
                         vNode = createVNode(
                             node.nodeName.toLowerCase(),
@@ -291,7 +294,7 @@ export default {
             }
         },
 
-        wwTextBarAction(options) {
+        wwTextBarAction(options, event) {
             //console.log(action);
             const category = options.split(':')[0];
             const action = options.split(':').length > 1 ? options.split(':')[1] : null;
@@ -325,8 +328,8 @@ export default {
                     case 'reset':
                         this.reset()
                         break;
-                    case 'other':
-                        this.edit()
+                    case 'openMenu':
+                        this.openMenu(event)
                         break;
                     case 'delete':
                         this.remove();
@@ -691,6 +694,10 @@ export default {
             wwLib.wwObjectMargins.set(this.wwObjectCtrl.context);
         },
 
+        async openMenu(event) {
+            this.wwObjectCtrl.context.openMenu(event, true);
+        },
+
         async edit() {
             wwLib.wwObjectHover.setLock(this);
 
@@ -768,6 +775,22 @@ export default {
         /* wwManager:end */
     },
     created() {
+        /* wwManager:start */
+        let needUpdate = false;
+        if (this.wwObject.content.data.text.fr_FR) {
+            this.wwObject.content.data.text.fr = this.wwObject.content.data.text.fr_FR;
+            delete this.wwObject.content.data.text.fr_FR;
+            needUpdate = true;
+        }
+        if (this.wwObject.content.data.text.en_GB) {
+            this.wwObject.content.data.text.en = this.wwObject.content.data.text.en_GB;
+            delete this.wwObject.content.data.text.en_GB;
+            needUpdate = true;
+        }
+        if (needUpdate) {
+            this.wwObjectCtrl.update(this.wwObject);
+        }
+        /* wwManager:end */
     },
     mounted() {
 
@@ -780,7 +803,6 @@ export default {
                 wwLib.wwLang.setText(self.wwObject.content.data.text, self.$el.innerHTML, lang.old);
             }
 
-            //self.text = wwLib.wwLang.getText(self.wwObject.content.data.text);
             self.$forceUpdate();
 
         });
