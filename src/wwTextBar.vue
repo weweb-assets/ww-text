@@ -90,13 +90,13 @@
 
                     <div class="subitems">
                         <div class="item font" v-for="font in c_fonts" :key="font.name" @click="action('style:font:' + getFont(font))" :style="'font-family:' + getFont(font)">{{font.name}}</div>
-                        <div class="item font" @click="action('style:font:' + getDefaultFont().split(',')[0])" :style="{'font-family':getDefaultFont().split(',')[0]}">- Default -
+                        <div class="item font" v-if="getDefaultFont()" @click="action('style:font:inherit')" :style="{'font-family':getDefaultFont()}">- Default -
                             <br>
-                            {{ getDefaultFont().split(',')[0] }}
+                            {{ getDefaultFont() }}
                         </div>
-                        <div class="item font" @click="action('style:font:more')">
+                        <!-- <div class="item font" @click="action('style:font:more')">
                             <i>More...</i>
-                        </div>
+                        </div>-->
                     </div>
                 </div>
                 <div class="item separator">
@@ -275,16 +275,8 @@ export default {
         },
 
         getDefaultFont() {
-            switch (this.options.context.wwObject.content.data.font) {
-                case 'Raleway Light':
-                    return 'Raleway';
-                    break;
-                default:
-                    let font = this.options.context.wwObject.content.data.font || '';
-                    return font.split(',')[0];
-                    break;
-            }
-            return;
+            const defaultFont = (wwLib.wwWebsiteData.getInfo().fonts || {}).default || {}
+            return defaultFont.name;
         },
 
         /*=============================================m_ÔÔ_m=============================================\
@@ -313,11 +305,6 @@ export default {
             if (left + width > innerWidth) {
                 left -= ((left + width) - innerWidth);
             }
-
-            console.log({
-                top: top,
-                left: left
-            });
 
             return {
                 top: top,

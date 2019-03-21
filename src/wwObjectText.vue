@@ -112,10 +112,7 @@ export default {
                 },
                 attrs: {
                     contenteditable: this.editing
-                },
-                on: {
-                    click: this.click
-                },
+                }
             },
                 createVNodes(childNodes)
             )
@@ -129,7 +126,7 @@ export default {
         wwAttrs: {
             type: Object,
             default: {}
-        },
+        }
     },
     data: function () {
         return {
@@ -178,31 +175,7 @@ export default {
             return text;
         },
 
-        click(event) {
-            /* wwManager:start */
-            this._click(event);
-            /* wwManager:end */
-        },
-
         /* wwManager:start */
-        _click(event) {
-            /*
-
-            if (this.wwObjectCtrl.getSectionCtrl() && this.wwObjectCtrl.getSectionCtrl().getEditMode() == 'CONTENT') {
-                event.preventDefault();
-                event.stopPropagation();
-
-                wwLib.wwObjectEditors.add(this.textBar);
-                wwLib.wwObjectMargins.close();
-
-                document.removeEventListener('selectionchange', this.updateSelection);
-                document.addEventListener('selectionchange', this.updateSelection);
-
-            }
-
-            */
-
-        },
 
         getTextFromDom() {
 
@@ -210,6 +183,20 @@ export default {
 
                 if (!node) {
                     return;
+                }
+
+                const attrsToRemove = [];
+                for (const attr of newNode.attributes) {
+                    if (attr.name.indexOf('data-v-') === 0) {
+                        attrsToRemove.push(attr.name);
+                    }
+                    else if (!attr.value) {
+                        attrsToRemove.push(attr.name);
+                    }
+
+                }
+                for (const attrName of attrsToRemove) {
+                    newNode.removeAttribute(attrName);
                 }
 
                 for (let i = 0; i < node.childNodes.length; i++) {
@@ -240,17 +227,15 @@ export default {
 
             }
 
-            const a = this.$el.cloneNode(true);
             const newNode = document.createElement('div');
-
-
-            let t = getText(a, newNode)
-
+            let t = getText(this.$el.cloneNode(true), newNode);
             return t;
 
         },
 
         async saveText() {
+            wwLib.wwObjectMenu.preventNextOpen();
+
             wwLib.wwObjectEditors.close(this.textBar);
 
             let newText = this.getTextFromDom();
@@ -330,12 +315,6 @@ export default {
                         break;
                     case 'openMenu':
                         this.openMenu(event)
-                        break;
-                    case 'delete':
-                        this.remove();
-                        break;
-                    case 'margins':
-                        this.margins();
                         break;
                     default:
 
@@ -539,18 +518,10 @@ export default {
         },
 
         setFont(value) {
-
             if (!this.textSelection || this.textSelection.toString().length == 0) {
                 this.selectAll();
             }
-            switch (value) {
-                case 'more':
-                    console.log('OPEN MORE !');
-                    break;
-                default:
-                    document.execCommand('fontName', false, value);
-                    break;
-            }
+            document.execCommand('fontName', false, value);
         },
 
         async setColor(value) {
@@ -660,6 +631,8 @@ export default {
         addWwObject() {
             const newWwObject = wwLib.wwObject.getDefault({ type: 'ww-button' });
 
+            this.wwObject.data.children = this.wwObject.data.children || [];
+
             //Find first empty index in current wwObject children
             let index = 0;
             while (this.wwObject.data.children[index]) {
@@ -676,25 +649,10 @@ export default {
 
             wwLib.wwLang.setText(this.wwObject.content.data.text, newText);
             this.wwObjectCtrl.update(this.wwObject);
-
-
-
-
-        },
-
-        remove() {
-            wwLib.wwObjectEditors.close(this.textBar);
-            this.wwObjectCtrl.context.remove();
-        },
-
-        margins() {
-            wwLib.wwObjectHover.setMain(this.wwObjectCtrl.context);
-            wwLib.wwObjectHover.setLock(this.wwObjectCtrl.context);
-            wwLib.wwObjectEditors.close(this.textBar);
-            wwLib.wwObjectMargins.set(this.wwObjectCtrl.context);
         },
 
         async openMenu(event) {
+            wwLib.wwObjectEditors.close(this.textBar);
             this.wwObjectCtrl.context.openMenu(event, true);
         },
 
@@ -762,7 +720,6 @@ export default {
                 }, 50);
             }
             else if (oldFocus) {
-                wwLib.wwObjectEditors.close(this.textBar);
                 document.removeEventListener('selectionchange', this.updateSelection);
 
                 this.saveText();
