@@ -791,11 +791,13 @@ export default {
         /* wwManager:end */
     },
     beforeDestroy() {
-
+        /* wwManager:start */
+          
         this.saveText();
         wwLib.$off('wwFocus', this.setFocus);
 
         wwLib.wwObjectEditors.close(this.textBar);
+        /* wwManager:end */
     }
 };
 </script>
