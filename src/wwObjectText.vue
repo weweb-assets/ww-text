@@ -695,6 +695,7 @@ export default {
             const oldFocus = this.focus;
             this.focus = focusId == this.$parent._uid
             if (this.focus) {
+                wwLib.wwObjectMenu.allowNextOpen && wwLib.wwObjectMenu.allowNextOpen();
                 wwLib.wwObjectEditors.add(this.textBar);
                 wwLib.wwObjectMargins.close();
 
@@ -792,7 +793,7 @@ export default {
     },
     beforeDestroy() {
         /* wwManager:start */
-          
+
         this.saveText();
         wwLib.$off('wwFocus', this.setFocus);
 
