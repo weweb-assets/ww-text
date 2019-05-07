@@ -653,7 +653,7 @@ export default {
 
         async openMenu(event) {
             wwLib.wwObjectEditors.close(this.textBar);
-            this.wwObjectCtrl.context.openMenu(event, true);
+            this.wwObjectCtrl.context.openMenu(event, true, true);
         },
 
         async edit() {
