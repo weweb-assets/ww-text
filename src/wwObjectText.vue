@@ -130,6 +130,7 @@ export default {
     },
     data: function () {
         return {
+            d_edited: false,
             /* wwManager:start */
             textBar: null,
             textSelection: null,
@@ -234,6 +235,10 @@ export default {
         },
 
         async saveText() {
+            if (!this.d_edited) {
+                return;
+            }
+            this.d_edited = false;
             wwLib.wwObjectMenu.preventNextOpen();
 
             wwLib.wwObjectEditors.close(this.textBar);
@@ -245,6 +250,7 @@ export default {
             this.clearRender = true;
 
             wwLib.wwLang.setText(this.wwObject.content.data.text, newText);
+
             await this.wwObjectCtrl.update(this.wwObject);
         },
 
@@ -695,6 +701,7 @@ export default {
             const oldFocus = this.focus;
             this.focus = focusId == this.$parent._uid
             if (this.focus) {
+                this.d_edited = true;
                 wwLib.wwObjectMenu.allowNextOpen && wwLib.wwObjectMenu.allowNextOpen();
                 wwLib.wwObjectEditors.add(this.textBar);
                 wwLib.wwObjectMargins.close();
