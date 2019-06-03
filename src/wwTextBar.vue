@@ -90,7 +90,8 @@
 
                     <div class="subitems">
                         <div class="item font" v-for="font in c_fonts" :key="font.name" @click="action('style:font:' + getFont(font))" :style="'font-family:' + getFont(font)">{{font.name}}</div>
-                        <div class="item font" v-if="getDefaultFont()" @click="action('style:font:inherit')" :style="{'font-family':getDefaultFont()}">- Default -
+                        <div class="item font" v-if="getDefaultFont()" @click="action('style:font:inherit')" :style="{'font-family':getDefaultFont()}">
+                            - Default -
                             <br>
                             {{ getDefaultFont() }}
                         </div>
@@ -169,10 +170,12 @@
                 </div>
                 -->
                 <div class="item-placeholder separator"></div>
+                <div class="item separator" @click="action('html')">
+                    <span class="small-icon fas fa-code"></span>
+                </div>
                 <div class="item separator" @click="action('add')">
                     <span class="wwi wwi-add"></span>
                 </div>
-                <div class="item-placeholder separator"></div>
                 <div class="item orange separator" @click="action('openMenu', $event)">
                     <span class="wwi wwi-edit-other"></span>
                 </div>
@@ -610,6 +613,11 @@ $ww-blue: #2e85c2;
                     &:hover {
                         background-color: transparent;
                     }
+                }
+
+                .small-icon {
+                    font-size: 18px;
+                    margin-top: 4px;
                 }
 
                 input {

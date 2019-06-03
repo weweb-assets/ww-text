@@ -4,6 +4,8 @@ import Vue from 'vue'
 
 /* wwManager:start */
 import wwTextBar from './wwTextBar.vue';
+import wwTextPopupHtml from './wwTextPopupHtml.vue';
+wwLib.wwPopups.addPopup('wwTextPopupHtml', wwTextPopupHtml);
 /* wwManager:end */
 
 export default {
@@ -318,6 +320,9 @@ export default {
                         break;
                     case 'reset':
                         this.reset()
+                        break;
+                    case 'html':
+                        this.editHTML()
                         break;
                     case 'openMenu':
                         this.openMenu(event)
@@ -660,6 +665,55 @@ export default {
         async openMenu(event) {
             wwLib.wwObjectEditors.close(this.textBar);
             this.wwObjectCtrl.context.openMenu(event, true, true);
+        },
+
+        async editHTML() {
+            wwLib.wwObjectHover.setLock(this);
+
+            wwLib.wwPopups.addStory('WWTEXT_HTML', {
+                title: {
+                    en: 'Edit HTML',
+                    fr: 'Editer le HTML'
+                },
+                type: 'wwTextPopupHtml',
+                buttons: null,
+                storyData: {
+                },
+                buttons: {
+                    NEXT: {
+                        text: {
+                            en: 'Ok',
+                            fr: 'Ok'
+                        },
+                        next: false
+                    }
+                }
+            })
+
+            let options = {
+                firstPage: 'WWTEXT_HTML',
+                data: {
+                    wwObject: this.wwObject,
+                    html: this.getTextFromDom()
+                }
+            }
+
+            try {
+                const result = await wwLib.wwPopups.open(options);
+
+                if (result && typeof (result.html) !== undefined) {
+                    this.clearRender = true;
+
+                    wwLib.wwLang.setText(this.wwObject.content.data.text, result.html);
+
+                    await this.wwObjectCtrl.update(this.wwObject);
+                }
+
+            } catch (error) {
+                console.log(error);
+            }
+
+            wwLib.wwObjectHover.removeLock();
         },
 
         async edit() {
