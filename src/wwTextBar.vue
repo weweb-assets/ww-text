@@ -435,7 +435,7 @@ export default {
 
         setTextColor(value) {
             this.d_textColor = value;
-            this.options.context.wwTextBarAction('exec:color:' + this.d_textColor);
+            this.options.context.wwTextBarAction('color:' + this.d_textColor);
         },
 
         setBackgroundColor(value) {

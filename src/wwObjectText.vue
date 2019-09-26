@@ -16,8 +16,6 @@ export default {
 
 
     render(createVNode) {
-
-
         if (this.clearRender) {
             this.$nextTick(function () {
                 this.clearRender = false;
@@ -194,13 +192,12 @@ export default {
         /* wwManager:start */
         async editingSection(a, oldEditingSection) {
             if (this.editingSection && !this.oldEditingSection) {
-                // setTimeout(async () => {
-                await this.correctText();
-                this.loadQuill();
-                this.quill.disable();
-                // this.quill.update();
-                //this.quill.enable();
-                // }, 200)
+                this.correctText();
+
+                this.$nextTick(() => {
+                    this.loadQuill();
+                    this.quill.disable();
+                })
             }
         }
         /* wwManager:end */
@@ -219,8 +216,8 @@ export default {
             await this.loadQuillModules();
 
             if (this.editingSection) {
-                await this.correctText();
-                await this.loadQuill();
+                this.correctText();
+                this.loadQuill();
             }
             /* wwManager:end */
         },
@@ -269,6 +266,7 @@ export default {
             }
             let mouseDownCoords = [event.clientX, event.clientY];
             let preventNext = false;
+            console.log('prev');
 
             function onMouseMove(event) {
                 const distX = Math.abs(mouseDownCoords[0] - event.clientX);
@@ -278,11 +276,7 @@ export default {
                     wwLib.wwUtils.preventNextFocus();
                     preventNext = true;
                 }
-
-                wwLib.getFrontWindow().addEventListener('click', onClick, { capture: true });
-                wwLib.getManagerWindow().addEventListener('click', onClick, { capture: true });
             }
-
 
             function onClick(event) {
                 if (preventNext) {
@@ -296,146 +290,158 @@ export default {
                 wwLib.getManagerWindow().removeEventListener('mousemove', onMouseMove);
             }
 
+            wwLib.getFrontWindow().addEventListener('click', onClick, { capture: true });
+            wwLib.getManagerWindow().addEventListener('click', onClick, { capture: true });
             wwLib.getFrontWindow().addEventListener('mousemove', onMouseMove);
             wwLib.getManagerWindow().addEventListener('mousemove', onMouseMove);
         },
 
-        async correctText() {
-            return new Promise((resolve) => {
+        correctText() {
+            let corrected = false;
+            for (const lang of Object.keys(this.wwObject.content.data.text)) {
 
-                for (const lang of Object.keys(this.wwObject.content.data.text)) {
+                if (this.wwObject.content.data._q && this.wwObject.content.data._q[lang]) {
+                    continue;
+                }
+                corrected = true;
 
-                    if (this.wwObject.content.data._q && this.wwObject.content.data._q[lang]) {
-                        continue;
-                    }
+                this.d_edited = true;
 
-                    this.d_edited = true;
+                let text = this.wwObject.content.data.text[lang];
+                const wwObjRegex = /\[\[wwObject=([^\]]*)\]\]/gi;
 
-                    let text = this.wwObject.content.data.text[lang];
-                    const wwObjRegex = /\[\[wwObject=([^\]]*)\]\]/gi;
+                text = text.replace(wwObjRegex, '<span class="ww-object-embed" data-ww-object-id="$1"></span>');
 
-                    text = text.replace(wwObjRegex, '<span class="ww-object-embed" data-ww-object-id="$1"></span>');
+                const elem = document.createElement('div');
+                const elemP = document.createElement('p');
+                elem.append(elemP);
+                elemP.innerHTML = text;
 
-                    const elem = document.createElement('div');
-                    const elemP = document.createElement('p');
-                    elem.append(elemP);
-                    elemP.innerHTML = text;
+                let self = this;
 
-                    let self = this;
-
-                    function getFontSize(el) {
-                        let size = el.style.fontSize;
-                        if (size) {
-                            if (size.indexOf('rem') !== -1) {
-                                size = parseFloat(size.replace('rem', '')) * 16;
-                            }
-                            else {
-                                size = parseFloat(size.replace('px', ''));
-                            }
-
-                            let fontSizes = [];
-                            for (let fontSize of wwLib.wwWebsiteData.getDesign().info.fontSizes.list) {
-                                fontSizes.push({
-                                    name: fontSize.name,
-                                    size: parseFloat(fontSize.screens.lg)
-                                })
-                            }
-
-                            let closest = fontSizes.reduce(function (prevSize, currSize) {
-                                return (Math.abs(currSize.size - size) < Math.abs(prevSize.size - size) ? currSize : prevSize);
-                            });
-                            const newSize = 'font-size-' + closest.name.toLowerCase().replace(/\s/g, '');
-                            return newSize;
+                function getFontSize(el) {
+                    let size = el.style.fontSize;
+                    if (size) {
+                        if (size.indexOf('rem') !== -1) {
+                            size = parseFloat(size.replace('rem', '')) * 16;
+                        }
+                        else {
+                            size = parseFloat(size.replace('px', ''));
                         }
 
-                        return '';
-                    }
-
-
-                    function parseHtml(el) {
-                        for (let i = 0; i < el.children.length; i++) {
-                            let subEl = el.children[i];
-
-                            let subNewEl;
-
-                            switch (subEl.tagName) {
-                                case 'SPAN':
-                                case 'DIV':
-                                    subNewEl = document.createElement(subEl.tagName)
-
-                                    let align = subEl.style.textAlign;
-                                    align = (align != 'inherit' ? align : null);
-
-                                    if (align) {
-                                        subNewEl.style.textAlign = align;
-                                    }
-
-                                    let newFontSize = getFontSize(subEl);
-                                    newFontSize && subNewEl.classList.add(newFontSize);
-                                    subNewEl.innerHTML = subEl.innerHTML;
-
-                                    break;
-                                case 'FONT':
-                                    let style = '';
-
-                                    if (subEl.attributes.color && subEl.attributes.color.nodeValue && subEl.attributes.color.nodeValue != 'inherit') {
-                                        style += 'color:' + subEl.attributes.color.nodeValue + ';';
-                                    }
-
-                                    if (subEl.attributes.face && subEl.attributes.face.nodeValue && subEl.attributes.face.nodeValue != 'inherit') {
-                                        style += 'font-family:' + subEl.attributes.face.nodeValue + ';';
-                                    }
-
-                                    subNewEl = document.createElement('span');
-                                    subNewEl.innerHTML = subEl.innerHTML;
-                                    subNewEl.setAttribute('style', style);
-                                    let newFontSize2 = getFontSize(subEl);
-                                    newFontSize2 && subNewEl.classList.add(newFontSize2);
-
-                                    break;
-
-                                case 'B':
-                                    subNewEl = document.createElement('strong')
-                                    subNewEl.innerHTML = subEl.innerHTML;
-                                    break;
-                                case 'I':
-                                    subNewEl = document.createElement('em')
-                                    subNewEl.innerHTML = subEl.innerHTML;
-
-                                    break;
-                                default:
-                                    subNewEl = document.createElement(subEl.tagName)
-                                    subNewEl.innerHTML = subEl.innerHTML;
-
-                                    break;
-                            }
-
-                            parseHtml(subNewEl);
-
-                            el.insertBefore(subNewEl, subEl);
-
-                            subEl.remove();
+                        let fontSizes = [];
+                        for (let fontSize of wwLib.wwWebsiteData.getDesign().info.fontSizes.list) {
+                            fontSizes.push({
+                                name: fontSize.name,
+                                size: parseFloat(fontSize.screens.lg)
+                            })
                         }
 
+                        let closest = fontSizes.reduce(function (prevSize, currSize) {
+                            return (Math.abs(currSize.size - size) < Math.abs(prevSize.size - size) ? currSize : prevSize);
+                        });
+                        const newSize = 'font-size-' + closest.name.toLowerCase().replace(/\s/g, '');
+                        return newSize;
                     }
 
-                    parseHtml(elemP);
-
-                    this.wwObject.content.data.text[lang] = elem.innerHTML;
-                    this.wwObject.content.data._q = this.wwObject.content.data._q || {};
-                    this.wwObject.content.data._q[lang] = true;
+                    return '';
                 }
 
-                this.wwObjectCtrl.update(this.wwObject);
 
-                // this.$nextTick(() => { 
-                resolve(true);
-                // });
-            })
+                function parseHtml(el) {
+                    for (let i = 0; i < el.children.length; i++) {
+                        let subEl = el.children[i];
+
+                        let subNewEl;
+
+                        switch (subEl.tagName) {
+                            case 'SPAN':
+                            case 'DIV':
+                                subNewEl = document.createElement(subEl.tagName)
+
+                                let align = subEl.style.textAlign;
+                                align = (align != 'inherit' ? align : null);
+
+                                if (align) {
+                                    subNewEl.style.textAlign = align;
+                                }
+
+                                let newFontSize = getFontSize(subEl);
+                                newFontSize && subNewEl.classList.add(newFontSize);
+                                subNewEl.innerHTML = subEl.innerHTML;
+
+                                break;
+                            case 'FONT':
+                                let style = '';
+
+                                if (subEl.attributes.color && subEl.attributes.color.nodeValue && subEl.attributes.color.nodeValue != 'inherit') {
+                                    style += 'color:' + subEl.attributes.color.nodeValue + ';';
+                                }
+
+                                if (subEl.attributes.face && subEl.attributes.face.nodeValue && subEl.attributes.face.nodeValue != 'inherit') {
+                                    style += 'font-family:' + subEl.attributes.face.nodeValue + ';';
+                                }
+
+                                subNewEl = document.createElement('span');
+                                subNewEl.innerHTML = subEl.innerHTML;
+                                subNewEl.setAttribute('style', style);
+                                let newFontSize2 = getFontSize(subEl);
+                                newFontSize2 && subNewEl.classList.add(newFontSize2);
+
+                                break;
+
+                            case 'B':
+                                subNewEl = document.createElement('strong')
+                                subNewEl.innerHTML = subEl.innerHTML;
+                                break;
+                            case 'I':
+                                subNewEl = document.createElement('em')
+                                subNewEl.innerHTML = subEl.innerHTML;
+
+                                break;
+                            default:
+                                subNewEl = document.createElement(subEl.tagName)
+                                subNewEl.innerHTML = subEl.innerHTML;
+
+                                break;
+                        }
+
+                        parseHtml(subNewEl);
+
+                        el.insertBefore(subNewEl, subEl);
+
+                        subEl.remove();
+                    }
+
+                }
+
+                parseHtml(elemP);
+
+                this.wwObject.content.data.text[lang] = elem.innerHTML;
+                this.wwObject.content.data._q = this.wwObject.content.data._q || {};
+                this.wwObject.content.data._q[lang] = true;
+            }
+
+            // this.wwObject.uniqueId == 3696391900 && console.log('child', this)
+            corrected && this.wwObjectCtrl.update(this.wwObject);
+
+            // this.$nextTick(() => { 
+            return true;
+            // });
         },
 
-        async loadQuill() {
+        loadQuill() {
             this.quill = new Quill(this.$el);
+        },
+
+        reloadQuill() {
+            this.clearRender = true;
+
+            setTimeout(() => {
+                if (this.editingSection) {
+                    this.loadQuill();
+                }
+            }, 100);
         },
 
         async loadQuillModules() {
@@ -462,13 +468,22 @@ export default {
                         }
 
                         self.wwObject.content.data.children[wwObjectIndex] = wwObjectData;
+                        console.log("2");
                         self.wwObjectCtrl.update(self.wwObject);
+                    }
+
+                    for (let c of self.$children) {
+                        if (c.c_wwObject.uniqueId == wwObjectData.uniqueId) {
+                            c.$destroy();
+                        }
                     }
 
                     const wwObject = new Vue.options.components.wwObject({ propsData: { wwObject: wwObjectData } });
                     wwObject.$parent = self;
+                    self.$children.push(wwObject);
                     wwObject.$store = self.$store;
                     wwObject.$mount();
+
                     // wwObject.$el.setAttribute('ww-inside-ww-object', 'ww-text');
 
                     return { el: wwObject.$el, wwObjectId: wwObjectIndex };
@@ -506,6 +521,7 @@ export default {
 
                     format(name, value) {
                         if (name == 'wwObjectId' && value) {
+
                             this.domNode.innerHTML = '';
 
 
@@ -515,6 +531,9 @@ export default {
                                 return;
                             }
                             else {
+                                // console.log(vueNode.__vue__);
+
+                                //.$destroy();
                                 const { el, wwObjectId } = createWwObject(vueNode.__vue__, value);
                                 this.domNode.appendChild(el);
 
@@ -530,11 +549,11 @@ export default {
                         while (node && !node.__vue__) {
                             node = node.parentNode;
                         }
-                        if (node.__vue__) {
+                        if (node && node.__vue__) {
                             return node;
                         }
                         else {
-                            console.log('Error self ?');
+                            // console.log('Error self ?');
                             return null;
                         }
                     }
@@ -615,7 +634,7 @@ export default {
                 Quill.register(letterSpacing, true);
 
 
-                //LINE HEIGHT
+                // LINE HEIGHT
                 let configLineHeight = { scope: Parchment.Scope.BLOCK };
                 let lineHeight = new Parchment.Attributor.Style('lineHeight', 'line-height', configLineHeight);
                 Quill.register(lineHeight, true);
@@ -626,7 +645,100 @@ export default {
                 let listType = new Parchment.Attributor.Attribute('listType', 'type', configListType);
                 Quill.register(listType, true);
 
+
+                // LIST ITEM COLOR
+                class ListItemColor extends Parchment.Attributor.Style {
+                    value(node) {
+                        let value = super.value(node);
+
+                        if (!value.startsWith('rgb(')) return value;
+
+                        value = value.replace(/^[^\d]+/, '').replace(/[^\d]+$/, '');
+
+                        const color = '#' + value.split(',').map(function (component) {
+                            return ('00' + parseInt(component, 10).toString(16)).slice(-2);
+                        }).join('');
+                        return color
+                    }
+                }
+                const listItemColor = new ListItemColor('li-color', 'color', {
+                    scope: Parchment.Scope.BLOCK,
+                });
+                Quill.register(listItemColor);
+
+
+                // LIST ITEM FONT
+                class ListItemFont extends Parchment.Attributor.Style {
+                    value(node) {
+                        let value = super.value(node);
+                        return value;
+                    }
+                }
+                const listItemFont = new ListItemFont('li-font', 'font-family', {
+                    scope: Parchment.Scope.BLOCK,
+                });
+                Quill.register(listItemFont);
+
+
+                // // LIST ITEM SIZE
+                // class ListItemSize extends Parchment.Attributor.Class {
+                //     value(node) {
+                //         let value = super.value(node);
+                //         return value;
+                //     }
+                // }
+                // const listItemSize = new ListItemSize('li-size', 'font-size', {
+                //     scope: Parchment.Scope.BLOCK,
+                // });
+                // Quill.register(listItemSize);
+
+
+                // STYLED LIST ITEM
+                var ListItem = Quill.import('formats/list/item');
+                class ListItemStyle extends ListItem {
+                    optimize(context) {
+                        super.optimize(context);
+
+                        // if (this.children.length === 1) {
+                        const child = this.children.head;
+                        const attributes = child.attributes;
+
+                        if (attributes && attributes.attributes.color) {
+                            const color = attributes.attributes.color.value(child.domNode);
+                            super.format('li-color', color);
+                        }
+
+                        if (attributes && attributes.attributes.font) {
+                            const font = attributes.attributes.font.value(child.domNode);
+                            super.format('li-font', font);
+                        }
+
+                        // if (attributes && attributes.attributes.fontSize) {
+                        //     const fontSize = attributes.attributes.fontSize.value(child.domNode);
+                        //     if (!this.attributes.attributes.hasOwnProperty('li-size') || !this.domNode.classList.contains('font-size-' + fontSize)) {
+                        //         this.format('li-size', fontSize);
+                        //     }
+                        // }
+                        // }
+                        // else {
+                        //     if (this.attributes.attributes.hasOwnProperty('li-color')) {
+                        //         super.format('li-color', null);
+                        //     }
+                        //     if (this.attributes.attributes.hasOwnProperty('li-font')) {
+                        //         super.format('li-font', null);
+                        //     }
+                        //     if (this.attributes.attributes.hasOwnProperty('li-size')) {
+                        //         super.format('li-size', null);
+                        //     }
+                        // }
+                    }
+                }
+                Quill.register(ListItemStyle, true);
             }
+        },
+
+        onPasteWwObject() {
+            this.reloadQuill();
         },
 
         getTextFromDom(format) {
@@ -734,8 +846,12 @@ export default {
             return t;
         },
 
-        async saveText() {
-            this.clearRender = true;
+        async saveText(options) {
+            options = options || {};
+
+            if (options.clearRender) {
+                this.clearRender = true;
+            }
             if (!this.d_edited) {
                 return;
             }
@@ -750,8 +866,8 @@ export default {
             // wwLib.wwObjectHover.close();
 
 
-            wwLib.wwLang.setText(this.wwObject.content.data.text, newText);
-
+            wwLib.wwLang.setText(this.wwObject.content.data.text, newText, options.lang);
+            console.log("3");
             await this.wwObjectCtrl.update(this.wwObject);
         },
 
@@ -828,6 +944,9 @@ export default {
                         break;
                     case 'prop':
                         this.setProp(action, value);
+                        break;
+                    case 'color':
+                        this.setColor(action);
                         break;
 
                     // case 'insert':
@@ -1008,7 +1127,9 @@ export default {
         },
 
         setProp(prop, value) {
+            this.saveText({ clearRender: true });
             this.wwObject.content.data[prop] = value;
+            console.log("6");
             this.wwObjectCtrl.update(this.wwObject);
 
             wwLib.wwObjectHover.removeLock();
@@ -1067,6 +1188,10 @@ export default {
             const cursorPosition = this.quill.getSelection().index;
             this.quill.insertEmbed(cursorPosition, 'line', JSON.stringify(value));
             this.quill.setSelection(cursorPosition + 1);
+        },
+
+        setColor(value) {
+            this.quill.format('color', value);
         },
 
         /*
@@ -1356,6 +1481,7 @@ export default {
 
                     wwLib.wwLang.setText(this.wwObject.content.data.text, result.html);
 
+                    console.log("8");
                     await this.wwObjectCtrl.update(this.wwObject);
                 }
 
@@ -1476,6 +1602,7 @@ export default {
             needUpdate = true;
         }
         if (needUpdate) {
+            console.log("4");
             this.wwObjectCtrl.update(this.wwObject);
         }
         /* wwManager:end */
@@ -1488,16 +1615,7 @@ export default {
 
 
 
-        // this.$el.addEventListener('paste', function (e) {
 
-        //     e.preventDefault();
-
-        //     // get text representation of clipboard
-        //     var text = (e.originalEvent || e).clipboardData.getData('text/plain');
-
-        //     // insert text manually
-        //     document.execCommand("insertHTML", false, text);
-        // })
 
         /* wwManager:start */
         this.textBar = {
@@ -1506,6 +1624,16 @@ export default {
             component: wwTextBar
         }
 
+        this.$el.addEventListener('paste', function (e) {
+            e.preventDefault();
+
+            // get text representation of clipboard
+            var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+
+            // insert text manually
+            document.execCommand("insertHTML", false, text);
+        })
+
         wwLib.$on('wwFocus', this.setFocus);
 
         wwLib.wwAsyncScripts.loadAsset({
@@ -1513,14 +1641,17 @@ export default {
             name: 'ww-text',
         });
 
-        // wwLib.$on("wwLang:changed", (lang) => {
+        wwLib.$on("wwLang:changed", (lang) => {
+            this.saveText({ lang: lang.old });
 
-        //     if (this.focus) {
-        //         wwLib.wwLang.setText(this.wwObject.content.data.text, this.$el.innerHTML, lang.old);
-        //     }
+            this.clearRender = true;
 
-        //     this.$forceUpdate();
-        // });
+            setTimeout(() => {
+                if (this.editingSection) {
+                    this.loadQuill();
+                }
+            }, 100);
+        });
 
         /* wwManager:end */
     },
