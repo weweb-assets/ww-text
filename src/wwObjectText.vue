@@ -266,7 +266,6 @@ export default {
             }
             let mouseDownCoords = [event.clientX, event.clientY];
             let preventNext = false;
-            console.log('prev');
 
             function onMouseMove(event) {
                 const distX = Math.abs(mouseDownCoords[0] - event.clientX);
@@ -418,11 +417,10 @@ export default {
                 parseHtml(elemP);
 
                 this.wwObject.content.data.text[lang] = elem.innerHTML;
-                this.wwObject.content.data._q = this.wwObject.content.data._q || {};
+                this.wwObject.content.data._q = (this.wwObject.content.data._q && typeof (this.wwObject.content.data._q) == 'object') ? this.wwObject.content.data._q : {};
                 this.wwObject.content.data._q[lang] = true;
             }
 
-            // this.wwObject.uniqueId == 3696391900 && console.log('child', this)
             corrected && this.wwObjectCtrl.update(this.wwObject);
 
             // this.$nextTick(() => { 
@@ -468,7 +466,7 @@ export default {
                         }
 
                         self.wwObject.content.data.children[wwObjectIndex] = wwObjectData;
-                        console.log("2");
+
                         self.wwObjectCtrl.update(self.wwObject);
                     }
 
@@ -531,9 +529,6 @@ export default {
                                 return;
                             }
                             else {
-                                // console.log(vueNode.__vue__);
-
-                                //.$destroy();
                                 const { el, wwObjectId } = createWwObject(vueNode.__vue__, value);
                                 this.domNode.appendChild(el);
 
@@ -553,7 +548,6 @@ export default {
                             return node;
                         }
                         else {
-                            // console.log('Error self ?');
                             return null;
                         }
                     }
@@ -584,13 +578,28 @@ export default {
                         const line = document.createElement('div');
                         line.style.width = value.width || '100%';
                         line.style.display = 'inline-block';
-                        line.style.borderTop = (value.height || 1) + 'px solid ' + (value.color || 'black');
+                        line.style.borderTop = (value.height || 1) + 'px solid';
+                        line.style.borderTopColor = (value.color || 'black');
                         line.style.margin = '2px 0';
+                        line.classList.add('line');
 
                         node.setAttribute('data-line', JSON.stringify(value));
 
                         node.appendChild(line);
                         return node;
+                    }
+
+                    format(name, value) {
+                        if (name == 'color' && value) {
+                            this.domNode.querySelector('.line').style.borderTopColor = value;
+                            let _value = JSON.parse(this.domNode.getAttribute('data-line') || '{}');
+                            _value.color = value;
+                            this.domNode.setAttribute('data-line', JSON.stringify(_value));
+                        }
+                    }
+
+                    static formats(node) {
+                        return JSON.parse(node.getAttribute('data-line') || '{}');
                     }
 
                     // get value of the node (for implement undo function)
@@ -604,16 +613,126 @@ export default {
                 Quill.register(Line, true);
 
 
+                // LIST ITEM COLOR
+                class ListItemColor extends Parchment.Attributor.Style {
+                    value(node) {
+                        let value = super.value(node);
+
+                        if (!value.startsWith('rgb(')) return value;
+
+                        value = value.replace(/^[^\d]+/, '').replace(/[^\d]+$/, '');
+
+                        const color = '#' + value.split(',').map(function (component) {
+                            return ('00' + parseInt(component, 10).toString(16)).slice(-2);
+                        }).join('');
+                        return color
+                    }
+                }
+                const listItemColor = new ListItemColor('li-color', 'color', {
+                    scope: Parchment.Scope.BLOCK,
+                });
+                Quill.register(listItemColor);
+
+
+                // LIST ITEM SIZE
+                class ListItemSize extends Parchment.Attributor.Class {
+                    value(node) {
+                        let value = super.value(node);
+                        return value;
+                    }
+                }
+                const listItemSize = new ListItemSize('li-size', 'font-size', {
+                    scope: Parchment.Scope.BLOCK,
+                });
+                Quill.register(listItemSize);
+
+
+                // LIST ITEM FONT
+                class ListItemFont extends Parchment.Attributor.Style {
+                    value(node) {
+                        let value = super.value(node);
+                        return value;
+                    }
+                }
+                const listItemFont = new ListItemFont('li-font', 'font-family', {
+                    scope: Parchment.Scope.BLOCK,
+                });
+                Quill.register(listItemFont);
+
+
+                // STYLISED LIST ITEM
+                var ListItem = Quill.import('formats/list/item');
+                class ListItemStyle extends ListItem {
+
+                    format(name, value) {
+                        if (name == 'li-font') {
+                            this.domNode.style.fontFamily = value;
+                        }
+                        else if (name == 'li-size') {
+                            for (let c of this.domNode.classList) {
+                                if (c.indexOf('font-size-') === 0) {
+                                    this.domNode.classList.remove(c);
+                                }
+                            }
+                            if (value) {
+                                this.domNode.classList.add('font-size-' + value);
+                            }
+                        }
+                        else {
+                            super.format(name, value);
+                        }
+                    }
+
+                    optimize(context) {
+                        super.optimize(context);
+
+                        // if (this.children.length === 1) {
+                        const child = this.children.head;
+                        const attributes = child.attributes;
+
+                        if (attributes && attributes.attributes.color) {
+                            const color = attributes.attributes.color.value(child.domNode);
+                            super.format('li-color', color);
+                        }
+
+                        if (attributes && attributes.attributes.font) {
+                            const font = attributes.attributes.font.value(child.domNode);
+                            super.format('li-font', font);
+                        }
+
+                        if (attributes && attributes.attributes.fontSize) {
+                            const fontSize = attributes.attributes.fontSize.value(child.domNode);
+                            if (!this.domNode.classList.contains('font-size-' + fontSize)) {
+                                this.format('li-size', fontSize);
+                            }
+                        }
+                        // }
+                        // else {
+                        //     if (this.attributes.attributes.hasOwnProperty('li-color')) {
+                        //         super.format('li-color', null);
+                        //     }
+                        //     if (this.attributes.attributes.hasOwnProperty('li-font')) {
+                        //         super.format('li-font', null);
+                        //     }
+                        //     if (this.attributes.attributes.hasOwnProperty('li-size')) {
+                        //         super.format('li-size', null);
+                        //     }
+                        // }
+                    }
+                }
+                Quill.register(ListItemStyle);
+
+
                 // FONT SIZE
                 let configFontSize = { scope: Parchment.Scope.INLINE };
                 let fontSize = new Parchment.Attributor.Class('fontSize', 'font-size', configFontSize);
                 Quill.register(fontSize, true)
 
 
-                // FONT STYLE
-                let configFontStyle = { scope: Parchment.Scope.INLINE };
-                let fontStyle = new Parchment.Attributor.Style('font', 'font-family', configFontStyle);
-                Quill.register(fontStyle, true);
+                // FONT
+                let configFont = { scope: Parchment.Scope.INLINE };
+                let font = new Parchment.Attributor.Style('font', 'font-family', configFont);
+                Quill.register(font, true);
 
 
                 // ALIGN
@@ -646,94 +765,7 @@ export default {
                 Quill.register(listType, true);
 
 
-                // LIST ITEM COLOR
-                class ListItemColor extends Parchment.Attributor.Style {
-                    value(node) {
-                        let value = super.value(node);
 
-                        if (!value.startsWith('rgb(')) return value;
-
-                        value = value.replace(/^[^\d]+/, '').replace(/[^\d]+$/, '');
-
-                        const color = '#' + value.split(',').map(function (component) {
-                            return ('00' + parseInt(component, 10).toString(16)).slice(-2);
-                        }).join('');
-                        return color
-                    }
-                }
-                const listItemColor = new ListItemColor('li-color', 'color', {
-                    scope: Parchment.Scope.BLOCK,
-                });
-                Quill.register(listItemColor);
-
-
-                // LIST ITEM FONT
-                class ListItemFont extends Parchment.Attributor.Style {
-                    value(node) {
-                        let value = super.value(node);
-                        return value;
-                    }
-                }
-                const listItemFont = new ListItemFont('li-font', 'font-family', {
-                    scope: Parchment.Scope.BLOCK,
-                });
-                Quill.register(listItemFont);
-
-
-                // // LIST ITEM SIZE
-                // class ListItemSize extends Parchment.Attributor.Class {
-                //     value(node) {
-                //         let value = super.value(node);
-                //         return value;
-                //     }
-                // }
-                // const listItemSize = new ListItemSize('li-size', 'font-size', {
-                //     scope: Parchment.Scope.BLOCK,
-                // });
-                // Quill.register(listItemSize);
-
-
-                // STYLED LIST ITEM
-                var ListItem = Quill.import('formats/list/item');
-                class ListItemStyle extends ListItem {
-                    optimize(context) {
-                        super.optimize(context);
-
-                        // if (this.children.length === 1) {
-                        const child = this.children.head;
-                        const attributes = child.attributes;
-
-                        if (attributes && attributes.attributes.color) {
-                            const color = attributes.attributes.color.value(child.domNode);
-                            super.format('li-color', color);
-                        }
-
-                        if (attributes && attributes.attributes.font) {
-                            const font = attributes.attributes.font.value(child.domNode);
-                            super.format('li-font', font);
-                        }
-
-                        // if (attributes && attributes.attributes.fontSize) {
-                        //     const fontSize = attributes.attributes.fontSize.value(child.domNode);
-                        //     if (!this.attributes.attributes.hasOwnProperty('li-size') || !this.domNode.classList.contains('font-size-' + fontSize)) {
-                        //         this.format('li-size', fontSize);
-                        //     }
-                        // }
-                        // }
-                        // else {
-                        //     if (this.attributes.attributes.hasOwnProperty('li-color')) {
-                        //         super.format('li-color', null);
-                        //     }
-                        //     if (this.attributes.attributes.hasOwnProperty('li-font')) {
-                        //         super.format('li-font', null);
-                        //     }
-                        //     if (this.attributes.attributes.hasOwnProperty('li-size')) {
-                        //         super.format('li-size', null);
-                        //     }
-                        // }
-                    }
-                }
-                Quill.register(ListItemStyle, true);
             }
         },
 
@@ -867,7 +899,7 @@ export default {
 
 
             wwLib.wwLang.setText(this.wwObject.content.data.text, newText, options.lang);
-            console.log("3");
+
             await this.wwObjectCtrl.update(this.wwObject);
         },
 
@@ -1129,8 +1161,10 @@ export default {
         setProp(prop, value) {
             this.saveText({ clearRender: true });
             this.wwObject.content.data[prop] = value;
-            console.log("6");
+
             this.wwObjectCtrl.update(this.wwObject);
+
+            this.reloadQuill();
 
             wwLib.wwObjectHover.removeLock();
             wwLib.wwObjectHover.close();
@@ -1481,8 +1515,9 @@ export default {
 
                     wwLib.wwLang.setText(this.wwObject.content.data.text, result.html);
 
-                    console.log("8");
                     await this.wwObjectCtrl.update(this.wwObject);
+
+                    this.reloadQuill();
                 }
 
             } catch (error) {
@@ -1602,7 +1637,6 @@ export default {
             needUpdate = true;
         }
         if (needUpdate) {
-            console.log("4");
             this.wwObjectCtrl.update(this.wwObject);
         }
         /* wwManager:end */

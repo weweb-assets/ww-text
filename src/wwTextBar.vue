@@ -37,8 +37,8 @@
                     <span class="fas fa-font"></span>
 
                     <div class="subitems">
-                        <div class="item font" v-for="font in c_fonts" :key="font.name" @click="action('exec:font:' + getFont(font))" :style="'font-family:' + getFont(font)">{{font.name}}</div>
-                        <div class="item font" v-if="getDefaultFont()" @click="action('exec:font:inherit')" :style="{'font-family':getDefaultFont()}">
+                        <div class="item font" v-for="font in c_fonts" :key="font.name" @click="action('exec:font-family:' + getFont(font))" :style="'font-family:' + getFont(font)">{{font.name}}</div>
+                        <div class="item font" v-if="getDefaultFont()" @click="action('exec:font-family:inherit')" :style="{'font-family':getDefaultFont()}">
                             - Default -
                             <br />
                             {{ getDefaultFont() }}
