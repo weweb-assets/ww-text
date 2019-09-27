@@ -1472,6 +1472,8 @@ export default {
         */
 
         async openMenu(event) {
+            this.saveText();
+
             wwLib.wwObjectEditors.close(this.textBar);
             this.wwObjectCtrl.context.openMenu(event, true, true);
         },
