@@ -980,6 +980,9 @@ export default {
                     case 'color':
                         this.setColor(action);
                         break;
+                    case 'open':
+                        this.openPopup(action);
+                        break;
 
                     // case 'insert':
                     //     this.insert(action, value)
@@ -1470,6 +1473,20 @@ export default {
             this.wwObjectCtrl.update(this.wwObject);
         },
         */
+
+        async openPopup(popup) {
+            let options = {
+                firstPage: popup
+            }
+
+            try {
+                const result = await wwLib.wwPopups.open(options);
+                wwLib.wwObjectEditors.close(this.textBar);
+                wwLib.wwObjectEditors.add(this.textBar);
+            } catch (error) {
+                console.log(error);
+            }
+        },
 
         async openMenu(event) {
             this.saveText();

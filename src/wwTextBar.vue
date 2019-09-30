@@ -27,6 +27,9 @@
                     <div class="subitems">
                         <div class="item font-size" v-for="fontSize in c_fontSizes" :key="fontSize.name" @click="action('fontSize:' + getFontSizeClass(fontSize))">{{fontSize.name}}</div>
                         <div class="item font-size" @click="action('fontSize')">- Default -</div>
+                        <div class="item font-size blue" @click="action('open:DESIGN_FONT_SIZES')">
+                            <span class="wwi wwi-add"></span>
+                        </div>
                         <!-- <div class="item input">
                             <input type="text" v-model="customSize" @click="$event.stopPropagation()" @keydown="checkEnterSize($event)" />
                         </div>-->
@@ -42,6 +45,9 @@
                             - Default -
                             <br />
                             {{ getDefaultFont() }}
+                        </div>
+                        <div class="item font blue" @click="action('open:DESIGN_FONTS')">
+                            <span class="wwi wwi-add"></span>
                         </div>
                         <!-- <div class="item font" @click="action('style:font:more')">
                             <i>More...</i>
