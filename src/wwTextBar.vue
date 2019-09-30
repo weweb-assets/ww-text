@@ -1,15 +1,231 @@
 <template>
     <div class="ww-text-bar" :class="{'show': show}" :style="position" @click="focus()">
-        <div class="handle-container" @mousedown="startDrag($event)">
-            <div class="handle">
-                <div></div>
-                <div></div>
-                <div></div>
-            </div>
+        <div class="move" @mousedown="startDrag($event)">
+            <span class="fas fa-arrows-alt"></span>
         </div>
-        <div class="content">
-            <div class="line">
-                <div class="item separator">
+        <div class="content" :class="{'expended': expended}">
+            <div class="line main">
+                <!-- BOLD -->
+                <div class="item" @click="action('exec:bold')">
+                    <span class="fas fa-bold"></span>
+                </div>
+                <!-- ITALIC -->
+                <div class="item" @click="action('exec:italic')">
+                    <span class="fas fa-italic"></span>
+                </div>
+                <!-- UNDERLINE -->
+                <div class="item" @click="action('exec:underline')">
+                    <span class="fas fa-underline"></span>
+                </div>
+
+                <div class="separator"></div>
+
+                <!-- FONT SIZE -->
+                <div class="item">
+                    <span class="wwi wwi-font-size"></span>
+
+                    <div class="subitems">
+                        <div class="item font-size" v-for="fontSize in c_fontSizes" :key="fontSize.name" @click="action('fontSize:' + getFontSizeClass(fontSize))">{{fontSize.name}}</div>
+                        <div class="item font-size" @click="action('fontSize')">- Default -</div>
+                        <div class="item font-size blue" @click="action('open:DESIGN_FONT_SIZES')">
+                            <span class="wwi wwi-add"></span>
+                        </div>
+                        <!-- <div class="item input">
+                            <input type="text" v-model="customSize" @click="$event.stopPropagation()" @keydown="checkEnterSize($event)" />
+                        </div>-->
+                    </div>
+                </div>
+                <!-- FONT -->
+                <div class="item">
+                    <span class="fas fa-font"></span>
+
+                    <div class="subitems">
+                        <div class="item font" v-for="font in c_fonts" :key="font.name" @click="action('exec:font-family:' + getFont(font))" :style="'font-family:' + getFont(font)">{{font.name}}</div>
+                        <div class="item font" v-if="getDefaultFont()" @click="action('exec:font-family:inherit')" :style="{'font-family':getDefaultFont()}">
+                            - Default -
+                            <br />
+                            {{ getDefaultFont() }}
+                        </div>
+                        <div class="item font blue" @click="action('open:DESIGN_FONTS')">
+                            <span class="wwi wwi-add"></span>
+                        </div>
+                        <!-- <div class="item font" @click="action('style:font:more')">
+                            <i>More...</i>
+                        </div>-->
+                    </div>
+                </div>
+                <!-- ALIGN -->
+                <div class="item">
+                    <span class="fas fa-align-left"></span>
+
+                    <div class="subitems">
+                        <div class="item" @click="action('exec:align:justify')">
+                            <span class="fas fa-align-justify"></span>
+                        </div>
+                        <div class="item" @click="action('exec:align:right')">
+                            <span class="fas fa-align-right"></span>
+                        </div>
+                        <div class="item" @click="action('exec:align:center')">
+                            <span class="fas fa-align-center"></span>
+                        </div>
+                        <div class="item" @click="action('exec:align:left')">
+                            <span class="fas fa-align-left"></span>
+                        </div>
+                    </div>
+                </div>
+                <!-- COLOR -->
+                <div class="item">
+                    <span class="wwi wwi-color"></span>
+                    <div class="subitems">
+                        <div class="item colors">
+                            <div class="color">
+                                Text
+                                <wwManagerColorSelect v-model="d_textColor" @change="setTextColor($event)"></wwManagerColorSelect>
+                            </div>
+                            <div class="color">
+                                Background
+                                <wwManagerColorSelect v-model="d_backgroundColor" @change="setBackgroundColor($event)"></wwManagerColorSelect>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- <div class="subitems">
+                        <div class="item colors">
+                            <div style="background-color:white" @click="action('exec:color:white')"></div>
+                            <div style="background-color:#808080" @click="action('exec:color:#808080')"></div>
+                            <div style="background-color:#404040" @click="action('exec:color:#404040')"></div>
+                            <div style="background-color:black" @click="action('exec:color:black')"></div>
+                        </div>
+                        <div class="item colors">
+                            <div style="background-color:#FF0000" @click="action('exec:color:#FF0000')"></div>
+                            <div style="background-color:#FF6600" @click="action('exec:color:#FF6600')"></div>
+                            <div style="background-color:#FFFF00" @click="action('exec:color:#FFFF00')"></div>
+                            <div style="background-color:#8CC700" @click="action('exec:color:#8CC700')"></div>
+                        </div>
+                        <div class="item colors">
+                            <div style="background-color:#0FAD00" @click="action('exec:color:#0FAD00')"></div>
+                            <div style="background-color:#00A3C7" @click="action('exec:color:#00A3C7')"></div>
+                            <div style="background-color:#0010A5" @click="action('exec:color:#0010A5')"></div>
+                            <div style="background-color:#C5007C" @click="action('exec:color:#C5007C')"></div>
+                        </div>
+
+                        <div class="item font" @click="action('exec:color:more')">
+                            <i>More...</i>
+                        </div>
+                    </div>-->
+                </div>
+
+                <div class="separator"></div>
+
+                <!-- COPY FORMAT -->
+                <div class="item" @click="copyFormat()" :class="{'green': d_copiedFormat}">
+                    <span class="fas fa-paint-roller"></span>
+                </div>
+
+                <div class="separator"></div>
+
+                <!-- EXPEND -->
+                <div class="item expend-arrow" @click="expended = !expended" :class="{'expended': expended}">
+                    <span class="wwi wwi-chevron-down"></span>
+                </div>
+
+                <!-- MENU -->
+                <div class="item orange round" @click="action('openMenu', $event)">
+                    <span class="wwi wwi-edit-other"></span>
+                </div>
+            </div>
+            <div class="line not-main">
+                <!-- CODE -->
+                <div class="item" @click="action('html')">
+                    <span class="fas fa-code"></span>
+                </div>
+                <!-- LINK -->
+                <div class="item" @click="action('link')">
+                    <span class="fas fa-link"></span>
+                </div>
+                <!-- CLEAR -->
+                <div class="item" @click="action('removeFormat')">
+                    <span class="fas fa-remove-format"></span>
+                </div>
+
+                <div class="separator"></div>
+
+                <!-- BULLETS -->
+                <div class="item">
+                    <span class="fas fa-list-ul"></span>
+
+                    <div class="subitems">
+                        <div class="item" @click="action('indent:right')">
+                            <span class="fas fa-outdent"></span>
+                        </div>
+                        <div class="item" @click="action('indent:left')">
+                            <span class="fas fa-indent"></span>
+                        </div>
+                        <div class="item" @click="action('list:ordered')">
+                            <span class="fas fa-list-ol"></span>
+                        </div>
+                        <div class="item" @click="action('list:bullet')">
+                            <span class="fas fa-list-ul"></span>
+                        </div>
+                    </div>
+                </div>
+                <!-- LINE SPACE -->
+                <div class="item">
+                    <span class="fas fa-text-height"></span>
+
+                    <div class="subitems">
+                        <div class="item font" @click="setLineHeight(30)">
+                            <span>30px</span>
+                        </div>
+                        <div class="item font" @click="setLineHeight(25)">
+                            <span>25px</span>
+                        </div>
+                        <div class="item font" @click="setLineHeight(20)">
+                            <span>20px</span>
+                        </div>
+                        <div class="item font" @click="setLineHeight(15)">
+                            <span>15px</span>
+                        </div>
+                        <div class="item font" @click="setLineHeight(10)">
+                            <span>10px</span>
+                        </div>
+                        <div class="item input">
+                            <input type="text" v-model="d_lineHeight" @click="$event.stopPropagation()" @keydown="checkEnterLineHeight($event)" />
+                        </div>
+                        <div class="item font" @click="action('exec:lineHeight')">- Default -</div>
+                    </div>
+                </div>
+                <!-- LETTER SPACE -->
+                <div class="item">
+                    <span class="fas fa-text-width"></span>
+
+                    <div class="subitems">
+                        <div class="item font" @click="setLetterSpacing(5)">
+                            <span>5px</span>
+                        </div>
+                        <div class="item font" @click="setLetterSpacing(4)">
+                            <span>4px</span>
+                        </div>
+                        <div class="item font" @click="setLetterSpacing(3)">
+                            <span>3px</span>
+                        </div>
+                        <div class="item font" @click="setLetterSpacing(2)">
+                            <span>2px</span>
+                        </div>
+                        <div class="item font" @click="setLetterSpacing(1)">
+                            <span>1px</span>
+                        </div>
+                        <div class="item input">
+                            <input type="text" v-model="d_letterSpacing" @click="$event.stopPropagation()" @keydown="checkEnterLetterSpacing($event)" />
+                        </div>
+                        <div class="item font" @click="action('exec:letterSpacing')">- Default -</div>
+                    </div>
+                </div>
+
+                <div class="separator"></div>
+
+                <!-- HEADER -->
+                <div class="item">
                     <span :class="getTagClasses()"></span>
 
                     <div class="subitems">
@@ -31,168 +247,34 @@
                     </div>
                 </div>
 
-                <div class="item" @click="action('exec:bold')">
-                    <span class="wwi wwi-bold"></span>
-                </div>
-                <div class="item" @click="action('exec:italic')">
-                    <span class="wwi wwi-italic"></span>
-                </div>
-                <div class="item" @click="action('exec:underline')">
-                    <span class="wwi wwi-underline"></span>
-                </div>
-                <div class="item separator" @click="action('exec:strikeThrough')">
-                    <span class="fa fa-strikethrough"></span>
-                </div>
-                <div class="item">
-                    <span class="wwi wwi-font-size"></span>
+                <div class="separator"></div>
 
-                    <div class="subitems">
-                        <div class="item xsmall" @click="action('style:size:xsmall')">
-                            <span class="wwi wwi-font-size"></span>
-                        </div>
-                        <div class="item small" @click="action('style:size:small')">
-                            <span class="wwi wwi-font-size"></span>
-                        </div>
-                        <div class="item medium" @click="action('style:size:medium')">
-                            <span class="wwi wwi-font-size"></span>
-                        </div>
-                        <div class="item big" @click="action('style:size:big')">
-                            <span class="wwi wwi-font-size"></span>
-                        </div>
-                        <div class="item xbig" @click="action('style:size:xbig')">
-                            <span class="wwi wwi-font-size"></span>
-                        </div>
-                        <div class="item input">
-                            <input type="text" v-model="customSize" @click="$event.stopPropagation()" @keydown="checkEnterSize($event)">
-                        </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <span class="wwi wwi-align-left"></span>
-
-                    <div class="subitems">
-                        <div class="item" @click="action('style:align:justify')">
-                            <span class="wwi wwi-justify"></span>
-                        </div>
-                        <div class="item" @click="action('style:align:right')">
-                            <span class="wwi wwi-align-right"></span>
-                        </div>
-                        <div class="item" @click="action('style:align:center')">
-                            <span class="wwi wwi-center"></span>
-                        </div>
-                        <div class="item" @click="action('style:align:left')">
-                            <span class="wwi wwi-align-left"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <span class="wwi wwi-font"></span>
-
-                    <div class="subitems">
-                        <div class="item font" v-for="font in c_fonts" :key="font.name" @click="action('style:font:' + getFont(font))" :style="'font-family:' + getFont(font)">{{font.name}}</div>
-                        <div class="item font" v-if="getDefaultFont()" @click="action('style:font:inherit')" :style="{'font-family':getDefaultFont()}">
-                            - Default -
-                            <br>
-                            {{ getDefaultFont() }}
-                        </div>
-                        <!-- <div class="item font" @click="action('style:font:more')">
-                            <i>More...</i>
-                        </div>-->
-                    </div>
-                </div>
-                <div class="item separator">
-                    <span class="wwi wwi-color"></span>
-
-                    <div class="subitems">
-                        <div class="item colors">
-                            <div style="background-color:white" @click="action('style:color:white')"></div>
-                            <div style="background-color:#808080" @click="action('style:color:#808080')"></div>
-                            <div style="background-color:#404040" @click="action('style:color:#404040')"></div>
-                            <div style="background-color:black" @click="action('style:color:black')"></div>
-                        </div>
-                        <div class="item colors">
-                            <div style="background-color:#FF0000" @click="action('style:color:#FF0000')"></div>
-                            <div style="background-color:#FF6600" @click="action('style:color:#FF6600')"></div>
-                            <div style="background-color:#FFFF00" @click="action('style:color:#FFFF00')"></div>
-                            <div style="background-color:#8CC700" @click="action('style:color:#8CC700')"></div>
-                        </div>
-                        <div class="item colors">
-                            <div style="background-color:#0FAD00" @click="action('style:color:#0FAD00')"></div>
-                            <div style="background-color:#00A3C7" @click="action('style:color:#00A3C7')"></div>
-                            <div style="background-color:#0010A5" @click="action('style:color:#0010A5')"></div>
-                            <div style="background-color:#C5007C" @click="action('style:color:#C5007C')"></div>
-                        </div>
-
-                        <div class="item font" @click="action('style:color:more')">
-                            <i>More...</i>
-                        </div>
-                    </div>
-                </div>
-
+                <!-- LINE -->
                 <div class="item">
                     <span class="wwi wwi-separator"></span>
 
                     <div class="subitems">
-                        <div class="item xsmall" @click="action('insert:hr:small')">
+                        <div class="item xsmall" @click="insertLine('25%')">
                             <span class="wwi wwi-separator"></span>
                         </div>
-                        <div class="item medium" @click="action('insert:hr:medium')">
+                        <div class="item medium" @click="insertLine('50%')">
                             <span class="wwi wwi-separator"></span>
                         </div>
-                        <div class="item xbig" @click="action('insert:hr:big')">
+                        <div class="item xbig" @click="insertLine('100%')">
                             <span class="wwi wwi-separator"></span>
+                        </div>
+                        <div class="item input">
+                            <input type="text" v-model="d_lineThickness" @click="$event.stopPropagation()" />
+                        </div>
+                        <div class="item">
+                            <wwManagerColorSelect v-model="d_lineColor" @change="setLineColor($event)"></wwManagerColorSelect>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="line">
-                <div class="item separator" @click="action('link')">
-                    <span class="wwi wwi-link-external"></span>
-                </div>
-                <div class="item-placeholder separator"></div>
-
-                <div class="item" @click="action('exec:insertOrderedList')">
-                    <span class="fa fa-list-ol"></span>
-                </div>
-                <div class="item separator" @click="action('exec:insertUnorderedList')">
-                    <span class="fa fa-list-ul"></span>
-                </div>
-                <div class="item" @click="action('exec:indent')">
-                    <span class="fa fa-indent"></span>
-                </div>
-                <div class="item separator" @click="action('exec:outdent')">
-                    <span class="fa fa-outdent"></span>
-                </div>
-
-                <!--
-                <div class="item" @click="action('clear')">
-                    <span class="fa fa-eraser"></span>
-                </div>
-                -->
-                <div class="item-placeholder separator"></div>
-                <div class="item separator" @click="action('html')">
-                    <span class="small-icon fas fa-code"></span>
-                </div>
-                <div class="item separator" @click="action('add')">
+                <!-- WWOBJECT -->
+                <div class="item blue" @click="action('insertWwObject')">
                     <span class="wwi wwi-add"></span>
                 </div>
-                <div class="item orange separator" @click="action('openMenu', $event)">
-                    <span class="wwi wwi-edit-other"></span>
-                </div>
-
-                <!-- <div class="item orange" :class="{'separator':!c_isInLayout}" @click="action('reset')">R</div> -->
-                <!-- <div v-if="c_isInLayout" class="item separator red" @click="action('delete')">
-                    <span class="wwi wwi-delete"></span>
-                </div>-->
-                <!-- 
-                <div v-if="!c_isInLayout" class="item-placeholder"></div>
-                <div class="item blue" @click="action('margins')">
-                    <span class="wwi wwi-edit-margin"></span>
-                </div>
-                <div class="item green" @click="action('other')">
-                    <span class="wwi wwi-edit-other"></span>
-                </div>
-                -->
             </div>
         </div>
     </div>
@@ -201,6 +283,7 @@
 
 <script>
 import Vue from 'vue'
+import { setTimeout } from 'timers';
 
 
 export default {
@@ -211,6 +294,7 @@ export default {
     data() {
         return {
             show: false,
+            expended: false,
             minDragDist: 0,
             dragging: false,
             dragStartPoint: { x: 0, y: 0 },
@@ -223,6 +307,13 @@ export default {
             customSize: 1.5,
             defaultFont: '',
             stopRequestAnimation: false,
+            d_copiedFormat: false,
+            d_letterSpacing: 0,
+            d_lineHeight: 0,
+            d_textColor: null,
+            d_backgroundColor: null,
+            d_lineColor: '#000000',
+            d_lineThickness: 1,
         };
     },
     computed: {
@@ -232,15 +323,88 @@ export default {
         c_fonts() {
             let fonts = wwLib.wwWebsiteData.getInfo().fonts || {};
             return fonts.list || [];
+        },
+        c_fontSizes() {
+            let fontSizes = wwLib.wwWebsiteData.getInfo().fontSizes || {};
+            return fontSizes.list || [];
         }
     },
     watch: {
     },
     methods: {
 
+        insertLine(width) {
+            this.options.context.insertLine({ width: width, color: this.d_lineColor, height: this.d_lineThickness });
+        },
+
+        setLineColor(color) {
+            this.d_lineColor = color;
+        },
+
+        getSpacings() {
+            try {
+                let format = this.options.context.quill.getFormat();
+                if (format.letterSpacing) {
+                    this.d_letterSpacing = parseFloat(format.letterSpacing.replace('px', ''));
+                }
+                else {
+                    this.d_letterSpacing = 0;
+                }
+                if (format.lineHeight) {
+                    this.d_lineHeight = parseFloat(format.lineHeight.replace('px', ''));
+                }
+                else {
+                    this.d_lineHeight = 0;
+                }
+            }
+            catch (error) {
+
+            }
+        },
+
+        getColors() {
+            try {
+                let format = this.options.context.quill.getFormat();
+                if (format.color) {
+                    this.d_textColor = Array.isArray(format.color) ? format.color[0] : format.color;
+                }
+                else {
+                    this.d_textColor = '';
+                }
+                if (format.background) {
+                    this.d_backgroundColor = Array.isArray(format.background) ? format.background[0] : format.background;
+                }
+                else {
+                    this.d_backgroundColor = '';
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+        },
+
+        getCopiedFormat() {
+            let copiedFormat = null;
+
+            try {
+                copiedFormat = localStorage.getItem('ww-text-copied-format');
+                copiedFormat = JSON.parse(copiedFormat);
+            } catch (error) {
+
+            }
+
+            this.d_copiedFormat = copiedFormat ? true : false;
+        },
+
+        copyFormat() {
+            this.action('format');
+
+            setTimeout(this.getCopiedFormat, 100);
+        },
+
         focus() {
-            this.options.context.$el.focus();
-            this.options.context.reselect();
+            // this.options.context.$el.focus();
+            // this.options.context.reselect();
         },
 
         action(action, event) {
@@ -251,6 +415,38 @@ export default {
             if (event.keyCode == 13) {
                 this.options.context.wwTextBarAction('style:size:' + this.customSize);
             }
+        },
+
+        setLetterSpacing(value) {
+            this.d_letterSpacing = value;
+            this.options.context.wwTextBarAction('exec:letterSpacing' + (this.d_letterSpacing ? ':' + this.d_letterSpacing + 'px' : ''));
+        },
+
+        checkEnterLetterSpacing(event) {
+            if (event.keyCode == 13) {
+                this.setLetterSpacing(this.d_letterSpacing);
+            }
+        },
+
+        setLineHeight(value) {
+            this.d_lineHeight = value;
+            this.options.context.wwTextBarAction('exec:lineHeight' + (this.d_lineHeight ? ':' + this.d_lineHeight + 'px' : ''));
+        },
+
+        checkEnterLineHeight(event) {
+            if (event.keyCode == 13) {
+                this.setLineHeight(this.d_lineHeight);
+            }
+        },
+
+        setTextColor(value) {
+            this.d_textColor = value;
+            this.options.context.wwTextBarAction('color:' + this.d_textColor);
+        },
+
+        setBackgroundColor(value) {
+            this.d_backgroundColor = value;
+            this.options.context.wwTextBarAction('exec:background:' + this.d_backgroundColor);
         },
 
         getTagClasses() {
@@ -275,6 +471,10 @@ export default {
 
         getFont(font) {
             return font.name + ', ' + (font.genericName || 'sans-serif');
+        },
+
+        getFontSizeClass(fontSize) {
+            return fontSize.name.toLowerCase().replace(/\s/g, '');
         },
 
         getDefaultFont() {
@@ -346,6 +546,8 @@ export default {
             return position;
         },
         isDragging(event) {
+            return true;
+
             if (this.dragging) {
                 return true;
             }
@@ -417,16 +619,29 @@ export default {
         }
 
     },
-    created: function () {
-
+    created() {
     },
-    mounted: function () {
+    mounted() {
 
         this.updatePosition();
 
         this.$nextTick(function () {
             this.show = true;
         })
+
+        this.getCopiedFormat();
+        this.getSpacings();
+        this.getColors();
+
+        this.options.context.quill.on('selection-change', () => {
+            setTimeout(() => {
+                if (this.options.context.focus) {
+                    this.getSpacings();
+                    this.getColors();
+                }
+            }, 200)
+
+        });
 
     },
     beforeDestroy() {
@@ -455,17 +670,13 @@ $ww-blue: #2e85c2;
     top: 0;
     left: 0;
     opacity: 1;
-    background-color: #fafafa;
     display: flex;
-    border-radius: 6px;
-    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.3);
+    //box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.3);
+    filter: drop-shadow(0 2px 5px rgba(99, 99, 99, 0.5));
     transition: transform 0.2s cubic-bezier(0.35, 0.07, 0.35, 1.65),
         opacity 0.2s ease;
 
-    &.show {
-        // opacity: 1;
-        // transform: translateY(-110%);
-    }
+    /*
     .handle-container {
         cursor: move;
         cursor: grab;
@@ -506,39 +717,90 @@ $ww-blue: #2e85c2;
             }
         }
     }
+    */
+
+    .move {
+        position: absolute;
+        z-index: 1;
+        top: 0;
+        left: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+        border-radius: 100%;
+        width: 40px;
+        height: 40px;
+        background-color: #ea5e1c;
+        background: linear-gradient(to right, #ea5e1c 0%, #ef811a 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 20px;
+        transition: 0.3s ease;
+        cursor: move;
+        cursor: grab;
+
+        span {
+            transition: 0.3s ease;
+            transform: rotate(360deg);
+        }
+    }
 
     .content {
         display: flex;
         flex-direction: column;
+        //overflow-x: hidden;
 
         .line {
+            position: relative;
             display: flex;
+            max-width: 0px;
             flex-direction: row;
+            background-color: white;
+            padding-left: 20px;
+            transition: max-width 0.3s cubic-bezier(0.015, 0.04, 0, 1);
+
+            &.main {
+                border-radius: 3px 50px 50px 3px;
+            }
+
+            &.not-main {
+                opacity: 0;
+                position: absolute;
+                bottom: 100%;
+                left: 0;
+                border-radius: 3px 3px 0 0;
+            }
+
+            @for $i from 1 through 15 {
+                & > :nth-child(#{$i}) {
+                    transition: all 0.3s ease, transform 0.3s ease 0.015s * $i;
+                }
+            }
 
             .item {
                 display: flex;
                 justify-content: center;
+                align-items: center;
                 padding: 10px;
                 font-size: 24px;
-                color: black;
+                color: #5e5e5e;
                 position: relative;
-                transition: background-color 0.3s ease, color 0.3s ease;
+
                 min-width: 44px;
                 cursor: pointer;
-
-                &.separator::after {
-                    content: "";
-                    position: absolute;
-                    left: 100%;
-                    top: 50%;
-                    transform: translate(-50%, -50%);
-                    width: 1px;
-                    height: 60%;
-                    border-right: 1px solid #cbcbcb;
-                }
+                transform: scale(0);
+                opacity: 0;
+                border-radius: 3px;
 
                 &:hover {
+                    z-index: 1;
                     background-color: #e4e4e4;
+                }
+
+                &.round {
+                    border-radius: 3px 50px 50px 3px;
+                    padding-left: 10px;
                 }
 
                 &.red {
@@ -572,6 +834,9 @@ $ww-blue: #2e85c2;
 
                 &.input {
                     padding: 10px 5px;
+                    input {
+                        border: 1px solid $ww-blue;
+                    }
                 }
 
                 &.xsmall {
@@ -596,23 +861,66 @@ $ww-blue: #2e85c2;
                     text-align: center;
                 }
 
+                &.font-size {
+                    white-space: nowrap;
+                    text-align: left;
+                    font-size: 14px !important;
+                }
+
                 &.colors {
                     display: flex;
                     flex-direction: row;
-                    padding: 5px 5px 0 5px !important;
+                    padding: 15px !important;
 
-                    div {
-                        border: 1px solid #a3a3a3;
-                        width: 20px;
-                        height: 20px;
-                        margin: 3px;
-                        cursor: pointer;
-                        border-radius: 3px;
-                    }
+                    // div {
+                    //     border: 1px solid #a3a3a3;
+                    //     width: 20px;
+                    //     height: 20px;
+                    //     margin: 3px;
+                    //     cursor: pointer;
+                    //     border-radius: 3px;
+                    // }
 
                     &:hover {
                         background-color: transparent;
                     }
+
+                    .color {
+                        // padding: 15px 10px 15px 5px;
+                        font-size: 10px;
+                        width: 80px;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+
+                        & > div {
+                            margin-top: 10px;
+                            width: 30px;
+                            height: 30px;
+                        }
+                    }
+                }
+
+                &.expend-arrow {
+                    span {
+                        transition: all 0.3s ease;
+                        transform: rotate(0deg);
+                    }
+                    &.expended {
+                        span {
+                            transform: rotate(-180deg);
+                        }
+                    }
+                }
+
+                span {
+                    z-index: 1;
+                }
+
+                span.fa,
+                span.fas {
+                    font-size: 18px;
                 }
 
                 .small-icon {
@@ -621,29 +929,74 @@ $ww-blue: #2e85c2;
                 }
 
                 input {
-                    width: 100%;
+                    width: 42px;
+                    text-align: center;
                 }
 
                 .subitems {
+                    z-index: 2;
                     position: absolute;
                     pointer-events: none;
                     opacity: 0;
-                    top: 0;
+                    top: 100%;
                     left: 50%;
-                    transform: translate(-50%, -90%);
-                    border-radius: 6px;
-                    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.3);
-                    background-color: #fafafa;
+                    transform: translate(-50%, -10px);
+                    border-radius: 3px;
+                    box-shadow: 0 2px 5px -1px rgba(99, 99, 99, 0.5);
+                    background-color: white;
                     transition: transform 0.2s
                             cubic-bezier(0.35, 0.07, 0.35, 1.65),
                         opacity 0.2s ease;
                     z-index: 1;
+
+                    &:after {
+                        content: "";
+                        background-color: white;
+                        position: absolute;
+                        top: 0;
+                        left: 50%;
+                        transform: translate(-50%, -50%) rotate(45deg);
+                        width: 10px;
+                        height: 10px;
+                    }
+
+                    &:before {
+                        content: "";
+                        width: 100%;
+                        height: 10px;
+                        position: absolute;
+                        bottom: 100%;
+                        left: 0;
+                    }
                 }
 
                 &:hover .subitems {
                     pointer-events: all;
                     opacity: 1;
-                    transform: translate(-50%, -100%);
+                    transform: translate(-50%, 10px);
+                }
+            }
+
+            &.not-main {
+                .item {
+                    .subitems {
+                        top: unset;
+                        bottom: 100%;
+                        transform: translate(-50%, 10px);
+
+                        &:after {
+                            top: 100%;
+                        }
+
+                        &:before {
+                            top: 100%;
+                            bottom: unset;
+                        }
+                    }
+
+                    &:hover .subitems {
+                        transform: translate(-50%, -10px);
+                    }
                 }
             }
 
@@ -651,8 +1004,14 @@ $ww-blue: #2e85c2;
                 display: flex;
                 width: 44px;
                 position: relative;
+            }
 
-                &.separator::after {
+            .separator {
+                width: 0;
+                position: relative;
+                opacity: 0;
+
+                &::after {
                     content: "";
                     position: absolute;
                     left: 100%;
@@ -661,6 +1020,51 @@ $ww-blue: #2e85c2;
                     width: 1px;
                     height: 60%;
                     border-right: 1px solid #cbcbcb;
+                }
+            }
+        }
+
+        &.expended {
+            .line.not-main {
+                opacity: 1;
+                max-width: 470px;
+
+                .item {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+                .separator {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+        }
+    }
+
+    &.show {
+        // opacity: 1;
+        // transform: translateY(-110%);
+
+        .move {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+
+            span {
+                transform: rotate(0deg);
+            }
+        }
+
+        .content {
+            .line.main {
+                max-width: 470px;
+
+                .item {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+                .separator {
+                    opacity: 1;
+                    transform: scale(1);
                 }
             }
         }

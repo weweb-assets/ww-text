@@ -1,31 +1,30 @@
-
 <script>
 import Vue from 'vue'
 
 /* wwManager:start */
 import wwTextBar from './wwTextBar.vue';
 import wwTextPopupHtml from './wwTextPopupHtml.vue';
+import { setTimeout } from 'timers';
 wwLib.wwPopups.addPopup('wwTextPopupHtml', wwTextPopupHtml);
+import Quill from 'quill';
 /* wwManager:end */
 
 export default {
     name: '__COMPONENT_NAME__',
     components: {
     },
+
+
     render(createVNode) {
-
         if (this.clearRender) {
-
             this.$nextTick(function () {
                 this.clearRender = false;
                 this.$forceUpdate();
             });
-
             this.$el.innerHTML = '';
-
             return createVNode(this.wwObject.content.data.tag || 'div', {
                 class: {
-                    "ww-text-content": true
+                    "ww-text": true
                 },
                 attrs: {
                     contenteditable: this.editing
@@ -38,7 +37,12 @@ export default {
 
             let content = document.createElement('div');
 
-            content.innerHTML = wwLib.wwLang.getText(this.wwObject.content.data.text).replace(wwObjRegex, '<ww-object data-ww-object-id="$1"></ww-object>') || '<br/>';
+            if (this.editingSection) {
+                content.innerHTML = wwLib.wwLang.getText(this.wwObject.content.data.text).replace(wwObjRegex, '<span class="ww-object-embed" data-ww-object-id="$1"></span>') || '<br/>';
+            }
+            else {
+                content.innerHTML = wwLib.wwLang.getText(this.wwObject.content.data.text).replace(wwObjRegex, '<ww-object data-ww-object-id="$1"></ww-object>') || '<br/>';
+            }
 
             const childNodes = content.childNodes;
 
@@ -49,12 +53,14 @@ export default {
                 for (const node of childNodes) {
                     let vNode = null;
 
-                    if (node.nodeName.toLowerCase() == '#text') {
+                    if (node.nodeName.toLowerCase() == '#comment') {
+                        //Do nothing.
+                    }
+                    else if (node.nodeName.toLowerCase() == '#text') {
                         vNode = self._v(node.textContent);
                     }
                     else if (node.nodeName.toLowerCase() == 'ww-object') {
                         let vn = createVNodes(node.childNodes);
-
 
                         let attributes = {};
 
@@ -71,8 +77,8 @@ export default {
                             node.nodeName.toLowerCase(),
                             {
                                 props: {
-                                    wwObject: self.wwObject.data.children[node.attributes['data-ww-object-id'].nodeValue],
-                                    inText: true,
+                                    wwObject: self.wwObject.content.data.children[node.attributes['data-ww-object-id'].nodeValue],
+                                    inText: true
                                 },
                                 attrs: attributes
                             },
@@ -86,8 +92,11 @@ export default {
                         let vn = createVNodes(node.childNodes);
 
                         let attributes = {};
-                        for (let a of node.attributes) {
-                            attributes[a.nodeName] = a.nodeValue;
+
+                        if (node.attributes) {
+                            for (let a of node.attributes) {
+                                attributes[a.nodeName] = a.nodeValue;
+                            }
                         }
 
                         vNode = createVNode(
@@ -110,10 +119,11 @@ export default {
 
             const root = createVNode(this.wwObject.content.data.tag || 'div', {
                 class: {
-                    "ww-text-content": true
+                    "ww-text": true
                 },
                 attrs: {
-                    contenteditable: this.editing
+
+                    // contenteditable: this.editingSection
                 }
             },
                 createVNodes(childNodes)
@@ -123,6 +133,8 @@ export default {
         }
 
     },
+
+
     props: {
         wwObjectCtrl: Object,
         wwAttrs: {
@@ -130,13 +142,15 @@ export default {
             default: {}
         }
     },
-    data: function () {
+    data() {
         return {
             d_edited: false,
             /* wwManager:start */
+            quill: null,
             textBar: null,
             textSelection: null,
             focus: false,
+            clearRender: false,
             /* wwManager:end */
         };
     },
@@ -146,24 +160,88 @@ export default {
         },
         editing() {
             return this.wwObjectCtrl.getSectionCtrl() && this.wwObjectCtrl.getSectionCtrl().getEditMode() == 'CONTENT' && this.focus
-        }
+        },
+        editingSection() {
+            return this.wwObjectCtrl.getSectionCtrl() && this.wwObjectCtrl.getSectionCtrl().getEditMode() == 'CONTENT';
+        },
+        // text() {
+        //     console.log('CHANGED LANG');
+        //     // <span class="ww-object-embed" data-ww-object-id="0"></span>
+        //     // [[wwObject=0]]
+
+        //     let text = wwLib.wwLang.getText(this.wwObject.content.data.text);
+        //     const wwObjRegex = /\[\[wwObject=([^\]]*)\]\]/gi;
+
+        //     text = text.replace(wwObjRegex, '<span class="ww-object-embed" data-ww-object-id="$1"></span>');
+
+        //     return text;
+        // }
     },
     watch: {
+        // async editing() {
+        //     if (this.editing) {
+        //         if (!this.quill) {
+        //             await this.loadQuill();
+        //         }
+        //         this.quill.enable();
+        //     }
+        //     else {
+        //         this.quill.disable();
+        //     }
+        // },
+        /* wwManager:start */
+        async editingSection(a, oldEditingSection) {
+            if (this.editingSection && !this.oldEditingSection) {
+                this.correctText();
+
+                this.$nextTick(() => {
+                    this.loadQuill();
+                    this.quill.disable();
+                })
+            }
+        }
+        /* wwManager:end */
     },
     methods: {
+        async init() {
+            /* wwManager:start */
+            this.$el.addEventListener('mousedown', this.preventNextClick);
+            this.$el.addEventListener('click', wwLib.wwObjectMenu.close);
 
+
+            // await wwLib.wwUtils.addScriptToHead({
+            //     link: 'https://cdn.quilljs.com/1.3.6/quill.js'
+            // });
+
+            await this.loadQuillModules();
+
+            if (this.editingSection) {
+                this.correctText();
+                this.loadQuill();
+            }
+            /* wwManager:end */
+        },
+
+
+        /*
         isTextEmpty() {
             return this.text.trim() == "";
         },
+        */
+        /*
         getType(text) {
             if (text && text.indexOf("wwObject=") == 0) {
                 return 'wwObject';
             }
             return 'wwSimpleText';
         },
+        */
+        /*
         isWwObject(text) {
             return text.indexOf("wwObject=") == 0;
         },
+        */
+        /*
         getWwObject(text) {
             let index = text.replace('wwObject=', '');
             try {
@@ -172,15 +250,551 @@ export default {
             catch (e) {
                 return text;
             }
-            if (this.wwObject.data && this.wwObject.data.children && this.wwObject.data.children[index]) {
-                return this.wwObject.data.children[index];
+            if (this.wwObject.content.data && this.wwObject.content.data.children && this.wwObject.content.data.children[index]) {
+                return this.wwObject.content.data.children[index];
             }
             return text;
         },
+        */
 
         /* wwManager:start */
 
-        getTextFromDom() {
+
+        preventNextClick(event) {
+            if (!this.focus) {
+                return;
+            }
+            let mouseDownCoords = [event.clientX, event.clientY];
+            let preventNext = false;
+
+            function onMouseMove(event) {
+                const distX = Math.abs(mouseDownCoords[0] - event.clientX);
+                const distY = Math.abs(mouseDownCoords[1] - event.clientY);
+
+                if (distX > 10 || distY > 10) {
+                    wwLib.wwUtils.preventNextFocus();
+                    preventNext = true;
+                }
+            }
+
+            function onClick(event) {
+                if (preventNext) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                wwLib.getFrontWindow().removeEventListener('click', onClick, { capture: true });
+                wwLib.getManagerWindow().removeEventListener('click', onClick, { capture: true });
+                wwLib.getFrontWindow().removeEventListener('mousemove', onMouseMove);
+                wwLib.getManagerWindow().removeEventListener('mousemove', onMouseMove);
+            }
+
+            wwLib.getFrontWindow().addEventListener('click', onClick, { capture: true });
+            wwLib.getManagerWindow().addEventListener('click', onClick, { capture: true });
+            wwLib.getFrontWindow().addEventListener('mousemove', onMouseMove);
+            wwLib.getManagerWindow().addEventListener('mousemove', onMouseMove);
+        },
+
+        correctText() {
+            let corrected = false;
+            for (const lang of Object.keys(this.wwObject.content.data.text)) {
+
+                if (this.wwObject.content.data._q && this.wwObject.content.data._q[lang]) {
+                    continue;
+                }
+                corrected = true;
+
+                this.d_edited = true;
+
+                let text = this.wwObject.content.data.text[lang];
+                const wwObjRegex = /\[\[wwObject=([^\]]*)\]\]/gi;
+
+                text = text.replace(wwObjRegex, '<span class="ww-object-embed" data-ww-object-id="$1"></span>');
+
+                const elem = document.createElement('div');
+                const elemP = document.createElement('p');
+                elem.append(elemP);
+                elemP.innerHTML = text;
+
+                let self = this;
+
+                function getFontSize(el) {
+                    let size = el.style.fontSize;
+                    if (size) {
+                        if (size.indexOf('rem') !== -1) {
+                            size = parseFloat(size.replace('rem', '')) * 16;
+                        }
+                        else {
+                            size = parseFloat(size.replace('px', ''));
+                        }
+
+                        let fontSizes = [];
+                        for (let fontSize of wwLib.wwWebsiteData.getDesign().info.fontSizes.list) {
+                            fontSizes.push({
+                                name: fontSize.name,
+                                size: parseFloat(fontSize.screens.lg)
+                            })
+                        }
+
+                        let closest = fontSizes.reduce(function (prevSize, currSize) {
+                            return (Math.abs(currSize.size - size) < Math.abs(prevSize.size - size) ? currSize : prevSize);
+                        });
+                        const newSize = 'font-size-' + closest.name.toLowerCase().replace(/\s/g, '');
+                        return newSize;
+                    }
+
+                    return '';
+                }
+
+
+                function parseHtml(el) {
+                    for (let i = 0; i < el.children.length; i++) {
+                        let subEl = el.children[i];
+
+                        let subNewEl;
+
+                        switch (subEl.tagName) {
+                            case 'SPAN':
+                            case 'DIV':
+                                subNewEl = document.createElement(subEl.tagName)
+
+                                let align = subEl.style.textAlign;
+                                align = (align != 'inherit' ? align : null);
+
+                                if (align) {
+                                    subNewEl.style.textAlign = align;
+                                }
+
+                                let newFontSize = getFontSize(subEl);
+                                newFontSize && subNewEl.classList.add(newFontSize);
+                                subNewEl.innerHTML = subEl.innerHTML;
+
+                                break;
+                            case 'FONT':
+                                let style = '';
+
+                                if (subEl.attributes.color && subEl.attributes.color.nodeValue && subEl.attributes.color.nodeValue != 'inherit') {
+                                    style += 'color:' + subEl.attributes.color.nodeValue + ';';
+                                }
+
+                                if (subEl.attributes.face && subEl.attributes.face.nodeValue && subEl.attributes.face.nodeValue != 'inherit') {
+                                    style += 'font-family:' + subEl.attributes.face.nodeValue + ';';
+                                }
+
+                                subNewEl = document.createElement('span');
+                                subNewEl.innerHTML = subEl.innerHTML;
+                                subNewEl.setAttribute('style', style);
+                                let newFontSize2 = getFontSize(subEl);
+                                newFontSize2 && subNewEl.classList.add(newFontSize2);
+
+                                break;
+
+                            case 'B':
+                                subNewEl = document.createElement('strong')
+                                subNewEl.innerHTML = subEl.innerHTML;
+                                break;
+                            case 'I':
+                                subNewEl = document.createElement('em')
+                                subNewEl.innerHTML = subEl.innerHTML;
+
+                                break;
+                            default:
+                                subNewEl = document.createElement(subEl.tagName)
+                                subNewEl.innerHTML = subEl.innerHTML;
+
+                                break;
+                        }
+
+                        parseHtml(subNewEl);
+
+                        el.insertBefore(subNewEl, subEl);
+
+                        subEl.remove();
+                    }
+
+                }
+
+                parseHtml(elemP);
+
+                this.wwObject.content.data.text[lang] = elem.innerHTML;
+                this.wwObject.content.data._q = (this.wwObject.content.data._q && typeof (this.wwObject.content.data._q) == 'object') ? this.wwObject.content.data._q : {};
+                this.wwObject.content.data._q[lang] = true;
+            }
+
+            corrected && this.wwObjectCtrl.update(this.wwObject);
+
+            // this.$nextTick(() => { 
+            return true;
+            // });
+        },
+
+        loadQuill() {
+            this.quill = new Quill(this.$el);
+        },
+
+        reloadQuill() {
+            this.clearRender = true;
+
+            setTimeout(() => {
+                if (this.editingSection) {
+                    this.loadQuill();
+                }
+            }, 100);
+        },
+
+        async loadQuillModules() {
+            if (!Quill.imports['formats/ww-object-embed']) {
+                const Parchment = Quill.import('parchment');
+                const Embed = Quill.import('blots/embed');
+                // WWOBJECT
+                function createWwObject(self, wwObjectIndex) {
+
+                    let wwObjectData;
+
+                    if (wwObjectIndex && self.wwObject.content.data.children && self.wwObject.content.data.children[wwObjectIndex]) {
+                        wwObjectData = self.wwObject.content.data.children[wwObjectIndex];
+                    }
+                    else {
+                        wwObjectData = wwLib.wwObject.getDefault({ type: 'ww-button' });
+
+                        self.wwObject.content.data.children = self.wwObject.content.data.children || [];
+
+                        wwObjectIndex = 0;
+                        //Find first empty index in current wwObject children
+                        while (self.wwObject.content.data.children[wwObjectIndex]) {
+                            wwObjectIndex++;
+                        }
+
+                        self.wwObject.content.data.children[wwObjectIndex] = wwObjectData;
+
+                        self.wwObjectCtrl.update(self.wwObject);
+                    }
+
+                    for (let c of self.$children) {
+                        if (c.c_wwObject.uniqueId == wwObjectData.uniqueId) {
+                            c.$destroy();
+                        }
+                    }
+
+                    const wwObject = new Vue.options.components.wwObject({ propsData: { wwObject: wwObjectData } });
+                    wwObject.$parent = self;
+                    self.$children.push(wwObject);
+                    wwObject.$store = self.$store;
+                    wwObject.$mount();
+
+                    // wwObject.$el.setAttribute('ww-inside-ww-object', 'ww-text');
+
+                    return { el: wwObject.$el, wwObjectId: wwObjectIndex };
+                };
+                class WwObject extends Embed {
+                    static create(value) {
+                        const node = super.create(value);
+                        node.setAttribute('data-ww-object-id', value);
+
+                        return node;
+                    }
+
+                    static formats(node) {
+                        return {
+                            wwObjectId: node.getAttribute('data-ww-object-id')
+                        }
+                    }
+
+                    attach() {
+                        super.attach();
+
+                        const vueNode = this.getVueNode();
+
+                        this.domNode.innerHTML = '';
+
+                        if (!vueNode) {
+                            return;
+                        }
+                        else {
+                            const { el, wwObjectId } = createWwObject(vueNode.__vue__, this.domNode.getAttribute('data-ww-object-id') || '');
+                            this.domNode.appendChild(el);
+                            this.domNode.setAttribute('data-ww-object-id', wwObjectId);
+                        }
+                    }
+
+                    format(name, value) {
+                        if (name == 'wwObjectId' && value) {
+
+                            this.domNode.innerHTML = '';
+
+
+                            const vueNode = this.getVueNode();
+
+                            if (!vueNode) {
+                                return;
+                            }
+                            else {
+                                const { el, wwObjectId } = createWwObject(vueNode.__vue__, value);
+                                this.domNode.appendChild(el);
+
+                                this.domNode.setAttribute('data-ww-object-id', wwObjectId);
+                            }
+                        } else {
+                            super.format(name, value);
+                        }
+                    }
+
+                    getVueNode() {
+                        let node = this.domNode.parentNode;
+                        while (node && !node.__vue__) {
+                            node = node.parentNode;
+                        }
+                        if (node && node.__vue__) {
+                            return node;
+                        }
+                        else {
+                            return null;
+                        }
+                    }
+
+
+                    // get value of the node (for implement undo function)
+                    static value(node) {
+                        return node.getAttribute('data-ww-object-id') || '';
+                    }
+                }
+                WwObject.blotName = 'ww-object-embed';
+                WwObject.tagName = 'SPAN';
+                WwObject.className = 'ww-object-embed';
+                Quill.register(WwObject, true);
+
+
+                // LINE
+                class Line extends Embed {
+                    static create(value) {
+                        try {
+                            value = JSON.parse(value);
+                        } catch (error) {
+                            value = {};
+                        }
+                        const node = super.create(value);
+
+                        node.style.lineHeight = (value.height || 1) + 'px';
+                        const line = document.createElement('div');
+                        line.style.width = value.width || '100%';
+                        line.style.display = 'inline-block';
+                        line.style.borderTop = (value.height || 1) + 'px solid';
+                        line.style.borderTopColor = (value.color || 'black');
+                        line.style.margin = '2px 0';
+                        line.classList.add('line');
+
+                        node.setAttribute('data-line', JSON.stringify(value));
+
+                        node.appendChild(line);
+                        return node;
+                    }
+
+                    format(name, value) {
+                        if (name == 'color' && value) {
+                            this.domNode.querySelector('.line').style.borderTopColor = value;
+                            let _value = JSON.parse(this.domNode.getAttribute('data-line') || '{}');
+                            _value.color = value;
+                            this.domNode.setAttribute('data-line', JSON.stringify(_value));
+                        }
+                    }
+
+                    static formats(node) {
+                        return JSON.parse(node.getAttribute('data-line') || '{}');
+                    }
+
+                    // get value of the node (for implement undo function)
+                    static value(node) {
+                        return node.getAttribute('data-line') || '{}';
+                    }
+                }
+                Line.blotName = 'line';
+                Line.tagName = 'SPAN';
+                Line.className = 'line';
+                Quill.register(Line, true);
+
+
+                // LIST ITEM COLOR
+                class ListItemColor extends Parchment.Attributor.Style {
+                    value(node) {
+                        let value = super.value(node);
+
+                        if (!value.startsWith('rgb(')) return value;
+
+                        value = value.replace(/^[^\d]+/, '').replace(/[^\d]+$/, '');
+
+                        const color = '#' + value.split(',').map(function (component) {
+                            return ('00' + parseInt(component, 10).toString(16)).slice(-2);
+                        }).join('');
+                        return color
+                    }
+                }
+                const listItemColor = new ListItemColor('li-color', 'color', {
+                    scope: Parchment.Scope.BLOCK,
+                });
+                Quill.register(listItemColor);
+
+
+                // LIST ITEM SIZE
+                class ListItemSize extends Parchment.Attributor.Class {
+                    value(node) {
+                        let value = super.value(node);
+                        return value;
+                    }
+                }
+                const listItemSize = new ListItemSize('li-size', 'font-size', {
+                    scope: Parchment.Scope.BLOCK,
+                });
+                Quill.register(listItemSize);
+
+
+                // LIST ITEM FONT
+                class ListItemFont extends Parchment.Attributor.Style {
+                    value(node) {
+                        let value = super.value(node);
+                        return value;
+                    }
+                }
+                const listItemFont = new ListItemFont('li-font', 'font-family', {
+                    scope: Parchment.Scope.BLOCK,
+                });
+                Quill.register(listItemFont);
+
+
+                // STYLISED LIST ITEM
+                var ListItem = Quill.import('formats/list/item');
+                class ListItemStyle extends ListItem {
+
+                    format(name, value) {
+                        if (name == 'li-font') {
+                            this.domNode.style.fontFamily = value;
+                        }
+                        else if (name == 'li-size') {
+                            for (let c of this.domNode.classList) {
+                                if (c.indexOf('font-size-') === 0) {
+                                    this.domNode.classList.remove(c);
+                                }
+                            }
+                            if (value) {
+                                this.domNode.classList.add('font-size-' + value);
+                            }
+                        }
+                        else {
+                            super.format(name, value);
+                        }
+                    }
+
+                    optimize(context) {
+                        super.optimize(context);
+
+                        // if (this.children.length === 1) {
+                        const child = this.children.head;
+                        const attributes = child.attributes;
+
+                        if (attributes && attributes.attributes.color) {
+                            const color = attributes.attributes.color.value(child.domNode);
+                            super.format('li-color', color);
+                        }
+
+                        if (attributes && attributes.attributes.font) {
+                            const font = attributes.attributes.font.value(child.domNode);
+                            super.format('li-font', font);
+                        }
+
+                        if (attributes && attributes.attributes.fontSize) {
+                            const fontSize = attributes.attributes.fontSize.value(child.domNode);
+                            if (!this.domNode.classList.contains('font-size-' + fontSize)) {
+                                this.format('li-size', fontSize);
+                            }
+                        }
+                        // }
+                        // else {
+                        //     if (this.attributes.attributes.hasOwnProperty('li-color')) {
+                        //         super.format('li-color', null);
+                        //     }
+                        //     if (this.attributes.attributes.hasOwnProperty('li-font')) {
+                        //         super.format('li-font', null);
+                        //     }
+                        //     if (this.attributes.attributes.hasOwnProperty('li-size')) {
+                        //         super.format('li-size', null);
+                        //     }
+                        // }
+                    }
+                }
+                Quill.register(ListItemStyle);
+
+
+                // FONT SIZE
+                let configFontSize = { scope: Parchment.Scope.INLINE };
+                let fontSize = new Parchment.Attributor.Class('fontSize', 'font-size', configFontSize);
+                Quill.register(fontSize, true)
+
+
+                // FONT
+                let configFont = { scope: Parchment.Scope.INLINE };
+                let font = new Parchment.Attributor.Style('font', 'font-family', configFont);
+                Quill.register(font, true);
+
+
+                // ALIGN
+                let configAlign = { scope: Parchment.Scope.BLOCK };
+                let align = new Parchment.Attributor.Style('align', 'text-align', configAlign);
+                Quill.register(align, true);
+
+
+                // INDENT
+                let configIndent = { scope: Parchment.Scope.BLOCK };
+                let indent = new Parchment.Attributor.Style('indent', 'padding-left', configIndent);
+                Quill.register(indent, true);
+
+
+                // LETTER SPACING
+                let configLetterSpacing = { scope: Parchment.Scope.INLINE };
+                let letterSpacing = new Parchment.Attributor.Style('letterSpacing', 'letter-spacing', configLetterSpacing);
+                Quill.register(letterSpacing, true);
+
+
+                // LINE HEIGHT
+                let configLineHeight = { scope: Parchment.Scope.BLOCK };
+                let lineHeight = new Parchment.Attributor.Style('lineHeight', 'line-height', configLineHeight);
+                Quill.register(lineHeight, true);
+
+
+                // LIST TYPE
+                let configListType = { scope: Parchment.Scope.BLOCK };
+                let listType = new Parchment.Attributor.Attribute('listType', 'type', configListType);
+                Quill.register(listType, true);
+
+
+
+            }
+        },
+
+        onPasteWwObject() {
+            this.reloadQuill();
+        },
+
+        getTextFromDom(format) {
+            function _format(node, level) {
+
+                var indentBefore = new Array(level++ + 1).join('    '),
+                    indentAfter = new Array(level - 1).join('   '),
+                    textNode;
+
+                for (var i = 0; i < node.children.length; i++) {
+
+                    textNode = document.createTextNode('\n' + indentBefore);
+                    node.insertBefore(textNode, node.children[i]);
+
+                    format(node.children[i], level);
+
+                    if (node.lastElementChild == node.children[i]) {
+                        textNode = document.createTextNode('\n' + indentAfter);
+                        node.appendChild(textNode);
+                    }
+                }
+
+                return node;
+            }
 
             function getText(node, newNode, isChild) {
 
@@ -209,13 +823,29 @@ export default {
                     }
 
                     if (node.childNodes[i].nodeName.toLowerCase() == '#text') {
-                        newNode.append(node.childNodes[i].cloneNode(false))
-                        //Nothing.
+                        newNode.append(node.childNodes[i].cloneNode(false));
                     }
-                    else if (node.childNodes[i].classList && node.childNodes[i].classList.contains('ww-object')) {
-                        //console.log(document.createTextNode('[[wwObject=' + node.childNodes[i].attributes['data-ww-object-id'].nodeValue + ']]'))
+                    else if (node.childNodes[i].classList && node.childNodes[i].classList.contains('ww-object-embed')) {
                         newNode.append(document.createTextNode('[[wwObject=' + node.childNodes[i].attributes['data-ww-object-id'].nodeValue + ']]'))
-                        //node.childNodes[i] = 
+                    }
+                    else if (node.childNodes[i].classList && node.childNodes[i].classList.contains('line')) {
+                        try {
+
+                            const value = JSON.parse(node.childNodes[i].attributes['data-line'].nodeValue);
+                            const lineNode = document.createElement('span');
+                            lineNode.classList.add('line');
+                            lineNode.setAttribute('data-line', node.childNodes[i].attributes['data-line'].nodeValue);
+
+                            lineNode.style.lineHeight = (value.height || 1) + 'px';
+                            lineNode.style.width = value.width || '100%';
+                            lineNode.style.display = 'inline-block';
+                            lineNode.style.borderTop = (value.height || 1) + 'px solid ' + (value.color || 'black');
+                            lineNode.style.margin = '2px 0';
+
+                            newNode.append(lineNode);
+                        } catch (error) {
+                            console.log(error);
+                        }
                     }
                     else {
                         newNode.append(node.childNodes[i].cloneNode(false))
@@ -225,18 +855,35 @@ export default {
                 }
 
                 if (!isChild) {
-                    return newNode.innerHTML;
+                    if (format) {
+                        return _format(newNode, 0).innerHTML;
+                    }
+                    else {
+                        return newNode.innerHTML;
+                    }
                 }
+
 
             }
 
             const newNode = document.createElement('div');
-            let t = getText(this.$el.cloneNode(true), newNode);
-            return t;
 
+            let elem = this.$el;
+            if (this.$el.querySelector('.ql-editor')) {
+                elem = this.$el.querySelector('.ql-editor');
+            }
+
+
+            let t = getText(elem.cloneNode(true), newNode);
+            return t;
         },
 
-        async saveText() {
+        async saveText(options) {
+            options = options || {};
+
+            if (options.clearRender) {
+                this.clearRender = true;
+            }
             if (!this.d_edited) {
                 return;
             }
@@ -248,14 +895,15 @@ export default {
             let newText = this.getTextFromDom();
 
             wwLib.wwObjectHover.removeLock();
+            // wwLib.wwObjectHover.close();
 
-            this.clearRender = true;
 
-            wwLib.wwLang.setText(this.wwObject.content.data.text, newText);
+            wwLib.wwLang.setText(this.wwObject.content.data.text, newText, options.lang);
 
             await this.wwObjectCtrl.update(this.wwObject);
         },
 
+        /*
         getSelection() {
             let selection = null;
             if (window.getSelection) {
@@ -271,13 +919,15 @@ export default {
             }
             return selection;
         },
-
+        */
+        /*
         updateSelection(event) {
             if (document.activeElement == this.$el) {
                 this.textSelection = this.getSelection();
             }
         },
-
+        */
+        /*
         reselect() {
             let selection = window.getSelection();
             selection.removeAllRanges();
@@ -286,46 +936,68 @@ export default {
                 selection.addRange(textSelection);
             }
         },
+        */
 
         wwTextBarAction(options, event) {
-            //console.log(action);
             const category = options.split(':')[0];
             const action = options.split(':').length > 1 ? options.split(':')[1] : null;
             const value = options.split(':').length > 2 ? options.split(':')[2] : null;
 
             this.$nextTick(function () {
-                this.reselect();
+                //this.reselect();
 
                 switch (category) {
-                    case 'style':
-                        this.editStyle(action, value);
-                        break;
+                    // case 'style':
+                    //     this.editStyle(action, value);
+                    //     break;
                     case 'link':
-                        this.addLink()
+                        this.addLink();
                         break;
-                    case 'add':
-                        this.addWwObject();
+                    case 'insertWwObject':
+                        this.insertWwObject();
                         break;
                     case 'exec':
-                        this.exec(action, value)
+                        this.exec(action, value);
+                        break;
+                    case 'list':
+                        this.setList(action);
+                        break;
+                    case 'indent':
+                        this.setIndent(action);
+                        break;
+                    case 'fontSize':
+                        this.setFontSize(action);
+                        break;
+                    case 'removeFormat':
+                        this.removeFormat();
+                        break;
+                    case 'format':
+                        this.copyFormat();
                         break;
                     case 'prop':
-                        this.setProp(action, value)
+                        this.setProp(action, value);
                         break;
-                    case 'insert':
-                        this.insert(action, value)
+                    case 'color':
+                        this.setColor(action);
                         break;
-                    case 'clear':
-                        this.clear()
+                    case 'open':
+                        this.openPopup(action);
                         break;
-                    case 'reset':
-                        this.reset()
-                        break;
+
+                    // case 'insert':
+                    //     this.insert(action, value)
+                    //     break;
+                    // case 'clear':
+                    //     this.clear()
+                    //     break;
+                    // case 'reset':
+                    //     this.reset()
+                    //     break;
                     case 'html':
-                        this.editHTML()
+                        this.editHTML();
                         break;
                     case 'openMenu':
-                        this.openMenu(event)
+                        this.openMenu(event);
                         break;
                     default:
 
@@ -359,11 +1031,13 @@ export default {
         /*=============================================m_ÔÔ_m=============================================\
           TEXT BAR FUNCTIONS
         \================================================================================================*/
+        /*
         reset() {
             this.$el.innerHTML = '';
             wwLib.wwLang.setText(this.wwObject.content.data.text, '');
         },
-
+        */
+        /*
         clear() {
             if (this.textSelection.toString().length !== 0) {
                 this.replaceSelectionWithHtml(window.getSelection().toString())
@@ -372,7 +1046,8 @@ export default {
                 this.$el.innerHTML = this.$el.innerText;
             }
         },
-
+        */
+        /*
         insert(action, value) {
             switch (action) {
                 case 'hr':
@@ -390,7 +1065,8 @@ export default {
                     break;
             }
         },
-
+        */
+        /*
         editStyle(action, value) {
 
             switch (action) {
@@ -421,15 +1097,141 @@ export default {
             }
 
         },
+        */
 
-        exec(cmd, value) {
-            document.execCommand(cmd, false, value || '');
+        async exec(cmd, value) {
+            if (typeof (value) === 'undefined' || value === null) {
+                value = this.quill.getFormat()[cmd] ? false : true;
+            }
+
+            switch (cmd) {
+                case 'color':
+                    if (value == 'more') {
+                        let options = {
+                            firstPage: 'COLOR_PICKER'
+                        }
+
+                        try {
+                            const result = await wwLib.wwPopups.open(options)
+
+                            if (typeof (result.color)) {
+                                value = result.color;
+                            }
+                            else {
+                                return;
+                            }
+                        } catch (error) {
+
+                        }
+                    }
+                    break;
+            }
+
+            this.quill.format(cmd, value);
+        },
+
+        setList(value) {
+            let currentFormat = this.quill.getFormat()['list'];
+
+            if (currentFormat == value) {
+                this.exec('list', null);
+            }
+            else {
+                this.exec('list', value);
+            }
+        },
+
+        setIndent(direction) {
+            let currentFormat = this.quill.getFormat()['indent'];
+
+            let newValue = 0;
+
+            if (currentFormat) {
+                newValue = parseInt(currentFormat.replace('px', ''));
+            }
+
+            if (direction == 'left') {
+                newValue += 50;
+            }
+            else {
+                newValue -= 50;
+            }
+
+            newValue = Math.max(newValue, 0);
+            this.exec('indent', newValue ? newValue + 'px' : false);
         },
 
         setProp(prop, value) {
+            this.saveText({ clearRender: true });
             this.wwObject.content.data[prop] = value;
+
+            this.wwObjectCtrl.update(this.wwObject);
+
+            this.reloadQuill();
+
+            wwLib.wwObjectHover.removeLock();
+            wwLib.wwObjectHover.close();
+
+            this.$nextTick(() => {
+                wwLib.wwObjectHover.setMain(this.$parent);
+                wwLib.wwObjectHover.setLock(this.$parent);
+            });
         },
 
+        setFontSize(value) {
+            if (!this.quill.getSelection().length) {
+                return;
+            }
+            this.quill.format('fontSize', value);
+        },
+
+        removeFormat() {
+            if (this.quill.getSelection().length) {
+                this.quill.removeFormat(this.quill.getSelection().index, this.quill.getSelection().length);
+            }
+        },
+
+        copyFormat() {
+            let copiedFormat = null;
+
+            try {
+                copiedFormat = localStorage.getItem('ww-text-copied-format');
+                copiedFormat = JSON.parse(copiedFormat);
+            } catch (error) {
+
+            }
+
+            if (copiedFormat) {
+                this.removeFormat();
+
+                for (let key in copiedFormat) {
+                    this.quill.format(key, copiedFormat[key]);
+                }
+
+                localStorage.removeItem('ww-text-copied-format');
+            }
+            else {
+                localStorage.setItem('ww-text-copied-format', JSON.stringify(this.quill.getFormat()));
+            }
+        },
+
+        insertWwObject() {
+            const cursorPosition = this.quill.getSelection().index;
+            this.quill.insertEmbed(cursorPosition, 'ww-object-embed', '');
+            this.quill.setSelection(cursorPosition + 1);
+        },
+
+        insertLine(value) {
+            const cursorPosition = this.quill.getSelection().index;
+            this.quill.insertEmbed(cursorPosition, 'line', JSON.stringify(value));
+            this.quill.setSelection(cursorPosition + 1);
+        },
+
+        setColor(value) {
+            this.quill.format('color', value);
+        },
+
+        /*
         removeTags(tag, style) {
 
             let str = this.$el.innerHTML;
@@ -471,7 +1273,8 @@ export default {
             }
 
         },
-
+        */
+        /*
         removeStyles(style, root) {
             root = root || this.$el;
 
@@ -485,7 +1288,8 @@ export default {
                 }
             }
         },
-
+        */
+        /*
         setStyle(style, value) {
 
             if (!this.textSelection || this.textSelection.toString().length == 0) {
@@ -510,7 +1314,8 @@ export default {
 
             this.replaceSelectionWithHtml(html);
         },
-
+        */
+        /*
         setAlign(value) {
             switch (value) {
                 case 'justify':
@@ -527,14 +1332,17 @@ export default {
                     break;
             }
         },
-
+        */
+        /*
         setFont(value) {
             if (!this.textSelection || this.textSelection.toString().length == 0) {
                 this.selectAll();
             }
             document.execCommand('fontName', false, value);
         },
+        */
 
+        /*
         async setColor(value) {
 
 
@@ -565,23 +1373,23 @@ export default {
                     break;
             }
         },
+        */
 
         addLink() {
+            if (!this.quill.getSelection().length) {
+                return alert('Selectionnez du texte pour inserer un lien.');
+            }
+
             let link = prompt("Lien à inserer :", "http://");
 
             if (!link) {
                 return;
             }
 
-            if (this.textSelection.toString().length !== 0) {
-                let linkText = window.getSelection().toString();
-
-                this.replaceSelectionWithHtml('<a target="_blank" class="ww-text-link" href="' + link + '"><u>' + linkText + "</u></a>");
-            } else {
-                this.replaceSelectionWithHtml('<a target="_blank" class="ww-text-link" href="' + link + '"><u>' + link + "</u></a>");
-            }
+            this.quill.format('link', link);
         },
 
+        /*
         replaceSelectionWithHtml(html) {
 
             let localrange;
@@ -602,7 +1410,8 @@ export default {
             }
 
         },
-
+        */
+        /*
         getSelectionHtml() {
             var html = "";
             if (typeof window.getSelection != "undefined") {
@@ -621,7 +1430,8 @@ export default {
             }
             return html;
         },
-
+        */
+        /*
         selectAll() {
             var node = this.$el;
 
@@ -638,19 +1448,20 @@ export default {
 
             this.textSelection = this.getSelection();
         },
-
+        */
+        /*
         addWwObject() {
             const newWwObject = wwLib.wwObject.getDefault({ type: 'ww-button' });
 
-            this.wwObject.data.children = this.wwObject.data.children || [];
+            this.wwObject.content.data.children = this.wwObject.content.data.children || [];
 
             //Find first empty index in current wwObject children
             let index = 0;
-            while (this.wwObject.data.children[index]) {
+            while (this.wwObject.content.data.children[index]) {
                 index++;
             }
 
-            this.wwObject.data.children[index] = newWwObject;
+            this.wwObject.content.data.children[index] = newWwObject;
 
             this.replaceSelectionWithHtml('[[wwObject=' + index + ']]');
 
@@ -661,8 +1472,25 @@ export default {
             wwLib.wwLang.setText(this.wwObject.content.data.text, newText);
             this.wwObjectCtrl.update(this.wwObject);
         },
+        */
+
+        async openPopup(popup) {
+            let options = {
+                firstPage: popup
+            }
+
+            try {
+                const result = await wwLib.wwPopups.open(options);
+                wwLib.wwObjectEditors.close(this.textBar);
+                wwLib.wwObjectEditors.add(this.textBar);
+            } catch (error) {
+                console.log(error);
+            }
+        },
 
         async openMenu(event) {
+            this.saveText();
+
             wwLib.wwObjectEditors.close(this.textBar);
             this.wwObjectCtrl.context.openMenu(event, true, true);
         },
@@ -707,6 +1535,8 @@ export default {
                     wwLib.wwLang.setText(this.wwObject.content.data.text, result.html);
 
                     await this.wwObjectCtrl.update(this.wwObject);
+
+                    this.reloadQuill();
                 }
 
             } catch (error) {
@@ -716,6 +1546,7 @@ export default {
             wwLib.wwObjectHover.removeLock();
         },
 
+        /*
         async edit() {
             wwLib.wwObjectHover.setLock(this);
 
@@ -750,47 +1581,65 @@ export default {
 
             wwLib.wwObjectHover.removeLock();
         },
+        */
 
         setFocus(focusId) {
             const oldFocus = this.focus;
-            this.focus = focusId == this.$parent._uid
+            this.focus = focusId == this.$parent._uid;
+
             if (this.focus) {
                 this.d_edited = true;
                 wwLib.wwObjectMenu.allowNextOpen && wwLib.wwObjectMenu.allowNextOpen();
                 wwLib.wwObjectEditors.add(this.textBar);
                 wwLib.wwObjectMargins.close();
 
+                if (this.editingSection && this.quill) {
+                    this.quill.enable();
+                }
 
-                document.removeEventListener('selectionchange', this.updateSelection);
-                document.addEventListener('selectionchange', this.updateSelection);
+                // document.removeEventListener('selectionchange', this.updateSelection);
+                // document.addEventListener('selectionchange', this.updateSelection);
 
-                const self = this;
-                setTimeout(function () {
+                setTimeout(() => {
                     wwLib.wwObjectHover.removeLock();
-                    wwLib.wwObjectHover.setMain(self.$parent);
-                    wwLib.wwObjectHover.setLock(self.$parent);
+                    wwLib.wwObjectHover.setMain(this.$parent);
+                    wwLib.wwObjectHover.setLock(this.$parent);
 
-                    if (self.$el.classList.contains('ww-text-content')) {
-                        self.$el.focus();
+                    if (this.$el.classList.contains('ww-text-content')) {
+                        this.$el.focus();
                     }
-                    else if (self.$el.querySelector('.ww-text-content')) {
-                        self.$el.querySelector('.ww-text-content').focus();
+                    else if (this.$el.querySelector('.ww-text-content')) {
+                        this.$el.querySelector('.ww-text-content').focus();
                     }
                     else {
-                        console.log('no focus...');
+
                     }
                 }, 50);
             }
             else if (oldFocus) {
-                document.removeEventListener('selectionchange', this.updateSelection);
+                // document.removeEventListener('selectionchange', this.updateSelection);
 
-                this.saveText();
+                //this.saveText();
+
+                if (this.quill) {
+                    this.quill.disable();
+                }
+                wwLib.wwObjectEditors.close(this.textBar);
             }
         },
 
         async beforeSave() {
             await this.saveText();
+            this.quill = null;
+        },
+
+        beforeCancel() {
+            wwLib.wwObjectHover.removeLock();
+            this.clearRender = true;
+            this.quill = null;
+            this.$forceUpdate();
         }
+
         /* wwManager:end */
     },
     created() {
@@ -813,21 +1662,22 @@ export default {
     },
     mounted() {
 
+        this.init();
+
         this.$emit('ww-loaded', this);
 
-        const self = this;
-        wwLib.$on("wwLang:changed", function (lang) {
 
-            if (self.focus) {
-                wwLib.wwLang.setText(self.wwObject.content.data.text, self.$el.innerHTML, lang.old);
-            }
 
-            self.$forceUpdate();
 
-        });
+
+        /* wwManager:start */
+        this.textBar = {
+            context: this,
+            type: 'wwTextBar',
+            component: wwTextBar
+        }
 
         this.$el.addEventListener('paste', function (e) {
-
             e.preventDefault();
 
             // get text representation of clipboard
@@ -837,24 +1687,29 @@ export default {
             document.execCommand("insertHTML", false, text);
         })
 
-        /* wwManager:start */
-        this.textBar = {
-            context: this,
-            type: 'wwTextBar',
-            component: wwTextBar
-        }
-
         wwLib.$on('wwFocus', this.setFocus);
 
         wwLib.wwAsyncScripts.loadAsset({
             target: 'manager',
             name: 'ww-text',
         });
+
+        wwLib.$on("wwLang:changed", (lang) => {
+            this.saveText({ lang: lang.old });
+
+            this.clearRender = true;
+
+            setTimeout(() => {
+                if (this.editingSection) {
+                    this.loadQuill();
+                }
+            }, 100);
+        });
+
         /* wwManager:end */
     },
     beforeDestroy() {
         /* wwManager:start */
-
         this.saveText();
         wwLib.$off('wwFocus', this.setFocus);
 
@@ -865,21 +1720,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.ww-text-content {
+.ww-text {
     display: inline-block;
     width: 100%;
     overflow-wrap: break-word;
     -webkit-line-break: after-white-space;
     outline: none;
-}
-
-.ww-text-content .ww-object-wrapper,
-.ww-text-content .ww-object {
-    display: inline-block;
-}
-
-.ww-text-content .ww-object {
-    margin: 1px;
 }
 
 .no-text {
@@ -901,39 +1747,51 @@ h4 {
     font-weight: inherit;
     margin: 0;
 }
-
-.ww-object {
-    vertical-align: middle;
-    // line-height: 0 !important;
-}
 </style>
 
 <style lang="scss">
-.ww-text-content {
+.ww-text {
     ol,
     ul {
         margin: 0;
-    }
-
-    hr {
-        font-size: inherit;
-        font-weight: inherit;
-        display: inline-block;
-        margin-block-start: 0px;
-        margin-block-end: 0px;
-        margin-inline-start: 0px;
-        margin-inline-end: 0px;
     }
 
     a {
         text-decoration: none;
         color: inherit;
     }
+    p {
+        margin: 0;
+        white-space: pre-wrap;
+    }
+
+    .ww-object,
+    .ww-object-embed {
+        font-size: initial;
+        font-weight: initial;
+        line-height: initial;
+        letter-spacing: initial;
+        white-space: initial;
+        vertical-align: middle;
+        display: inline-block;
+    }
+
+    .ww-object-wrapper {
+        display: inline-block;
+    }
+
+    // .ww-object {
+    //     margin: 1px;
+    // }
 }
 
 .ww-text-link {
     text-decoration: none;
     color: inherit;
+}
+
+.ql-clipboard {
+    display: none;
 }
 
 /* wwManager:start */
