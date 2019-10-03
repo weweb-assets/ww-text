@@ -16,11 +16,11 @@
     "dependencies": {
         "prismjs": "^1.16.0",
         "quill": "1.3.6",
-        "vue": "^2.5.16",
+        "vue": "^2.6.10",
         "vue-prism-editor": "^0.2.1"
     },
     "devDependencies": {
-        "weweb-client": "^1.0.40"
+        "weweb-client": "^1.0.47"
     },
     "browserslist": [
         "> 1%",

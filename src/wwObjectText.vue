@@ -7,6 +7,25 @@ import wwTextPopupHtml from './wwTextPopupHtml.vue';
 import { setTimeout } from 'timers';
 wwLib.wwPopups.addPopup('wwTextPopupHtml', wwTextPopupHtml);
 import Quill from 'quill';
+
+wwLib.wwPopups.addStory('WWTEXT_LINKS', {
+    title: {
+        en: 'Link',
+        fr: 'Lien'
+    },
+    type: 'wwPopupLinks',
+    storyData: {
+        links: [
+            'EXTERNAL',
+            'INTERNAL',
+            'SECTION',
+            // 'POPUP',
+            'DOWNLOAD',
+            'CLOSE_POPUP',
+            // 'NO_LINK'
+        ]
+    }
+})
 /* wwManager:end */
 
 export default {
@@ -27,25 +46,12 @@ export default {
                     "ww-text": true
                 },
                 attrs: {
-                    contenteditable: this.editing
+                    // contenteditable: this.editing
                 }
             }, null
             )
         }
         else {
-            const wwObjRegex = /\[\[wwObject=([^\]]*)\]\]/gi;
-
-            let content = document.createElement('div');
-
-            if (this.editingSection) {
-                content.innerHTML = wwLib.wwLang.getText(this.wwObject.content.data.text).replace(wwObjRegex, '<span class="ww-object-embed" data-ww-object-id="$1"></span>') || '<br/>';
-            }
-            else {
-                content.innerHTML = wwLib.wwLang.getText(this.wwObject.content.data.text).replace(wwObjRegex, '<ww-object data-ww-object-id="$1"></ww-object>') || '<br/>';
-            }
-
-            const childNodes = content.childNodes;
-
             const self = this;
             function createVNodes(childNodes) {
                 let vNodes = [];
@@ -73,14 +79,80 @@ export default {
 
                         attributes.wwInsideWwObject = "ww-text";
 
+
+                        let wwObjectData;
+                        if (self.wwObject.content.data.children && self.wwObject.content.data.children[node.attributes['data-ww-object-id'].nodeValue]) {
+                            wwObjectData = self.wwObject.content.data.children[node.attributes['data-ww-object-id'].nodeValue];
+                        }
+                        else if (self.wwObject.data.children && self.wwObject.data.children[node.attributes['data-ww-object-id'].nodeValue]) {
+                            wwObjectData = self.wwObject.data.children[node.attributes['data-ww-object-id'].nodeValue];
+                        }
+
                         vNode = createVNode(
                             node.nodeName.toLowerCase(),
                             {
                                 props: {
-                                    wwObject: self.wwObject.content.data.children[node.attributes['data-ww-object-id'].nodeValue],
+                                    wwObject: wwObjectData,
                                     inText: true
                                 },
                                 attrs: attributes
+                            },
+                            vn
+                        )
+                    }
+                    else if (node.nodeName.toLowerCase() == 'ww-link') {
+                        let vn = createVNodes(node.childNodes);
+
+                        // let attributes = {};
+
+                        // for (let a of node.attributes) {
+                        //     attributes[a.nodeName] = a.nodeValue;
+                        // }
+                        // for (let key in self.wwAttrs) {
+                        //     attributes[key] = self.wwAttrs[key];
+                        // }
+
+                        // attributes.wwInsideWwObject = "ww-text";
+
+
+                        const valueObject = JSON.parse(node.attributes['data-ww-link'].nodeValue);
+                        const linkType = Object.keys(valueObject)[0];
+                        let linkData = {
+                            type: 'none',
+                            data: {}
+                        }
+                        switch (linkType) {
+                            case 'linkExt':
+                                linkData.type = 'ww-link-ext';
+                                linkData.data.url = valueObject[linkType];
+                                break;
+                            case 'linkPage':
+                                linkData.type = 'ww-link-page';
+                                linkData.data.id = valueObject[linkType];
+                                break;
+                            case 'linkSection':
+                                linkData.type = 'ww-link-section';
+                                linkData.data.id = valueObject[linkType];
+                                break;
+                            case 'linkFile':
+                                linkData.type = 'ww-link-file';
+                                linkData.data.url = valueObject[linkType];
+                                break;
+                            case 'linkClosePopup':
+                                linkData.type = 'ww-link-closepopup';
+                                break;
+                        }
+
+                        let wwLink = wwLib.wwLinks.getLinkParams(linkData, self.$el);
+
+                        vNode = createVNode(
+                            node.nodeName.toLowerCase(),
+                            {
+                                props: {
+                                    wwLink: wwLink,
+                                    inText: true
+                                },
+                                // attrs: attributes
                             },
                             vn
                         )
@@ -117,17 +189,50 @@ export default {
                 return vNodes;
             }
 
+            const nodes = [];
+
+            const wwObjRegex = /\[\[wwObject=([^\]]*)\]\]/gi;
+            const wwLinkRegex = /\[\[wwLink=([^\|]*)\|text=([^\]]*)\]\]/gi;
+
+            let text = wwLib.wwLang.getText(this.wwObject.content.data.text).replace(wwObjRegex, '<ww-object data-ww-object-id="$1"></ww-object>') || '<br/>';
+            text = text.replace(wwLinkRegex, "<ww-link data-ww-link='$1'>$2</ww-link>") || '<br/>';
+            const contentText = document.createElement('div');
+            contentText.innerHTML = text;
+            const childNodesText = contentText.childNodes;
+            const nodesText = createVNodes(childNodesText);
+            const nodeText = createVNode('div', {
+                attrs: {
+                    style: this.editingSection ? 'display:none;' : ''
+                }
+            }, nodesText);
+            nodes.push(nodeText);
+
+
+            /* wwManager:start */
+            // let textQuill = wwLib.wwLang.getText(this.wwObject.content.data.text).replace(wwObjRegex, '<span class="ww-object-embed" data-ww-object-id="$1"></span>') || '<br/>';
+            // textQuill = textQuill.replace(wwLinkRegex, '<span class="ww-link" data-ww-link="$1"></span>');
+            // this.wwObject.uniqueId == 11747665601 && console.log(textQuill);
+            // const contentQuill = document.createElement('div');
+            // contentQuill.innerHTML = textQuill;
+            // const childNodesQuill = contentQuill.childNodes;
+            // const nodesQuill = createVNodes(childNodesQuill);
+            const nodeQuill = createVNode('div', {
+                class: {
+                    "ww-text-editor": true
+                },
+                attrs: {
+                    style: this.editingSection ? '' : 'display:none;'
+                }
+            }, null);
+            nodes.push(nodeQuill);
+            /* wwManager:end */
+
+
             const root = createVNode(this.wwObject.content.data.tag || 'div', {
                 class: {
                     "ww-text": true
-                },
-                attrs: {
-
-                    // contenteditable: this.editingSection
                 }
-            },
-                createVNodes(childNodes)
-            )
+            }, nodes)
 
             return root;
         }
@@ -217,7 +322,10 @@ export default {
 
             if (this.editingSection) {
                 this.correctText();
-                this.loadQuill();
+                this.$nextTick(() => {
+                    this.loadQuill();
+                    this.quill.disable();
+                })
             }
             /* wwManager:end */
         },
@@ -429,7 +537,13 @@ export default {
         },
 
         loadQuill() {
-            this.quill = new Quill(this.$el);
+            this.quill = new Quill(this.$el.querySelector('.ww-text-editor'));
+            const wwObjRegex = /\[\[wwObject=([^\]]*)\]\]/gi;
+            const wwLinkRegex = /\[\[wwLink=([^\|]*)\|text=([^\]]*)\]\]/gi;
+            let text = wwLib.wwLang.getText(this.wwObject.content.data.text).replace(wwObjRegex, '<span class="ww-object-embed" data-ww-object-id="$1"></span>') || '<br/>';
+            text = text.replace(wwLinkRegex, "<span class='ww-link-inline' data-ww-link='$1'>$2</span>");
+            this.wwObject.uniqueId == 11747665601 && console.log(text);
+            this.quill.pasteHTML(text);
         },
 
         reloadQuill() {
@@ -446,6 +560,15 @@ export default {
             if (!Quill.imports['formats/ww-object-embed']) {
                 const Parchment = Quill.import('parchment');
                 const Embed = Quill.import('blots/embed');
+                const Block = Quill.import('blots/block');
+                const TextBlot = Quill.import('blots/text');
+                const Break = Quill.import('blots/break');
+                const Cursor = Quill.import('blots/cursor');
+                const Inline = Quill.import('blots/inline');
+                const Container = Quill.import('blots/container');
+                const Scroll = Quill.import('blots/scroll');
+
+
                 // WWOBJECT
                 function createWwObject(self, wwObjectIndex) {
 
@@ -454,8 +577,11 @@ export default {
                     if (wwObjectIndex && self.wwObject.content.data.children && self.wwObject.content.data.children[wwObjectIndex]) {
                         wwObjectData = self.wwObject.content.data.children[wwObjectIndex];
                     }
+                    else if (wwObjectIndex && self.wwObject.data.children && self.wwObject.data.children[wwObjectIndex]) {
+                        wwObjectData = self.wwObject.data.children[wwObjectIndex];
+                    }
                     else {
-                        wwObjectData = wwLib.wwObject.getDefault({ type: 'ww-button' });
+                        wwObjectData = wwLib.wwObject.getDefault({ type: 'ww-icon' });
 
                         self.wwObject.content.data.children = self.wwObject.content.data.children || [];
 
@@ -471,7 +597,7 @@ export default {
                     }
 
                     for (let c of self.$children) {
-                        if (c.c_wwObject.uniqueId == wwObjectData.uniqueId) {
+                        if (c.c_wwObject && c.c_wwObject.uniqueId == wwObjectData.uniqueId) {
                             c.$destroy();
                         }
                     }
@@ -502,7 +628,6 @@ export default {
 
                     attach() {
                         super.attach();
-
                         const vueNode = this.getVueNode();
 
                         this.domNode.innerHTML = '';
@@ -512,32 +637,33 @@ export default {
                         }
                         else {
                             const { el, wwObjectId } = createWwObject(vueNode.__vue__, this.domNode.getAttribute('data-ww-object-id') || '');
-                            this.domNode.appendChild(el);
                             this.domNode.setAttribute('data-ww-object-id', wwObjectId);
+                            this.domNode.appendChild(el);
                         }
                     }
 
-                    format(name, value) {
-                        if (name == 'wwObjectId' && value) {
+                    // format(name, value) {
+                    //     if (name == 'wwObjectId' && value) {
+                    //         // console.log("format");
 
-                            this.domNode.innerHTML = '';
+                    //         // this.domNode.innerHTML = '';
 
 
-                            const vueNode = this.getVueNode();
+                    //         // const vueNode = this.getVueNode();
 
-                            if (!vueNode) {
-                                return;
-                            }
-                            else {
-                                const { el, wwObjectId } = createWwObject(vueNode.__vue__, value);
-                                this.domNode.appendChild(el);
+                    //         // if (!vueNode) {
+                    //         //     return;
+                    //         // }
+                    //         // else {
+                    //         //     const { el, wwObjectId } = createWwObject(vueNode.__vue__, value);
 
-                                this.domNode.setAttribute('data-ww-object-id', wwObjectId);
-                            }
-                        } else {
-                            super.format(name, value);
-                        }
-                    }
+                    //         //     this.domNode.setAttribute('data-ww-object-id', wwObjectId);
+                    //         //     this.domNode.appendChild(el);
+                    //         // }
+                    //     } else {
+                    //         super.format(name, value);
+                    //     }
+                    // }
 
                     getVueNode() {
                         let node = this.domNode.parentNode;
@@ -723,6 +849,81 @@ export default {
                 Quill.register(ListItemStyle);
 
 
+                // WWLINK
+                class WwLink extends Inline {
+                    static create(value) {
+                        const node = super.create(value);
+
+                        if (typeof (value) == 'object' && value.wwLink) {
+                            value = value.wwLink;
+                        }
+
+                        node.setAttribute('data-ww-link', value);
+
+                        const valueObject = JSON.parse(value);
+                        const linkType = Object.keys(valueObject)[0];
+                        let linkText = '';
+                        switch (linkType) {
+                            case 'linkExt':
+                                linkText = valueObject[linkType];
+                                break;
+                            case 'linkPage':
+                                const pageId = valueObject[linkType];
+                                let pageName = 'Unknown';
+                                for (const page of wwLib.wwWebsiteData.getPages()) {
+                                    if (page.id == pageId) {
+                                        pageName = page.name;
+                                    }
+                                }
+                                linkText = 'Page : ' + pageName;
+                                break;
+                            case 'linkSection':
+                                const sectionId = valueObject[linkType];
+                                let sectionName = 'Unknown';
+                                for (const _section of wwLib.wwWebsiteData.getCurrentPage().sections) {
+                                    const section = wwLib.$store.getters["websiteData/getSection"](_section.id);
+                                    if (section.linkId == sectionId) {
+                                        sectionName = section.sectionTitle;
+                                    }
+                                }
+                                linkText = 'Section : ' + sectionName;
+                                break;
+                            case 'linkFile':
+                                linkText = 'File : ' + valueObject[linkType].split('/')[valueObject[linkType].split('/').length - 1];
+                                break;
+                            case 'linkClosePopup':
+                                linkText = 'Close Popup';
+                                break;
+                        }
+
+                        node.setAttribute('data-link', linkText);
+
+                        //linkExt / url
+                        //linkPage / id
+                        //linkSection / id
+                        //linkFile / url
+                        //linkClosePopup / true
+
+                        return node;
+                    }
+
+                    static formats(node) {
+                        return {
+                            wwLink: node.getAttribute('data-ww-link')
+                        }
+                    }
+
+                    // get value of the node (for implement undo function)
+                    static value(node) {
+                        return node.getAttribute('data-ww-link') || '';
+                    }
+                }
+                WwLink.blotName = 'ww-link-inline';
+                WwLink.tagName = 'SPAN';
+                WwLink.className = 'ww-link-inline';
+                WwLink.allowedChildren = [TextBlot, Inline, Break, Cursor];
+                Quill.register(WwLink, true);
+
                 // FONT SIZE
                 let configFontSize = { scope: Parchment.Scope.INLINE };
                 let fontSize = new Parchment.Attributor.Class('fontSize', 'font-size', configFontSize);
@@ -827,6 +1028,10 @@ export default {
                     }
                     else if (node.childNodes[i].classList && node.childNodes[i].classList.contains('ww-object-embed')) {
                         newNode.append(document.createTextNode('[[wwObject=' + node.childNodes[i].attributes['data-ww-object-id'].nodeValue + ']]'))
+                    }
+                    else if (node.childNodes[i].classList && node.childNodes[i].classList.contains('ww-link-inline')) {
+                        const text = node.childNodes[i].innerHTML;
+                        newNode.append(document.createTextNode('[[wwLink=' + node.childNodes[i].attributes['data-ww-link'].nodeValue + '|text=' + text + ']]'))
                     }
                     else if (node.childNodes[i].classList && node.childNodes[i].classList.contains('line')) {
                         try {
@@ -1375,18 +1580,20 @@ export default {
         },
         */
 
-        addLink() {
+        async addLink() {
             if (!this.quill.getSelection().length) {
                 return alert('Selectionnez du texte pour inserer un lien.');
             }
 
-            let link = prompt("Lien à inserer :", "http://");
+            let result = await wwLib.wwPopups.open({
+                firstPage: 'WWTEXT_LINKS'
+            });
 
-            if (!link) {
+            if (!result) {
                 return;
             }
 
-            this.quill.format('link', link);
+            this.quill.format('ww-link-inline', JSON.stringify(result));
         },
 
         /*
@@ -1546,7 +1753,7 @@ export default {
             wwLib.wwObjectHover.removeLock();
         },
 
-        /*
+
         async edit() {
             wwLib.wwObjectHover.setLock(this);
 
@@ -1581,7 +1788,7 @@ export default {
 
             wwLib.wwObjectHover.removeLock();
         },
-        */
+
 
         setFocus(focusId) {
             const oldFocus = this.focus;
@@ -1629,6 +1836,7 @@ export default {
         },
 
         async beforeSave() {
+            this.clearRender = true;
             await this.saveText();
             this.quill = null;
         },
@@ -1778,6 +1986,41 @@ h4 {
 
     .ww-object-wrapper {
         display: inline-block;
+    }
+
+    .ww-link-inline {
+        position: relative;
+
+        &:before {
+            content: "";
+            position: absolute;
+            border: 1px dashed #2e86c2;
+            top: -2px;
+            left: -2px;
+            bottom: -2px;
+            right: -2px;
+            pointer-events: none;
+        }
+
+        &:after {
+            content: attr(data-link);
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            transform: translateY(-100%);
+            padding: 2px;
+            background-color: #2e86c2;
+            display: none;
+            font-size: 9px;
+            color: white;
+            white-space: nowrap;
+        }
+
+        &:hover {
+            &:after {
+                display: block;
+            }
+        }
     }
 
     // .ww-object {
