@@ -19,7 +19,8 @@ const addComponent = function () {
                     size: "",
                     color: "",
                     classes: [],
-                    children: []
+                    children: [],
+                    fontStyle: ''
                 }
             },
             upsales: {
@@ -41,7 +42,17 @@ const addComponent = function () {
                             },
                             icon: 'wwi wwi-edit-other',
                             action: 'edit'
+                        },
+                        {
+                            name: 'HTML',
+                            text: {
+                                en: 'HTML',
+                                fr: 'HTML'
+                            },
+                            icon: 'fas fa-code',
+                            action: 'editHTML'
                         }
+
                     ]
                 },
                 wwObjectHover: {

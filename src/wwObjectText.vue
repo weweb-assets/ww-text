@@ -103,18 +103,6 @@ export default {
                     else if (node.nodeName.toLowerCase() == 'ww-link') {
                         let vn = createVNodes(node.childNodes);
 
-                        // let attributes = {};
-
-                        // for (let a of node.attributes) {
-                        //     attributes[a.nodeName] = a.nodeValue;
-                        // }
-                        // for (let key in self.wwAttrs) {
-                        //     attributes[key] = self.wwAttrs[key];
-                        // }
-
-                        // attributes.wwInsideWwObject = "ww-text";
-
-
                         const valueObject = JSON.parse(node.attributes['data-ww-link'].nodeValue);
                         const linkType = Object.keys(valueObject)[0];
                         let linkData = {
@@ -189,6 +177,7 @@ export default {
                 return vNodes;
             }
 
+
             const nodes = [];
 
             const wwObjRegex = /\[\[wwObject=([^\]]*)\]\]/gi;
@@ -200,7 +189,10 @@ export default {
             contentText.innerHTML = text;
             const childNodesText = contentText.childNodes;
             const nodesText = createVNodes(childNodesText);
+            const textClasses = [];
+            this.wwObject.content.data.fontStyle && textClasses.push(this.wwObject.content.data.fontStyle);
             const nodeText = createVNode('div', {
+                class: textClasses,
                 attrs: {
                     style: this.editingSection ? 'display:none;' : ''
                 }
@@ -209,17 +201,10 @@ export default {
 
 
             /* wwManager:start */
-            // let textQuill = wwLib.wwLang.getText(this.wwObject.content.data.text).replace(wwObjRegex, '<span class="ww-object-embed" data-ww-object-id="$1"></span>') || '<br/>';
-            // textQuill = textQuill.replace(wwLinkRegex, '<span class="ww-link" data-ww-link="$1"></span>');
-            // this.wwObject.uniqueId == 11747665601 && console.log(textQuill);
-            // const contentQuill = document.createElement('div');
-            // contentQuill.innerHTML = textQuill;
-            // const childNodesQuill = contentQuill.childNodes;
-            // const nodesQuill = createVNodes(childNodesQuill);
+            const quillClasses = ["ww-text-editor"];
+            this.wwObject.content.data.fontStyle && quillClasses.push(this.wwObject.content.data.fontStyle);
             const nodeQuill = createVNode('div', {
-                class: {
-                    "ww-text-editor": true
-                },
+                class: quillClasses,
                 attrs: {
                     style: this.editingSection ? '' : 'display:none;'
                 }
@@ -227,11 +212,10 @@ export default {
             nodes.push(nodeQuill);
             /* wwManager:end */
 
-
+            const classes = ['ww-text'];
+            //this.wwObject.content.data.fontStyle && classes.push(this.wwObject.content.data.fontStyle);
             const root = createVNode(this.wwObject.content.data.tag || 'div', {
-                class: {
-                    "ww-text": true
-                }
+                class: classes
             }, nodes)
 
             return root;
@@ -440,14 +424,16 @@ export default {
                         for (let fontSize of wwLib.wwWebsiteData.getDesign().info.fontSizes.list) {
                             fontSizes.push({
                                 name: fontSize.name,
-                                size: parseFloat(fontSize.screens.lg)
+                                size: parseFloat(fontSize.screens.lg),
+                                className: fontSize.className
                             })
                         }
 
                         let closest = fontSizes.reduce(function (prevSize, currSize) {
                             return (Math.abs(currSize.size - size) < Math.abs(prevSize.size - size) ? currSize : prevSize);
                         });
-                        const newSize = 'font-size-' + closest.name.toLowerCase().replace(/\s/g, '');
+
+                        const newSize = closest.className;
                         return newSize;
                     }
 
@@ -538,11 +524,11 @@ export default {
 
         loadQuill() {
             this.quill = new Quill(this.$el.querySelector('.ww-text-editor'));
+            this.quill.disable();
             const wwObjRegex = /\[\[wwObject=([^\]]*)\]\]/gi;
             const wwLinkRegex = /\[\[wwLink=([^\|]*)\|text=([^\]]*)\]\]/gi;
             let text = wwLib.wwLang.getText(this.wwObject.content.data.text).replace(wwObjRegex, '<span class="ww-object-embed" data-ww-object-id="$1"></span>') || '<br/>';
             text = text.replace(wwLinkRegex, "<span class='ww-link-inline' data-ww-link='$1'>$2</span>");
-            this.wwObject.uniqueId == 11747665601 && console.log(text);
             this.quill.pasteHTML(text);
         },
 
@@ -641,29 +627,6 @@ export default {
                             this.domNode.appendChild(el);
                         }
                     }
-
-                    // format(name, value) {
-                    //     if (name == 'wwObjectId' && value) {
-                    //         // console.log("format");
-
-                    //         // this.domNode.innerHTML = '';
-
-
-                    //         // const vueNode = this.getVueNode();
-
-                    //         // if (!vueNode) {
-                    //         //     return;
-                    //         // }
-                    //         // else {
-                    //         //     const { el, wwObjectId } = createWwObject(vueNode.__vue__, value);
-
-                    //         //     this.domNode.setAttribute('data-ww-object-id', wwObjectId);
-                    //         //     this.domNode.appendChild(el);
-                    //         // }
-                    //     } else {
-                    //         super.format(name, value);
-                    //     }
-                    // }
 
                     getVueNode() {
                         let node = this.domNode.parentNode;
@@ -767,7 +730,7 @@ export default {
                         return value;
                     }
                 }
-                const listItemSize = new ListItemSize('li-size', 'font-size', {
+                const listItemSize = new ListItemSize('li-size', 'ww-font-size', {
                     scope: Parchment.Scope.BLOCK,
                 });
                 Quill.register(listItemSize);
@@ -796,12 +759,12 @@ export default {
                         }
                         else if (name == 'li-size') {
                             for (let c of this.domNode.classList) {
-                                if (c.indexOf('font-size-') === 0) {
+                                if (c.indexOf('ww-font-size-') === 0) {
                                     this.domNode.classList.remove(c);
                                 }
                             }
                             if (value) {
-                                this.domNode.classList.add('font-size-' + value);
+                                this.domNode.classList.add('ww-font-size-' + value);
                             }
                         }
                         else {
@@ -828,7 +791,7 @@ export default {
 
                         if (attributes && attributes.attributes.fontSize) {
                             const fontSize = attributes.attributes.fontSize.value(child.domNode);
-                            if (!this.domNode.classList.contains('font-size-' + fontSize)) {
+                            if (!this.domNode.classList.contains('ww-font-size-' + fontSize)) {
                                 this.format('li-size', fontSize);
                             }
                         }
@@ -926,7 +889,7 @@ export default {
 
                 // FONT SIZE
                 let configFontSize = { scope: Parchment.Scope.INLINE };
-                let fontSize = new Parchment.Attributor.Class('fontSize', 'font-size', configFontSize);
+                let fontSize = new Parchment.Attributor.Class('fontSize', 'ww-font-size', configFontSize);
                 Quill.register(fontSize, true)
 
 
@@ -1172,6 +1135,9 @@ export default {
                         break;
                     case 'fontSize':
                         this.setFontSize(action);
+                        break;
+                    case 'fontStyle':
+                        this.setFontStyle(action);
                         break;
                     case 'removeFormat':
                         this.removeFormat();
@@ -1436,6 +1402,23 @@ export default {
             this.quill.format('color', value);
         },
 
+        setFontStyle(value) {
+            this.saveText({ clearRender: true });
+            this.wwObject.content.data.fontStyle = value;
+
+            this.wwObjectCtrl.update(this.wwObject);
+
+            this.reloadQuill();
+
+            wwLib.wwObjectHover.removeLock();
+            wwLib.wwObjectHover.close();
+
+            this.$nextTick(() => {
+                wwLib.wwObjectHover.setMain(this.$parent);
+                wwLib.wwObjectHover.setLock(this.$parent);
+            });
+        },
+
         /*
         removeTags(tag, style) {
 
@@ -1682,8 +1665,14 @@ export default {
         */
 
         async openPopup(popup) {
+
+            const selection = this.quill.getSelection();
+
             let options = {
-                firstPage: popup
+                firstPage: popup,
+                data: {
+                    fontStyle: this.quill.getFormat((selection && selection.index) ? selection.index : 0, 1)
+                }
             }
 
             try {
@@ -1873,10 +1862,6 @@ export default {
         this.init();
 
         this.$emit('ww-loaded', this);
-
-
-
-
 
         /* wwManager:start */
         this.textBar = {

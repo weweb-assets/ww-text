@@ -26,7 +26,6 @@
 
                     <div class="subitems">
                         <div class="item font-size" v-for="fontSize in c_fontSizes" :key="fontSize.name" @click="action('fontSize:' + getFontSizeClass(fontSize))">{{fontSize.name}}</div>
-                        <div class="item font-size" @click="action('fontSize')">- Default -</div>
                         <div class="item font-size blue" @click="action('open:DESIGN_FONT_SIZES')">
                             <span class="wwi wwi-add"></span>
                         </div>
@@ -135,10 +134,6 @@
                 </div>
             </div>
             <div class="line not-main">
-                <!-- CODE -->
-                <div class="item" @click="action('html')">
-                    <span class="fas fa-code"></span>
-                </div>
                 <!-- LINK -->
                 <div class="item" @click="action('link')">
                     <span class="fas fa-link"></span>
@@ -146,6 +141,24 @@
                 <!-- CLEAR -->
                 <div class="item" @click="action('removeFormat')">
                     <span class="fas fa-remove-format"></span>
+                </div>
+                <!-- STYLE -->
+                <div class="item">
+                    <span class="wwi wwi-edit-style"></span>
+
+                    <div class="subitems">
+                        <div class="item font-style" v-for="fontStyle in c_fontStyles" :key="fontStyle.name" @click="action('fontStyle:' + fontStyle.className)" :style="fontStyle.style" :class="[fontStyle.style.fontSizeClass, fontStyle.style.color == '#ffffff' ? 'white' : '']">{{fontStyle.name}}</div>
+                        <div class="item font-style" @click="action('fontStyle:')">
+                            - No style -
+                            <br />
+                        </div>
+                        <div class="item font-style blue" @click="action('open:DESIGN_FONT_STYLES')">
+                            <span class="wwi wwi-add"></span>
+                        </div>
+                        <!-- <div class="item font" @click="action('style:font:more')">
+                            <i>More...</i>
+                        </div>-->
+                    </div>
                 </div>
 
                 <div class="separator"></div>
@@ -174,20 +187,20 @@
                     <span class="fas fa-text-height"></span>
 
                     <div class="subitems">
+                        <div class="item font" @click="setLineHeight(60)">
+                            <span>60px</span>
+                        </div>
+                        <div class="item font" @click="setLineHeight(50)">
+                            <span>50px</span>
+                        </div>
+                        <div class="item font" @click="setLineHeight(40)">
+                            <span>40px</span>
+                        </div>
                         <div class="item font" @click="setLineHeight(30)">
                             <span>30px</span>
                         </div>
-                        <div class="item font" @click="setLineHeight(25)">
-                            <span>25px</span>
-                        </div>
                         <div class="item font" @click="setLineHeight(20)">
                             <span>20px</span>
-                        </div>
-                        <div class="item font" @click="setLineHeight(15)">
-                            <span>15px</span>
-                        </div>
-                        <div class="item font" @click="setLineHeight(10)">
-                            <span>10px</span>
                         </div>
                         <div class="item input">
                             <input type="text" v-model="d_lineHeight" @click="$event.stopPropagation()" @keydown="checkEnterLineHeight($event)" />
@@ -327,6 +340,10 @@ export default {
         c_fontSizes() {
             let fontSizes = wwLib.wwWebsiteData.getInfo().fontSizes || {};
             return fontSizes.list || [];
+        },
+        c_fontStyles() {
+            let fontStyles = wwLib.wwWebsiteData.getInfo().fontStyles || {};
+            return fontStyles.list || [];
         }
     },
     watch: {
@@ -473,6 +490,10 @@ export default {
             return font.name + ', ' + (font.genericName || 'sans-serif');
         },
 
+        // getFontStyle(fontStyle) {
+        //     return fontStyle.name.toLowerCase().replace(/[^a-z]*/g, '');
+        // },
+
         getFontSizeClass(fontSize) {
             return fontSize.name.toLowerCase().replace(/\s/g, '');
         },
@@ -490,17 +511,22 @@ export default {
             let width = this.$el.getBoundingClientRect().width;
             let height = this.$el.getBoundingClientRect().height;
 
-            const w = wwLib.getFrontWindow();
-            const d = wwLib.getFrontDocument();
+            const w = wwLib.getManagerWindow();
+            const d = wwLib.getManagerDocument();
 
             //const scrollX = (w.pageXOffset || d.documentElement.scrollLeft) - (d.documentElement.clientLeft || 0);
             //const scrollY = (w.pageYOffset || d.documentElement.scrollTop) - (d.documentElement.clientTop || 0);
 
-            let top = this.options.context.$el.getBoundingClientRect().y - height - 5; //+ scrollY;
-            let left = this.options.context.$el.getBoundingClientRect().x// + scrollX;
+            const wwTextRect = wwLib.wwFrontElements.getRect(this.options.context.$el);
+            if (!wwTextRect) {
+                return;
+            }
+
+            let top = wwTextRect.y - height - 5; //+ scrollY;
+            let left = wwTextRect.x// + scrollX;
 
             if (top < 0) {
-                top = this.options.context.$el.getBoundingClientRect().y + this.options.context.$el.getBoundingClientRect().height + 5;
+                top = wwTextRect.y + wwTextRect.height + 5;
             }
 
             const innerWidth = (w.innerWidth || d.documentElement.clientWidth || d.getElementsByTagName('body')[0].clientWidth) - 40
@@ -865,6 +891,14 @@ $ww-blue: #2e85c2;
                     white-space: nowrap;
                     text-align: left;
                     font-size: 14px !important;
+                }
+
+                &.font-style {
+                    white-space: nowrap;
+                    font-size: 14px;
+                    &.white {
+                        background-color: #e8e8e8;
+                    }
                 }
 
                 &.colors {
