@@ -20,7 +20,7 @@
         "vue-prism-editor": "^0.2.1"
     },
     "devDependencies": {
-        "weweb-client": "^1.0.47"
+        "weweb-client": "^1.0.48"
     },
     "browserslist": [
         "> 1%",

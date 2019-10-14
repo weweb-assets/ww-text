@@ -5,6 +5,13 @@
         </div>
         <div class="content" :class="{'expended': expended}">
             <div class="line main">
+                <!-- EXPEND -->
+                <div class="item expend-arrow" @mouseenter="expended = true" :class="{'expended': expended}">
+                    <span class="wwi wwi-chevron-down"></span>
+                </div>
+
+                <div class="separator"></div>
+
                 <!-- BOLD -->
                 <div class="item" @click="action('exec:bold')">
                     <span class="fas fa-bold"></span>
@@ -122,11 +129,6 @@
                 </div>
 
                 <div class="separator"></div>
-
-                <!-- EXPEND -->
-                <div class="item expend-arrow" @click="expended = !expended" :class="{'expended': expended}">
-                    <span class="wwi wwi-chevron-down"></span>
-                </div>
 
                 <!-- MENU -->
                 <div class="item orange round" @click="action('openMenu', $event)">
