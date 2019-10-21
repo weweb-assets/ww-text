@@ -267,17 +267,6 @@ export default {
         // }
     },
     watch: {
-        // async editing() {
-        //     if (this.editing) {
-        //         if (!this.quill) {
-        //             await this.loadQuill();
-        //         }
-        //         this.quill.enable();
-        //     }
-        //     else {
-        //         this.quill.disable();
-        //     }
-        // },
         /* wwManager:start */
         async editingSection(a, oldEditingSection) {
             if (this.editingSection && !this.oldEditingSection) {
@@ -399,118 +388,9 @@ export default {
                 this.d_edited = true;
 
                 let text = this.wwObject.content.data.text[lang];
-                const wwObjRegex = /\[\[wwObject=([^\]]*)\]\]/gi;
-
-                text = text.replace(wwObjRegex, '<span class="ww-object-embed" data-ww-object-id="$1"></span>');
-
-                const elem = document.createElement('div');
-                const elemP = document.createElement('p');
-                elem.append(elemP);
-                elemP.innerHTML = text;
-
-                let self = this;
-
-                function getFontSize(el) {
-                    let size = el.style.fontSize;
-                    if (size) {
-                        if (size.indexOf('rem') !== -1) {
-                            size = parseFloat(size.replace('rem', '')) * 16;
-                        }
-                        else {
-                            size = parseFloat(size.replace('px', ''));
-                        }
-
-                        let fontSizes = [];
-                        for (let fontSize of wwLib.wwWebsiteData.getDesign().info.fontSizes.list) {
-                            fontSizes.push({
-                                name: fontSize.name,
-                                size: parseFloat(fontSize.screens.lg),
-                                className: fontSize.className
-                            })
-                        }
-
-                        let closest = fontSizes.reduce(function (prevSize, currSize) {
-                            return (Math.abs(currSize.size - size) < Math.abs(prevSize.size - size) ? currSize : prevSize);
-                        });
-
-                        const newSize = closest.className;
-                        return newSize;
-                    }
-
-                    return '';
-                }
 
 
-                function parseHtml(el) {
-                    for (let i = 0; i < el.children.length; i++) {
-                        let subEl = el.children[i];
-
-                        let subNewEl;
-
-                        switch (subEl.tagName) {
-                            case 'SPAN':
-                            case 'DIV':
-                                subNewEl = document.createElement(subEl.tagName)
-
-                                let align = subEl.style.textAlign;
-                                align = (align != 'inherit' ? align : null);
-
-                                if (align) {
-                                    subNewEl.style.textAlign = align;
-                                }
-
-                                let newFontSize = getFontSize(subEl);
-                                newFontSize && subNewEl.classList.add(newFontSize);
-                                subNewEl.innerHTML = subEl.innerHTML;
-
-                                break;
-                            case 'FONT':
-                                let style = '';
-
-                                if (subEl.attributes.color && subEl.attributes.color.nodeValue && subEl.attributes.color.nodeValue != 'inherit') {
-                                    style += 'color:' + subEl.attributes.color.nodeValue + ';';
-                                }
-
-                                if (subEl.attributes.face && subEl.attributes.face.nodeValue && subEl.attributes.face.nodeValue != 'inherit') {
-                                    style += 'font-family:' + subEl.attributes.face.nodeValue + ';';
-                                }
-
-                                subNewEl = document.createElement('span');
-                                subNewEl.innerHTML = subEl.innerHTML;
-                                subNewEl.setAttribute('style', style);
-                                let newFontSize2 = getFontSize(subEl);
-                                newFontSize2 && subNewEl.classList.add(newFontSize2);
-
-                                break;
-
-                            case 'B':
-                                subNewEl = document.createElement('strong')
-                                subNewEl.innerHTML = subEl.innerHTML;
-                                break;
-                            case 'I':
-                                subNewEl = document.createElement('em')
-                                subNewEl.innerHTML = subEl.innerHTML;
-
-                                break;
-                            default:
-                                subNewEl = document.createElement(subEl.tagName)
-                                subNewEl.innerHTML = subEl.innerHTML;
-
-                                break;
-                        }
-
-                        parseHtml(subNewEl);
-
-                        el.insertBefore(subNewEl, subEl);
-
-                        subEl.remove();
-                    }
-
-                }
-
-                parseHtml(elemP);
-
-                this.wwObject.content.data.text[lang] = elem.innerHTML;
+                this.wwObject.content.data.text[lang] = this._correctText(text);
                 this.wwObject.content.data._q = (this.wwObject.content.data._q && typeof (this.wwObject.content.data._q) == 'object') ? this.wwObject.content.data._q : {};
                 this.wwObject.content.data._q[lang] = true;
             }
@@ -520,6 +400,120 @@ export default {
             // this.$nextTick(() => { 
             return true;
             // });
+        },
+
+
+        _correctText(text) {
+            const wwObjRegex = /\[\[wwObject=([^\]]*)\]\]/gi;
+            text = text.replace(wwObjRegex, '<span class="ww-object-embed" data-ww-object-id="$1"></span>');
+
+            const elem = document.createElement('div');
+            const elemP = document.createElement('p');
+            elem.append(elemP);
+            elemP.innerHTML = text;
+
+            let self = this;
+
+            function getFontSize(el) {
+                let size = el.style.fontSize;
+                if (size) {
+                    if (size.indexOf('rem') !== -1) {
+                        size = parseFloat(size.replace('rem', '')) * 16;
+                    }
+                    else {
+                        size = parseFloat(size.replace('px', ''));
+                    }
+
+                    let fontSizes = [];
+                    for (let fontSize of wwLib.wwWebsiteData.getDesign().info.fontSizes.list) {
+                        fontSizes.push({
+                            name: fontSize.name,
+                            size: parseFloat(fontSize.screens.lg),
+                            className: fontSize.className
+                        })
+                    }
+
+                    let closest = fontSizes.reduce(function (prevSize, currSize) {
+                        return (Math.abs(currSize.size - size) < Math.abs(prevSize.size - size) ? currSize : prevSize);
+                    });
+
+                    const newSize = closest.className;
+                    return newSize;
+                }
+
+                return '';
+            }
+
+            function parseHtml(el) {
+                for (let i = 0; i < el.children.length; i++) {
+                    let subEl = el.children[i];
+
+                    let subNewEl;
+
+                    switch (subEl.tagName) {
+                        case 'SPAN':
+                        case 'DIV':
+                            subNewEl = document.createElement(subEl.tagName)
+
+                            let align = subEl.style.textAlign;
+                            align = (align != 'inherit' ? align : null);
+
+                            if (align) {
+                                subNewEl.style.textAlign = align;
+                            }
+
+                            let newFontSize = getFontSize(subEl);
+                            newFontSize && subNewEl.classList.add(newFontSize);
+                            subNewEl.innerHTML = subEl.innerHTML;
+
+                            break;
+                        case 'FONT':
+                            let style = '';
+
+                            if (subEl.attributes.color && subEl.attributes.color.nodeValue && subEl.attributes.color.nodeValue != 'inherit') {
+                                style += 'color:' + subEl.attributes.color.nodeValue + ';';
+                            }
+
+                            if (subEl.attributes.face && subEl.attributes.face.nodeValue && subEl.attributes.face.nodeValue != 'inherit') {
+                                style += 'font-family:' + subEl.attributes.face.nodeValue + ';';
+                            }
+
+                            subNewEl = document.createElement('span');
+                            subNewEl.innerHTML = subEl.innerHTML;
+                            subNewEl.setAttribute('style', style);
+                            let newFontSize2 = getFontSize(subEl);
+                            newFontSize2 && subNewEl.classList.add(newFontSize2);
+
+                            break;
+
+                        case 'B':
+                            subNewEl = document.createElement('strong')
+                            subNewEl.innerHTML = subEl.innerHTML;
+                            break;
+                        case 'I':
+                            subNewEl = document.createElement('em')
+                            subNewEl.innerHTML = subEl.innerHTML;
+
+                            break;
+                        default:
+                            subNewEl = document.createElement(subEl.tagName)
+                            subNewEl.innerHTML = subEl.innerHTML;
+
+                            break;
+                    }
+
+                    parseHtml(subNewEl);
+
+                    el.insertBefore(subNewEl, subEl);
+
+                    subEl.remove();
+                }
+
+            }
+
+            parseHtml(elemP);
+
+            return elem.innerHTML;
         },
 
         loadQuill() {
@@ -931,10 +925,6 @@ export default {
 
 
             }
-        },
-
-        onPasteWwObject() {
-            this.reloadQuill();
         },
 
         getTextFromDom(format) {
@@ -1390,6 +1380,8 @@ export default {
             const cursorPosition = this.quill.getSelection().index;
             this.quill.insertEmbed(cursorPosition, 'ww-object-embed', '');
             this.quill.setSelection(cursorPosition + 1);
+
+            this.$nextTick(this.saveText);
         },
 
         insertLine(value) {
@@ -1815,7 +1807,7 @@ export default {
             else if (oldFocus) {
                 // document.removeEventListener('selectionchange', this.updateSelection);
 
-                //this.saveText();
+                this.saveText();
 
                 if (this.quill) {
                     this.quill.disable();
@@ -1870,14 +1862,40 @@ export default {
             component: wwTextBar
         }
 
-        this.$el.addEventListener('paste', function (e) {
+        this.$el.addEventListener('paste', (e) => {
             e.preventDefault();
 
             // get text representation of clipboard
-            var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+            let text = (e.originalEvent || e).clipboardData.getData('text/plain');
 
-            // insert text manually
-            document.execCommand("insertHTML", false, text);
+            // text = this._correctText(text)
+
+            // var delta = this.quill.clipboard.convert(html);
+            // console.log(delta);
+
+            // // insert text manually
+            // this.quill.pasteHTML(html);
+
+            // this.quill.deleteText(this.quill.getSelection().index, this.quill.getSelection().length);
+
+
+
+            setTimeout(() => {
+
+                // var tmp = document.createElement("DIV");
+                // tmp.innerHTML = text;
+                // text = tmp.innerHTML || tmp.innerHTML || "";
+
+
+                // console.log(text);
+                document.execCommand("insertHTML", false, text);
+                // this.quill.pasteHTML(text);
+            }, 1)
+
+
+
+
+            // this.quill.clipboard.dangerouslyPasteHTML(0, text);
         })
 
         wwLib.$on('wwFocus', this.setFocus);
