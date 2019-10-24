@@ -1260,6 +1260,17 @@ export default {
         },
         */
 
+        checkSelection() {
+            const selection = {
+                index: this.quill.getSelection().index,
+                length: this.quill.getSelection().length
+            }
+
+            if (!selection.length) {
+                this.quill.setSelection(0, this.quill.getLength());
+            }
+        },
+
         async exec(cmd, value) {
             if (typeof (value) === 'undefined' || value === null) {
                 value = this.quill.getFormat()[cmd] ? false : true;
@@ -1287,6 +1298,8 @@ export default {
                     }
                     break;
             }
+
+            this.checkSelection();
 
             this.quill.format(cmd, value);
         },
@@ -1340,16 +1353,13 @@ export default {
         },
 
         setFontSize(value) {
-            if (!this.quill.getSelection().length) {
-                return;
-            }
+            this.checkSelection();
             this.quill.format('fontSize', value);
         },
 
         removeFormat() {
-            if (this.quill.getSelection().length) {
-                this.quill.removeFormat(this.quill.getSelection().index, this.quill.getSelection().length);
-            }
+            this.checkSelection();
+            this.quill.removeFormat(this.quill.getSelection().index, this.quill.getSelection().length);
         },
 
         copyFormat() {
@@ -1391,6 +1401,7 @@ export default {
         },
 
         setColor(value) {
+            this.checkSelection();
             this.quill.format('color', value);
         },
 
