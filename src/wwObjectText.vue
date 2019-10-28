@@ -189,7 +189,7 @@ export default {
             contentText.innerHTML = text;
             const childNodesText = contentText.childNodes;
             const nodesText = createVNodes(childNodesText);
-            const textClasses = [];
+            const textClasses = ['ww-text-content'];
             this.wwObject.content.data.fontStyle && textClasses.push(this.wwObject.content.data.fontStyle);
             const nodeText = createVNode('div', {
                 class: textClasses,
@@ -917,6 +917,12 @@ export default {
                 Quill.register(lineHeight, true);
 
 
+                // FONT WEIGHT
+                let configFontWeight = { scope: Parchment.Scope.INLINE };
+                let fontWeight = new Parchment.Attributor.Style('fontWeight', 'font-weight', configFontWeight);
+                Quill.register(fontWeight, true);
+
+
                 // LIST TYPE
                 let configListType = { scope: Parchment.Scope.BLOCK };
                 let listType = new Parchment.Attributor.Attribute('listType', 'type', configListType);
@@ -1030,7 +1036,9 @@ export default {
             if (this.$el.querySelector('.ql-editor')) {
                 elem = this.$el.querySelector('.ql-editor');
             }
-
+            else if (this.$el.querySelector('.ww-text-content')) {
+                elem = this.$el.querySelector('.ww-text-content');
+            }
 
             let t = getText(elem.cloneNode(true), newNode);
             return t;
@@ -1104,6 +1112,8 @@ export default {
             this.$nextTick(function () {
                 //this.reselect();
 
+                console.log(category);
+
                 switch (category) {
                     // case 'style':
                     //     this.editStyle(action, value);
@@ -1128,6 +1138,9 @@ export default {
                         break;
                     case 'fontStyle':
                         this.setFontStyle(action);
+                        break;
+                    case 'fontWeight':
+                        this.setFontWeight(action);
                         break;
                     case 'removeFormat':
                         this.removeFormat();
@@ -1355,6 +1368,18 @@ export default {
         setFontSize(value) {
             this.checkSelection();
             this.quill.format('fontSize', value);
+        },
+
+        setFontWeight(value) {
+            this.checkSelection();
+            if (parseInt(value) == 700) {
+                this.quill.format('fontWeight', null);
+                this.quill.format('bold', true);
+            }
+            else {
+                this.quill.format('bold', false);
+                this.quill.format('fontWeight', value);
+            }
         },
 
         removeFormat() {
@@ -1804,15 +1829,15 @@ export default {
                     wwLib.wwObjectHover.setMain(this.$parent);
                     wwLib.wwObjectHover.setLock(this.$parent);
 
-                    if (this.$el.classList.contains('ww-text-content')) {
-                        this.$el.focus();
-                    }
-                    else if (this.$el.querySelector('.ww-text-content')) {
-                        this.$el.querySelector('.ww-text-content').focus();
-                    }
-                    else {
+                    // if (this.$el.classList.contains('ww-text-content')) {
+                    //     this.$el.focus();
+                    // }
+                    // else if (this.$el.querySelector('.ww-text-content')) {
+                    //     this.$el.querySelector('.ww-text-content').focus();
+                    // }
+                    // else {
 
-                    }
+                    // }
                 }, 50);
             }
             else if (oldFocus) {

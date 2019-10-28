@@ -6,8 +6,24 @@
         <div class="content" :class="{'expended': expended}">
             <div class="line main">
                 <!-- BOLD -->
-                <div class="item" @click="action('exec:bold')">
+                <div class="item">
+                    <!-- @click="action('exec:bold')" -->
                     <span class="fas fa-bold"></span>
+
+                    <div class="subitems">
+                        <div class="item font" @click="setFontWeight(700)">
+                            <span>Bold (700)</span>
+                        </div>
+                        <div class="item font" @click="setFontWeight(400)">
+                            <span>Normal (400)</span>
+                        </div>
+                        <div class="item font" @click="setFontWeight(100)">
+                            <span>Light (100)</span>
+                        </div>
+                        <div class="item input">
+                            <input type="text" v-model="d_fontWeight" @click="$event.stopPropagation()" @keydown="checkEnterFontWeight($event)" />
+                        </div>
+                    </div>
                 </div>
                 <!-- ITALIC -->
                 <div class="item" @click="action('exec:italic')">
@@ -327,6 +343,7 @@ export default {
             d_backgroundColor: null,
             d_lineColor: '#000000',
             d_lineThickness: 1,
+            d_fontWeight: 400,
         };
     },
     computed: {
@@ -453,6 +470,17 @@ export default {
         checkEnterLineHeight(event) {
             if (event.keyCode == 13) {
                 this.setLineHeight(this.d_lineHeight);
+            }
+        },
+
+        setFontWeight(value) {
+            this.d_fontWeight = value;
+            this.options.context.wwTextBarAction('fontWeight:' + value);
+        },
+
+        checkEnterFontWeight(event) {
+            if (event.keyCode == 13) {
+                this.setFontWeight(this.d_fontWeight);
             }
         },
 
