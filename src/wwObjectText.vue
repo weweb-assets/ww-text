@@ -180,8 +180,8 @@ export default {
 
             const nodes = [];
 
-            const wwObjRegex = /\[\[wwObject=([^\]]*)\]\]/gi;
-            const wwLinkRegex = /\[\[wwLink=([^\|]*)\|text=([^\]]*)\]\]/gi;
+            const wwObjRegex = /\[\[wwObject\s*=\s*([^\]]*)\]\]/gi;
+            const wwLinkRegex = /\[\[wwLink\s*=\s*([^\|]*)\s*\|\s*text\s*=\s*([^\]]*)\]\]/gi;
 
             let text = wwLib.wwLang.getText(this.wwObject.content.data.text).replace(wwObjRegex, '<ww-object data-ww-object-id="$1"></ww-object>') || '<br/>';
             text = text.replace(wwLinkRegex, "<ww-link data-ww-link='$1'>$2</ww-link>") || '<br/>';
@@ -270,7 +270,7 @@ export default {
         /* wwManager:start */
         async editingSection(a, oldEditingSection) {
             if (this.editingSection && !this.oldEditingSection) {
-                this.correctText();
+                //this.correctText();
 
                 this.$nextTick(() => {
                     this.loadQuill();
@@ -294,7 +294,7 @@ export default {
             await this.loadQuillModules();
 
             if (this.editingSection) {
-                this.correctText();
+                //this.correctText();
                 this.$nextTick(() => {
                     this.loadQuill();
                     this.quill.disable();
@@ -404,7 +404,7 @@ export default {
 
 
         _correctText(text) {
-            const wwObjRegex = /\[\[wwObject=([^\]]*)\]\]/gi;
+            const wwObjRegex = /\[\[wwObject\s*=\s*([^\]]*)\]\]/gi;
             text = text.replace(wwObjRegex, '<span class="ww-object-embed" data-ww-object-id="$1"></span>');
 
             const elem = document.createElement('div');
@@ -519,8 +519,8 @@ export default {
         loadQuill() {
             this.quill = new Quill(this.$el.querySelector('.ww-text-editor'));
             this.quill.disable();
-            const wwObjRegex = /\[\[wwObject=([^\]]*)\]\]/gi;
-            const wwLinkRegex = /\[\[wwLink=([^\|]*)\|text=([^\]]*)\]\]/gi;
+            const wwObjRegex = /\[\[wwObject\s*=\s*([^\]]*)\]\]/gi;
+            const wwLinkRegex = /\[\[wwLink\s*=\s*([^\|]*)\s*\|\s*text\s*=\s*([^\]]*)\]\]/gi;
             let text = wwLib.wwLang.getText(this.wwObject.content.data.text).replace(wwObjRegex, '<span class="ww-object-embed" data-ww-object-id="$1"></span>') || '<br/>';
             text = text.replace(wwLinkRegex, "<span class='ww-link-inline' data-ww-link='$1'>$2</span>");
             this.quill.pasteHTML(text);
