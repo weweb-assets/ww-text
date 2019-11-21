@@ -989,7 +989,11 @@ export default {
                         newNode.append(document.createTextNode('[[wwObject=' + node.childNodes[i].attributes['data-ww-object-id'].nodeValue + ']]'))
                     }
                     else if (node.childNodes[i].classList && node.childNodes[i].classList.contains('ww-link-inline')) {
-                        const text = node.childNodes[i].innerHTML;
+                        // const text = node.childNodes[i].innerHTML;
+                        // const text = getText(node.childNodes[i], newNode.childNodes[newNode.childNodes.length - 1], true);
+                        const txt = document.createElement("textarea");
+                        txt.innerHTML = node.childNodes[i].innerHTML;
+                        const text = txt.value;
                         newNode.append(document.createTextNode('[[wwLink=' + node.childNodes[i].attributes['data-ww-link'].nodeValue + '|text=' + text + ']]'))
                     }
                     else if (node.childNodes[i].classList && node.childNodes[i].classList.contains('line')) {
