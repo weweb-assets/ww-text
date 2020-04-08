@@ -1,0 +1,53 @@
+{
+	"componentPath": "./src/wwObjectText.vue",
+	"content": {
+		"type": "ww-text",
+		"data": {
+			"text": {
+				"fr": "Nouveau texte"
+			},
+			"tag": "div",
+			"align": "",
+			"font": "",
+			"size": "",
+			"color": "",
+			"classes": [],
+			"children": [],
+			"fontStyle": ""
+		}
+	},
+	"upsales": {
+		"wwAnalytics": {
+			"click": false
+		}
+	},
+	"cmsOptions": {
+		"wwObjectMenu": {
+			"noClickMenu": true,
+			"items": [
+				{
+					"name": "OPTIONS",
+					"main": true,
+					"text": {
+						"en": "Options",
+						"fr": "Options"
+					},
+					"icon": "wwi wwi-edit-other",
+					"action": "edit"
+				},
+				{
+					"name": "HTML",
+					"text": {
+						"en": "HTML",
+						"fr": "HTML"
+					},
+					"icon": "fas fa-code",
+					"action": "editHTML"
+				}
+			]
+		},
+		"wwObjectHover": {
+			"hoverClass": "getHoverTag"
+		}
+	}
+}
