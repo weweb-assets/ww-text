@@ -11,7 +11,7 @@ import Quill from "quill";
 wwLib.wwPopups.addStory("WWTEXT_LINKS", {
     title: {
         en: "Link",
-        fr: "Lien"
+        fr: "Lien",
     },
     type: "wwPopupLinks",
     storyData: {
@@ -21,10 +21,10 @@ wwLib.wwPopups.addStory("WWTEXT_LINKS", {
             "SECTION",
             // 'POPUP',
             "DOWNLOAD",
-            "CLOSE_POPUP"
+            "CLOSE_POPUP",
             // 'NO_LINK'
-        ]
-    }
+        ],
+    },
 });
 /* wwManager:end */
 
@@ -43,11 +43,11 @@ export default {
                 this.wwObject.content.data.tag || "div",
                 {
                     class: {
-                        "ww-text": true
+                        "ww-text": true,
                     },
                     attrs: {
                         // contenteditable: this.editing
-                    }
+                    },
                 },
                 null
             );
@@ -89,9 +89,9 @@ export default {
                             {
                                 props: {
                                     wwObject: wwObjectData,
-                                    inText: true
+                                    inText: true,
                                 },
-                                attrs: attributes
+                                attrs: attributes,
                             },
                             vn
                         );
@@ -102,7 +102,7 @@ export default {
                         const linkType = Object.keys(valueObject)[0];
                         let linkData = {
                             type: "none",
-                            data: {}
+                            data: {},
                         };
                         switch (linkType) {
                             case "linkExt":
@@ -133,8 +133,8 @@ export default {
                             {
                                 props: {
                                     wwLink: wwLink,
-                                    inText: true
-                                }
+                                    inText: true,
+                                },
                                 // attrs: attributes
                             },
                             vn
@@ -157,7 +157,7 @@ export default {
                         vNode = createVNode(
                             nodeName,
                             {
-                                attrs: attributes
+                                attrs: attributes,
                             },
                             vn
                         );
@@ -189,8 +189,8 @@ export default {
                 {
                     class: textClasses,
                     attrs: {
-                        style: this.editingSection ? "display:none;" : ""
-                    }
+                        style: this.editingSection ? "display:none;" : "",
+                    },
                 },
                 nodesText
             );
@@ -204,8 +204,8 @@ export default {
                 {
                     class: quillClasses,
                     attrs: {
-                        style: this.editingSection ? "" : "display:none;"
-                    }
+                        style: this.editingSection ? "" : "display:none;",
+                    },
                 },
                 null
             );
@@ -217,7 +217,7 @@ export default {
             const root = createVNode(
                 this.wwObject.content.data.tag || "div",
                 {
-                    class: classes
+                    class: classes,
                 },
                 nodes
             );
@@ -230,8 +230,8 @@ export default {
         wwObjectCtrl: Object,
         wwAttrs: {
             type: Object,
-            default: {}
-        }
+            default: {},
+        },
     },
     data() {
         return {
@@ -241,7 +241,7 @@ export default {
             textBar: null,
             textSelection: null,
             focus: false,
-            clearRender: false
+            clearRender: false,
             /* wwManager:end */
         };
     },
@@ -254,7 +254,7 @@ export default {
         },
         editingSection() {
             return this.wwObjectCtrl.getSectionCtrl() && this.wwObjectCtrl.getSectionCtrl().getEditMode() == "CONTENT";
-        }
+        },
         // text() {
         //     console.log('CHANGED LANG');
         //     // <span class="ww-object-embed" data-ww-object-id="0"></span>
@@ -279,7 +279,7 @@ export default {
                     this.quill.disable();
                 });
             }
-        }
+        },
         /* wwManager:end */
     },
     methods: {
@@ -424,7 +424,7 @@ export default {
                         fontSizes.push({
                             name: fontSize.name,
                             size: parseFloat(fontSize.screens.lg),
-                            className: fontSize.className
+                            className: fontSize.className,
                         });
                     }
 
@@ -592,7 +592,7 @@ export default {
 
                     static formats(node) {
                         return {
-                            wwObjectId: node.getAttribute("data-ww-object-id")
+                            wwObjectId: node.getAttribute("data-ww-object-id"),
                         };
                     }
 
@@ -702,7 +702,7 @@ export default {
                     }
                 }
                 const listItemColor = new ListItemColor("li-color", "color", {
-                    scope: Parchment.Scope.BLOCK
+                    scope: Parchment.Scope.BLOCK,
                 });
                 Quill.register(listItemColor);
 
@@ -714,7 +714,7 @@ export default {
                     }
                 }
                 const listItemSize = new ListItemSize("li-size", "ww-font-size", {
-                    scope: Parchment.Scope.BLOCK
+                    scope: Parchment.Scope.BLOCK,
                 });
                 Quill.register(listItemSize);
 
@@ -726,7 +726,7 @@ export default {
                     }
                 }
                 const listItemFont = new ListItemFont("li-font", "font-family", {
-                    scope: Parchment.Scope.BLOCK
+                    scope: Parchment.Scope.BLOCK,
                 });
                 Quill.register(listItemFont);
 
@@ -849,7 +849,7 @@ export default {
 
                     static formats(node) {
                         return {
-                            wwLink: node.getAttribute("data-ww-link")
+                            wwLink: node.getAttribute("data-ww-link"),
                         };
                     }
 
@@ -1233,7 +1233,7 @@ export default {
         checkSelection() {
             const selection = {
                 index: this.quill.getSelection().index,
-                length: this.quill.getSelection().length
+                length: this.quill.getSelection().length,
             };
 
             if (!selection.length) {
@@ -1250,7 +1250,7 @@ export default {
                 case "color":
                     if (value == "more") {
                         let options = {
-                            firstPage: "COLOR_PICKER"
+                            firstPage: "COLOR_PICKER",
                         };
 
                         try {
@@ -1545,7 +1545,7 @@ export default {
             }
 
             let result = await wwLib.wwPopups.open({
-                firstPage: "WWTEXT_LINKS"
+                firstPage: "WWTEXT_LINKS",
             });
 
             if (!result) {
@@ -1646,8 +1646,8 @@ export default {
             let options = {
                 firstPage: popup,
                 data: {
-                    fontStyle: this.quill.getFormat(selection && selection.index ? selection.index : 0, 1)
-                }
+                    fontStyle: this.quill.getFormat(selection && selection.index ? selection.index : 0, 1),
+                },
             };
 
             try {
@@ -1672,7 +1672,7 @@ export default {
             wwLib.wwPopups.addStory("WWTEXT_HTML", {
                 title: {
                     en: "Edit HTML",
-                    fr: "Editer le HTML"
+                    fr: "Editer le HTML",
                 },
                 type: "wwTextPopupHtml",
                 buttons: null,
@@ -1681,32 +1681,26 @@ export default {
                     NEXT: {
                         text: {
                             en: "Ok",
-                            fr: "Ok"
+                            fr: "Ok",
                         },
-                        next: false
-                    }
-                }
+                        next: false,
+                    },
+                },
             });
 
             let options = {
                 firstPage: "WWTEXT_HTML",
                 data: {
                     wwObject: this.wwObject,
-                    html: this.getTextFromDom()
-                }
+                    html: this.getTextFromDom(),
+                },
             };
 
             try {
                 const result = await wwLib.wwPopups.open(options);
 
                 if (result && typeof result.html !== undefined) {
-                    this.clearRender = true;
-
-                    wwLib.wwLang.setText(this.wwObject.content.data.text, result.html);
-
-                    await this.wwObjectCtrl.update(this.wwObject);
-
-                    this.reloadQuill();
+                    await this.replaceText(result.html);
                 }
             } catch (error) {
                 console.log(error);
@@ -1715,26 +1709,36 @@ export default {
             wwLib.wwObjectHover.removeLock();
         },
 
+        async replaceText(text, lang) {
+            this.clearRender = true;
+
+            wwLib.wwLang.setText(this.wwObject.content.data.text, text, lang);
+
+            await this.wwObjectCtrl.update(this.wwObject);
+
+            this.reloadQuill();
+        },
+
         async edit() {
             wwLib.wwObjectHover.setLock(this);
 
             wwLib.wwPopups.addStory("WWTEXT_EDIT", {
                 title: {
                     en: "Edit Text",
-                    fr: "Editer le texte"
+                    fr: "Editer le texte",
                 },
                 type: "wwPopupEditWwObject",
                 buttons: null,
                 storyData: {
-                    list: {}
-                }
+                    list: {},
+                },
             });
 
             let options = {
                 firstPage: "WWTEXT_EDIT",
                 data: {
-                    wwObject: this.wwObject
-                }
+                    wwObject: this.wwObject,
+                },
             };
 
             try {
@@ -1803,7 +1807,7 @@ export default {
             this.clearRender = true;
             this.quill = null;
             this.$forceUpdate();
-        }
+        },
 
         /* wwManager:end */
     },
@@ -1834,10 +1838,10 @@ export default {
         this.textBar = {
             context: this,
             type: "wwTextBar",
-            component: wwTextBar
+            component: wwTextBar,
         };
 
-        this.$el.addEventListener("paste", e => {
+        this.$el.addEventListener("paste", (e) => {
             e.preventDefault();
 
             // get text representation of clipboard
@@ -1870,10 +1874,10 @@ export default {
 
         wwLib.wwAsyncScripts.loadAsset({
             target: "manager",
-            name: "ww-text"
+            name: "ww-text",
         });
 
-        wwLib.$on("wwLang:changed", lang => {
+        wwLib.$on("wwLang:changed", (lang) => {
             this.saveText({ lang: lang.old });
 
             this.clearRender = true;
@@ -1894,7 +1898,7 @@ export default {
 
         wwLib.wwObjectEditors.close(this.textBar);
         /* wwManager:end */
-    }
+    },
 };
 </script>
 
