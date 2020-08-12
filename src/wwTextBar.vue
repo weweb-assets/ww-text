@@ -1,5 +1,5 @@
 <template>
-    <div class="ww-text-bar" :class="{'show': show}" :style="position" @click="focus()">
+    <div class="ww-text-bar" :class="{'show': show}" :style="position">
         <div class="move" @mousedown="startDrag($event)">
             <span class="fas fa-arrows-alt"></span>
         </div>
@@ -436,11 +436,6 @@ export default {
             setTimeout(this.getCopiedFormat, 100);
         },
 
-        focus() {
-            // this.options.context.$el.focus();
-            // this.options.context.reselect();
-        },
-
         action(action, event) {
             this.options.context.wwTextBarAction(action, event);
         },
@@ -689,7 +684,7 @@ export default {
 
         this.options.context.quill.on('selection-change', () => {
             setTimeout(() => {
-                if (this.options.context.focus) {
+                if (this.options.context.isFocused) {
                     this.getSpacings();
                     this.getColors();
                 }

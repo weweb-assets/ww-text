@@ -230,8 +230,9 @@ export default {
         wwObjectCtrl: Object,
         wwAttrs: {
             type: Object,
-            default: {},
+            default: () => ({}),
         },
+        isFocused: { type: Boolean, default: false },
     },
     data() {
         return {
@@ -240,7 +241,6 @@ export default {
             quill: null,
             textBar: null,
             textSelection: null,
-            focus: false,
             clearRender: false,
             /* wwManager:end */
         };
@@ -250,7 +250,7 @@ export default {
             return this.wwObjectCtrl.get();
         },
         editing() {
-            return this.wwObjectCtrl.getSectionCtrl() && this.wwObjectCtrl.getSectionCtrl().getEditMode() == "CONTENT" && this.focus;
+            return this.wwObjectCtrl.getSectionCtrl() && this.wwObjectCtrl.getSectionCtrl().getEditMode() == "CONTENT" && this.isFocused;
         },
         editingSection() {
             return this.wwObjectCtrl.getSectionCtrl() && this.wwObjectCtrl.getSectionCtrl().getEditMode() == "CONTENT";
@@ -278,6 +278,32 @@ export default {
                     this.loadQuill();
                     this.quill.disable();
                 });
+            }
+        },
+        isFocused(isFocused, wasFocused) {
+            if (isFocused) {
+                this.d_edited = true;
+                wwLib.wwObjectMenu.allowNextOpen && wwLib.wwObjectMenu.allowNextOpen();
+                wwLib.wwObjectEditors.add(this.textBar);
+                wwLib.wwObjectMargins.close();
+
+                if (this.editingSection && this.quill) {
+                    this.quill.enable();
+                }
+
+                setTimeout(() => {
+                    wwLib.wwObjectHover.removeLock();
+                    wwLib.wwObjectHover.setMain(this.$parent);
+                    wwLib.wwObjectHover.setLock(this.$parent);
+                }, 50);
+            // Loosing focused
+            } else if (wasFocused) {
+                this.saveText();
+
+                if (this.quill) {
+                    this.quill.disable();
+                }
+                wwLib.wwObjectEditors.close(this.textBar);
             }
         },
         /* wwManager:end */
@@ -341,7 +367,7 @@ export default {
         /* wwManager:start */
 
         preventNextClick(event) {
-            if (!this.focus) {
+            if (!this.isFocused) {
                 return;
             }
             let mouseDownCoords = [event.clientX, event.clientY];
@@ -1750,50 +1776,6 @@ export default {
             }
 
             wwLib.wwObjectHover.removeLock();
-        },
-
-        setFocus(focusId) {
-            const oldFocus = this.focus;
-            this.focus = focusId == this.$parent._uid;
-
-            if (this.focus) {
-                this.d_edited = true;
-                wwLib.wwObjectMenu.allowNextOpen && wwLib.wwObjectMenu.allowNextOpen();
-                wwLib.wwObjectEditors.add(this.textBar);
-                wwLib.wwObjectMargins.close();
-
-                if (this.editingSection && this.quill) {
-                    this.quill.enable();
-                }
-
-                // document.removeEventListener('selectionchange', this.updateSelection);
-                // document.addEventListener('selectionchange', this.updateSelection);
-
-                setTimeout(() => {
-                    wwLib.wwObjectHover.removeLock();
-                    wwLib.wwObjectHover.setMain(this.$parent);
-                    wwLib.wwObjectHover.setLock(this.$parent);
-
-                    // if (this.$el.classList.contains('ww-text-content')) {
-                    //     this.$el.focus();
-                    // }
-                    // else if (this.$el.querySelector('.ww-text-content')) {
-                    //     this.$el.querySelector('.ww-text-content').focus();
-                    // }
-                    // else {
-
-                    // }
-                }, 50);
-            } else if (oldFocus) {
-                // document.removeEventListener('selectionchange', this.updateSelection);
-
-                this.saveText();
-
-                if (this.quill) {
-                    this.quill.disable();
-                }
-                wwLib.wwObjectEditors.close(this.textBar);
-            }
         },
 
         async beforeSave() {
