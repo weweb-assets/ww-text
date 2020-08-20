@@ -222,18 +222,18 @@ export default {
         wwObjectCtrl: Object,
         wwAttrs: {
             type: Object,
-            default: () => ({}),
+            default: () => ({})
         },
-        isFocused: { type: Boolean, default: false },
+        isSelected: { type: Boolean, default: false }
     },
     data() {
         return {
             d_edited: false,
             /* wwManager:start */
             quill: null,
-            textBar: null,
             textSelection: null,
-            clearRender: false
+            clearRender: false,
+            textBarEditorId: null
             /* wwManager:end */
         };
     },
@@ -242,7 +242,7 @@ export default {
             return this.wwObjectCtrl.get();
         },
         editing() {
-            return this.wwObjectCtrl.getSectionCtrl() && this.wwObjectCtrl.getSectionCtrl().getEditMode() === 'CONTENT' && this.isFocused;
+            return this.wwObjectCtrl.getSectionCtrl() && this.wwObjectCtrl.getSectionCtrl().getEditMode() === 'CONTENT' && this.isSelected;
         },
         editingSection() {
             return this.wwObjectCtrl.getSectionCtrl() && this.wwObjectCtrl.getSectionCtrl().getEditMode() === 'CONTENT';
@@ -260,23 +260,24 @@ export default {
                 });
             }
         },
-        isFocused(isFocused, wasFocused) {
-            if (isFocused) {
+        isSelected(isSelected) {
+            if (isSelected) {
                 this.d_edited = true;
-                wwLib.wwObjectEditors.add(this.textBar);
-                wwLib.wwObjectMargins.close();
+                this.textBarEditorId = wwLib.wwObjectEditors.add({
+                    type: 'wwTextBar',
+                    component: wwTextBar,
+                    context: this
+                });
 
                 if (this.editingSection && this.quill) {
                     this.quill.enable();
                 }
-            // Loosing focused
-            } else if (wasFocused) {
+            } else {
                 this.saveText();
 
                 if (this.quill) {
                     this.quill.disable();
                 }
-                wwLib.wwObjectEditors.close(this.textBar);
             }
         },
         'wwObject.content.data.text'(newVal, oldVal) {
@@ -305,9 +306,9 @@ export default {
         },
 
         /* wwManager:start */
-
+        // TODO: rewrite this
         preventNextClick(event) {
-            if (!this.isFocused) {
+            if (!this.isSelected) {
                 return;
             }
             let mouseDownCoords = [event.clientX, event.clientY];
@@ -318,7 +319,7 @@ export default {
                 const distY = Math.abs(mouseDownCoords[1] - event.clientY);
 
                 if (distX > 10 || distY > 10) {
-                    wwLib.wwUtils.preventNextFocus();
+                    wwLib.wwManagerUI.lockSelection();
                     preventNext = true;
                 }
             }
@@ -327,6 +328,7 @@ export default {
                 if (preventNext) {
                     event.preventDefault();
                     event.stopPropagation();
+                    wwLib.wwManagerUI.unlockSelection();
                 }
 
                 wwLib.getFrontWindow().removeEventListener('click', onClick, { capture: true });
@@ -960,7 +962,7 @@ export default {
             this.d_edited = false;
             // wwLib.wwObjectMenu.preventNextOpen();
 
-            wwLib.wwObjectEditors.close(this.textBar);
+            wwLib.wwObjectEditors.close(this.textBarEditorId);
 
             let newText = this.getTextFromDom();
 
@@ -1240,8 +1242,7 @@ export default {
 
             try {
                 await wwLib.wwPopups.open(options);
-                wwLib.wwObjectEditors.close(this.textBar);
-                wwLib.wwObjectEditors.add(this.textBar);
+                wwLib.wwObjectEditors.refresh(this.textBarEditorId, this);
             } catch (error) {
                 console.log(error);
             }
@@ -1249,9 +1250,9 @@ export default {
 
         async openMenu(event) {
             this.saveText();
-
-            wwLib.wwObjectEditors.close(this.textBar);
-            wwLib.wwObjectMenu.openWwObjectMenu(this.wwObjectCtrl.context, { x: event.pageX, y: event.pageY, fromManager: false });
+            wwLib.wwObjectEditors.close(this.textBarEditorId);
+            wwLib.wwObjectMenu.openWwObjectMenu(this.wwObjectCtrl.context, { x: event.pageX, y: event.pageY, fromManager: true });
+            event.stopPropagation();
         },
 
         async editHTML() {
@@ -1307,7 +1308,7 @@ export default {
         },
 
         async edit() {
-            wwLib.wwObjectHover.setLock(this);
+            // wwLib.wwObjectHover.setLock(this);
 
             wwLib.wwPopups.addStory('WWTEXT_EDIT', {
                 title: {
@@ -1382,12 +1383,6 @@ export default {
         this.$emit('ww-loaded', this);
 
         /* wwManager:start */
-        this.textBar = {
-            context: this,
-            type: 'wwTextBar',
-            component: wwTextBar
-        };
-
         this.$el.addEventListener('paste', e => {
             e.preventDefault();
 

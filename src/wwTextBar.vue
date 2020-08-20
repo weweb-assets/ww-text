@@ -1,9 +1,9 @@
 <template>
-    <div class="ww-text-bar" :class="{'show': show}" :style="position">
+    <div class="ww-text-bar" :class="{ show: show }" :style="position" @click.stop.prevent="">
         <div class="move" @mousedown="startDrag($event)">
             <span class="fas fa-arrows-alt"></span>
         </div>
-        <div class="content" :class="{'expended': expended}">
+        <div class="content" :class="{ expended: expended }">
             <div class="line main">
                 <!-- BOLD -->
                 <div class="item">
@@ -41,7 +41,7 @@
                     <span class="wwi wwi-font-size"></span>
 
                     <div class="subitems">
-                        <div class="item font-size" v-for="fontSize in c_fontSizes" :key="fontSize.name" @click="action('fontSize:' + getFontSizeClass(fontSize))">{{fontSize.name}}</div>
+                        <div class="item font-size" v-for="fontSize in c_fontSizes" :key="fontSize.name" @click="action('fontSize:' + getFontSizeClass(fontSize))">{{ fontSize.name }}</div>
                         <div class="item font-size blue" @click="action('open:DESIGN_FONT_SIZES')">
                             <span class="wwi wwi-add"></span>
                         </div>
@@ -55,8 +55,8 @@
                     <span class="fas fa-font"></span>
 
                     <div class="subitems">
-                        <div class="item font" v-for="font in c_fonts" :key="font.name" @click="action('exec:font-family:' + getFont(font))" :style="'font-family:' + getFont(font)">{{font.name}}</div>
-                        <div class="item font" v-if="getDefaultFont()" @click="action('exec:font-family:inherit')" :style="{'font-family':getDefaultFont()}">
+                        <div class="item font" v-for="font in c_fonts" :key="font.name" @click="action('exec:font-family:' + getFont(font))" :style="'font-family:' + getFont(font)">{{ font.name }}</div>
+                        <div class="item font" v-if="getDefaultFont()" @click="action('exec:font-family:inherit')" :style="{ 'font-family': getDefaultFont() }">
                             - Default -
                             <br />
                             {{ getDefaultFont() }}
@@ -133,14 +133,14 @@
                 <div class="separator"></div>
 
                 <!-- COPY FORMAT -->
-                <div class="item" @click="copyFormat()" :class="{'green': d_copiedFormat}">
+                <div class="item" @click="copyFormat()" :class="{ green: d_copiedFormat }">
                     <span class="fas fa-paint-roller"></span>
                 </div>
 
                 <div class="separator"></div>
 
                 <!-- EXPEND -->
-                <div class="item expend-arrow" @mouseenter="expended = true" :class="{'expended': expended}">
+                <div class="item expend-arrow" @mouseenter="expended = true" :class="{ expended: expended }">
                     <span class="wwi wwi-chevron-down"></span>
                 </div>
 
@@ -163,7 +163,16 @@
                     <span class="wwi wwi-edit-style"></span>
 
                     <div class="subitems">
-                        <div class="item font-style" v-for="fontStyle in c_fontStyles" :key="fontStyle.name" @click="action('fontStyle:' + fontStyle.className)" :style="fontStyle.style" :class="[fontStyle.style.fontSizeClass, fontStyle.style.color == '#ffffff' ? 'white' : '']">{{fontStyle.name}}</div>
+                        <div
+                            class="item font-style"
+                            v-for="fontStyle in c_fontStyles"
+                            :key="fontStyle.name"
+                            @click="action('fontStyle:' + fontStyle.className)"
+                            :style="fontStyle.style"
+                            :class="[fontStyle.style.fontSizeClass, fontStyle.style.color == '#ffffff' ? 'white' : '']"
+                        >
+                            {{ fontStyle.name }}
+                        </div>
                         <div class="item font-style" @click="action('fontStyle:')">
                             - No style -
                             <br />
@@ -309,16 +318,13 @@
     </div>
 </template>
 
-
 <script>
-import Vue from 'vue'
 import { setTimeout } from 'timers';
-
 
 export default {
     name: 'wwTextBar',
     props: {
-        options: Object
+        context: Object
     },
     data() {
         return {
@@ -343,13 +349,10 @@ export default {
             d_backgroundColor: null,
             d_lineColor: '#000000',
             d_lineThickness: 1,
-            d_fontWeight: 400,
+            d_fontWeight: 400
         };
     },
     computed: {
-        c_isInLayout() {
-            return wwLib.wwUtils.getParentLayout(this.options.context.$el.parentElement);
-        },
         c_fonts() {
             let fonts = wwLib.wwWebsiteData.getInfo().fonts || {};
             return fonts.list || [];
@@ -363,12 +366,9 @@ export default {
             return fontStyles.list || [];
         }
     },
-    watch: {
-    },
     methods: {
-
         insertLine(width) {
-            this.options.context.insertLine({ width: width, color: this.d_lineColor, height: this.d_lineThickness });
+            this.context.insertLine({ width: width, color: this.d_lineColor, height: this.d_lineThickness });
         },
 
         setLineColor(color) {
@@ -377,42 +377,34 @@ export default {
 
         getSpacings() {
             try {
-                let format = this.options.context.quill.getFormat();
+                let format = this.context.quill.getFormat();
                 if (format.letterSpacing) {
                     this.d_letterSpacing = parseFloat(format.letterSpacing.replace('px', ''));
-                }
-                else {
+                } else {
                     this.d_letterSpacing = 0;
                 }
                 if (format.lineHeight) {
                     this.d_lineHeight = parseFloat(format.lineHeight.replace('px', ''));
-                }
-                else {
+                } else {
                     this.d_lineHeight = 0;
                 }
-            }
-            catch (error) {
-
-            }
+            } catch (error) {}
         },
 
         getColors() {
             try {
-                let format = this.options.context.quill.getFormat();
+                let format = this.context.quill.getFormat();
                 if (format.color) {
                     this.d_textColor = Array.isArray(format.color) ? format.color[0] : format.color;
-                }
-                else {
+                } else {
                     this.d_textColor = '';
                 }
                 if (format.background) {
                     this.d_backgroundColor = Array.isArray(format.background) ? format.background[0] : format.background;
-                }
-                else {
+                } else {
                     this.d_backgroundColor = '';
                 }
-            }
-            catch (error) {
+            } catch (error) {
                 console.log(error);
             }
         },
@@ -423,9 +415,7 @@ export default {
             try {
                 copiedFormat = localStorage.getItem('ww-text-copied-format');
                 copiedFormat = JSON.parse(copiedFormat);
-            } catch (error) {
-
-            }
+            } catch (error) {}
 
             this.d_copiedFormat = copiedFormat ? true : false;
         },
@@ -437,18 +427,18 @@ export default {
         },
 
         action(action, event) {
-            this.options.context.wwTextBarAction(action, event);
+            this.context.wwTextBarAction(action, event);
         },
 
         checkEnterSize(event) {
             if (event.keyCode == 13) {
-                this.options.context.wwTextBarAction('style:size:' + this.customSize);
+                this.context.wwTextBarAction('style:size:' + this.customSize);
             }
         },
 
         setLetterSpacing(value) {
             this.d_letterSpacing = value;
-            this.options.context.wwTextBarAction('exec:letterSpacing' + (this.d_letterSpacing ? ':' + this.d_letterSpacing + 'px' : ''));
+            this.context.wwTextBarAction('exec:letterSpacing' + (this.d_letterSpacing ? ':' + this.d_letterSpacing + 'px' : ''));
         },
 
         checkEnterLetterSpacing(event) {
@@ -459,7 +449,7 @@ export default {
 
         setLineHeight(value) {
             this.d_lineHeight = value;
-            this.options.context.wwTextBarAction('exec:lineHeight' + (this.d_lineHeight ? ':' + this.d_lineHeight + 'px' : ''));
+            this.context.wwTextBarAction('exec:lineHeight' + (this.d_lineHeight ? ':' + this.d_lineHeight + 'px' : ''));
         },
 
         checkEnterLineHeight(event) {
@@ -470,7 +460,7 @@ export default {
 
         setFontWeight(value) {
             this.d_fontWeight = value;
-            this.options.context.wwTextBarAction('fontWeight:' + value);
+            this.context.wwTextBarAction('fontWeight:' + value);
         },
 
         checkEnterFontWeight(event) {
@@ -481,16 +471,16 @@ export default {
 
         setTextColor(value) {
             this.d_textColor = value;
-            this.options.context.wwTextBarAction('color:' + this.d_textColor);
+            this.context.wwTextBarAction('color:' + this.d_textColor);
         },
 
         setBackgroundColor(value) {
             this.d_backgroundColor = value;
-            this.options.context.wwTextBarAction('exec:background:' + this.d_backgroundColor);
+            this.context.wwTextBarAction('exec:background:' + this.d_backgroundColor);
         },
 
         getTagClasses() {
-            switch (this.options.context.wwObject.content.data.tag) {
+            switch (this.context.wwObject.content.data.tag) {
                 case 'h1':
                     return ['wwi', 'wwi-tag-h1'];
                     break;
@@ -522,7 +512,7 @@ export default {
         },
 
         getDefaultFont() {
-            const defaultFont = (wwLib.wwWebsiteData.getInfo().fonts || {}).default || {}
+            const defaultFont = (wwLib.wwWebsiteData.getInfo().fonts || {}).default || {};
             return defaultFont.name;
         },
 
@@ -540,43 +530,42 @@ export default {
             //const scrollX = (w.pageXOffset || d.documentElement.scrollLeft) - (d.documentElement.clientLeft || 0);
             //const scrollY = (w.pageYOffset || d.documentElement.scrollTop) - (d.documentElement.clientTop || 0);
 
-            const wwTextRect = wwLib.wwFrontElements.getRect(this.options.context.$el);
+            const wwTextRect = wwLib.wwFrontElements.getRect(this.context.$el);
             if (!wwTextRect) {
                 return;
             }
 
             let top = wwTextRect.y - height - 5; //+ scrollY;
-            let left = wwTextRect.x// + scrollX;
+            let left = wwTextRect.x; // + scrollX;
 
             if (top < 0) {
                 top = wwTextRect.y + wwTextRect.height + 5;
             }
 
-            const innerWidth = (w.innerWidth || d.documentElement.clientWidth || d.getElementsByTagName('body')[0].clientWidth) - 40
+            const innerWidth = (w.innerWidth || d.documentElement.clientWidth || d.getElementsByTagName('body')[0].clientWidth) - 40;
 
             if (left + width > innerWidth) {
-                left -= ((left + width) - innerWidth);
+                left -= left + width - innerWidth;
             }
 
             return {
                 top: top,
                 left: left
-            }
+            };
         },
 
         getCurrentPosition() {
-
             if (this.position.left && this.position.top) {
                 return {
                     top: parseInt(this.position.top),
                     left: parseInt(this.position.left)
-                }
+                };
             }
 
             return {
                 top: 0,
                 left: 0
-            }
+            };
         },
 
         preventClick(event) {
@@ -590,7 +579,6 @@ export default {
 
             position.x = event.clientX;
             position.y = event.clientY;
-
 
             return position;
         },
@@ -623,12 +611,15 @@ export default {
                 return;
             }
 
-            const iframePos = wwLib.getManagerDocument().querySelector('.iframe').getBoundingClientRect();
+            const iframePos = wwLib
+                .getManagerDocument()
+                .querySelector('.iframe')
+                .getBoundingClientRect();
 
             this.position = {
                 top: this.getOrignialPosition().top + iframePos.top + 'px',
                 left: this.getOrignialPosition().left + iframePos.left + 'px'
-            }
+            };
 
             requestAnimationFrame(this.updatePosition);
         },
@@ -650,8 +641,8 @@ export default {
 
                 let currentDragPoint = this.getEventPosition(event);
 
-                this.position.left = (currentDragPoint.x - this.dragStartPoint.x + this.dragStartPosition.left) + 'px';
-                this.position.top = (currentDragPoint.y - this.dragStartPoint.y + this.dragStartPosition.top) + 'px';
+                this.position.left = currentDragPoint.x - this.dragStartPoint.x + this.dragStartPosition.left + 'px';
+                this.position.top = currentDragPoint.y - this.dragStartPoint.y + this.dragStartPosition.top + 'px';
             }
         },
         stopDrag(event) {
@@ -666,32 +657,26 @@ export default {
             wwLib.getFrontWindow().removeEventListener('mouseup', this.stopDrag);
             wwLib.getFrontWindow().removeEventListener('click', this.preventClick, true);
         }
-
-    },
-    created() {
     },
     mounted() {
-
         this.updatePosition();
 
-        this.$nextTick(function () {
+        this.$nextTick(function() {
             this.show = true;
-        })
+        });
 
         this.getCopiedFormat();
         this.getSpacings();
         this.getColors();
 
-        this.options.context.quill.on('selection-change', () => {
+        this.context.quill.on('selection-change', () => {
             setTimeout(() => {
-                if (this.options.context.isFocused) {
+                if (this.context.isSelected) {
                     this.getSpacings();
                     this.getColors();
                 }
-            }, 200)
-
+            }, 200);
         });
-
     },
     beforeDestroy() {
         this.stopRequestAnimation = true;
@@ -722,8 +707,7 @@ $ww-blue: #2e85c2;
     display: flex;
     //box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.3);
     filter: drop-shadow(0 2px 5px rgba(99, 99, 99, 0.5));
-    transition: transform 0.2s cubic-bezier(0.35, 0.07, 0.35, 1.65),
-        opacity 0.2s ease;
+    transition: transform 0.2s cubic-bezier(0.35, 0.07, 0.35, 1.65), opacity 0.2s ease;
 
     /*
     .handle-container {
@@ -1001,13 +985,11 @@ $ww-blue: #2e85c2;
                     border-radius: 3px;
                     box-shadow: 0 2px 5px -1px rgba(99, 99, 99, 0.5);
                     background-color: white;
-                    transition: transform 0.2s
-                            cubic-bezier(0.35, 0.07, 0.35, 1.65),
-                        opacity 0.2s ease;
+                    transition: transform 0.2s cubic-bezier(0.35, 0.07, 0.35, 1.65), opacity 0.2s ease;
                     z-index: 1;
 
                     &:after {
-                        content: "";
+                        content: '';
                         background-color: white;
                         position: absolute;
                         top: 0;
@@ -1018,7 +1000,7 @@ $ww-blue: #2e85c2;
                     }
 
                     &:before {
-                        content: "";
+                        content: '';
                         width: 100%;
                         height: 10px;
                         position: absolute;
@@ -1069,7 +1051,7 @@ $ww-blue: #2e85c2;
                 opacity: 0;
 
                 &::after {
-                    content: "";
+                    content: '';
                     position: absolute;
                     left: 100%;
                     top: 50%;
