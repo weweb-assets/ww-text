@@ -19,6 +19,8 @@
 const wwObjRegex = /\[\[wwObject\s*=\s*([^\]]*)\]\]/gi;
 const wwLinkRegex = /\[\[wwLink\s*=\s*([^\|]*)\s*\|\s*text\s*=\s*([^\]]*)\]\]/gi;
 
+import { openEditHTML } from './popups';
+
 import wwTextContent from './wwTextContent.vue';
 import wwTextEditor from './wwTextEditor.vue';
 
@@ -77,6 +79,12 @@ export default {
         },
         openMenu() {
             this.$emit('openMenu');
+        },
+        async edit() {
+            const { html } = (await openEditHTML(this.text)) || {};
+            if (html) {
+                this.updateText(html);
+            }
         },
     },
 };

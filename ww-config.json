@@ -6,7 +6,8 @@
             "fr": "Texte"
         },
         "editElementMenu": {
-            "disable": true
+            "disable": true,
+            "items": [{ "name": "OPTIONS", "label": { "en": "Options", "fr": "Options" }, "action": "edit" }]
         }
     }
 }
