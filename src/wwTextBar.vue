@@ -1,15 +1,10 @@
 <template>
-    <div class="ww-text-bar" :class="{ show: show }" :style="position" @click.stop.prevent="">
-        <div class="move" @mousedown="startDrag($event)">
-            <span class="fas fa-arrows-alt"></span>
-        </div>
-        <div class="content" :class="{ expended: expended }">
+    <wwEditorWidget movable class="ww-text-bar">
+        <div class="content" :class="{ expended }">
             <div class="line main">
                 <!-- BOLD -->
                 <div class="item">
-                    <!-- @click="action('exec:bold')" -->
                     <span class="fas fa-bold"></span>
-
                     <div class="subitems">
                         <div class="item font" @click="setFontWeight(700)">
                             <span>Bold (700)</span>
@@ -21,16 +16,17 @@
                             <span>Light (100)</span>
                         </div>
                         <div class="item input">
-                            <input type="text" v-model="d_fontWeight" @click="$event.stopPropagation()" @keydown="checkEnterFontWeight($event)" />
+                            <input type="text" v-model="fontWeight" @keydown.enter="setFontWeight(fontWeight)" />
                         </div>
                     </div>
                 </div>
+
                 <!-- ITALIC -->
-                <div class="item" @click="action('exec:italic')">
+                <div class="item" @click="toggleItalic">
                     <span class="fas fa-italic"></span>
                 </div>
                 <!-- UNDERLINE -->
-                <div class="item" @click="action('exec:underline')">
+                <div class="item" @click="toggleUnderline">
                     <span class="fas fa-underline"></span>
                 </div>
 
@@ -39,51 +35,63 @@
                 <!-- FONT SIZE -->
                 <div class="item">
                     <span class="wwi wwi-font-size"></span>
-
                     <div class="subitems">
-                        <div class="item font-size" v-for="fontSize in c_fontSizes" :key="fontSize.name" @click="action('fontSize:' + getFontSizeClass(fontSize))">{{ fontSize.name }}</div>
-                        <div class="item font-size blue" @click="action('open:DESIGN_FONT_SIZES')">
+                        <div
+                            class="item font-size"
+                            v-for="fontSize in fontSizes"
+                            :key="fontSize.name"
+                            @click="setFontSize(fontSize.name)"
+                        >
+                            {{ fontSize.name }}
+                        </div>
+                        <div class="item font-size blue" @click="openFontSizes">
                             <span class="wwi wwi-add"></span>
                         </div>
-                        <!-- <div class="item input">
-                            <input type="text" v-model="customSize" @click="$event.stopPropagation()" @keydown="checkEnterSize($event)" />
-                        </div>-->
                     </div>
                 </div>
+
                 <!-- FONT -->
                 <div class="item">
                     <span class="fas fa-font"></span>
-
                     <div class="subitems">
-                        <div class="item font" v-for="font in c_fonts" :key="font.name" @click="action('exec:font-family:' + getFont(font))" :style="'font-family:' + getFont(font)">{{ font.name }}</div>
-                        <div class="item font" v-if="getDefaultFont()" @click="action('exec:font-family:inherit')" :style="{ 'font-family': getDefaultFont() }">
+                        <div
+                            class="item font"
+                            v-for="font in fonts"
+                            :key="font.name"
+                            @click="setFontFamily(font.value)"
+                            :style="'font-family:' + font.value"
+                        >
+                            {{ font.name }}
+                        </div>
+                        <div
+                            class="item font"
+                            v-if="defaultFont"
+                            @click="setFontFamily('inherit')"
+                            :style="{ 'font-family': defaultFont }"
+                        >
                             - Default -
                             <br />
-                            {{ getDefaultFont() }}
+                            {{ defaultFont }}
                         </div>
-                        <div class="item font blue" @click="action('open:DESIGN_FONTS')">
+                        <div class="item font blue" @click="openFonts">
                             <span class="wwi wwi-add"></span>
                         </div>
-                        <!-- <div class="item font" @click="action('style:font:more')">
-                            <i>More...</i>
-                        </div>-->
                     </div>
                 </div>
                 <!-- ALIGN -->
                 <div class="item">
                     <span class="fas fa-align-left"></span>
-
                     <div class="subitems">
-                        <div class="item" @click="action('exec:align:justify')">
+                        <div class="item" @click="setAlign('justify')">
                             <span class="fas fa-align-justify"></span>
                         </div>
-                        <div class="item" @click="action('exec:align:right')">
+                        <div class="item" @click="setAlign('right')">
                             <span class="fas fa-align-right"></span>
                         </div>
-                        <div class="item" @click="action('exec:align:center')">
+                        <div class="item" @click="setAlign('center')">
                             <span class="fas fa-align-center"></span>
                         </div>
-                        <div class="item" @click="action('exec:align:left')">
+                        <div class="item" @click="setAlign('left')">
                             <span class="fas fa-align-left"></span>
                         </div>
                     </div>
@@ -95,57 +103,43 @@
                         <div class="item colors">
                             <div class="color">
                                 Text
-                                <wwManagerColorSelect v-model="d_textColor" @change="setTextColor($event)"></wwManagerColorSelect>
+                                <wwManagerColorSelect
+                                    :value="textColor"
+                                    @change="setTextColor($event)"
+                                ></wwManagerColorSelect>
                             </div>
                             <div class="color">
                                 Background
-                                <wwManagerColorSelect v-model="d_backgroundColor" @change="setBackgroundColor($event)"></wwManagerColorSelect>
+                                <wwManagerColorSelect
+                                    :value="backgroundColor"
+                                    @change="setBackgroundColor($event)"
+                                ></wwManagerColorSelect>
                             </div>
                         </div>
                     </div>
-
-                    <!-- <div class="subitems">
-                        <div class="item colors">
-                            <div style="background-color:white" @click="action('exec:color:white')"></div>
-                            <div style="background-color:#808080" @click="action('exec:color:#808080')"></div>
-                            <div style="background-color:#404040" @click="action('exec:color:#404040')"></div>
-                            <div style="background-color:black" @click="action('exec:color:black')"></div>
-                        </div>
-                        <div class="item colors">
-                            <div style="background-color:#FF0000" @click="action('exec:color:#FF0000')"></div>
-                            <div style="background-color:#FF6600" @click="action('exec:color:#FF6600')"></div>
-                            <div style="background-color:#FFFF00" @click="action('exec:color:#FFFF00')"></div>
-                            <div style="background-color:#8CC700" @click="action('exec:color:#8CC700')"></div>
-                        </div>
-                        <div class="item colors">
-                            <div style="background-color:#0FAD00" @click="action('exec:color:#0FAD00')"></div>
-                            <div style="background-color:#00A3C7" @click="action('exec:color:#00A3C7')"></div>
-                            <div style="background-color:#0010A5" @click="action('exec:color:#0010A5')"></div>
-                            <div style="background-color:#C5007C" @click="action('exec:color:#C5007C')"></div>
-                        </div>
-
-                        <div class="item font" @click="action('exec:color:more')">
-                            <i>More...</i>
-                        </div>
-                    </div>-->
                 </div>
 
                 <div class="separator"></div>
 
                 <!-- COPY FORMAT -->
-                <div class="item" @click="copyFormat()" :class="{ green: d_copiedFormat }">
+                <div class="item" @click="copyOrPasteFormat()" :class="{ green: hasCopiedFormat }">
                     <span class="fas fa-paint-roller"></span>
                 </div>
 
                 <div class="separator"></div>
 
                 <!-- EXPEND -->
-                <div class="item expend-arrow" @mouseenter="expended = true" :class="{ expended: expended }">
+                <div
+                    class="item expend-arrow"
+                    @mouseenter="expended = true"
+                    @click="expended = !expended"
+                    :class="{ expended }"
+                >
                     <span class="wwi wwi-chevron-down"></span>
                 </div>
 
                 <!-- MENU -->
-                <div class="item orange round" @click="action('openMenu', $event)">
+                <div class="item orange round" @click="openMenu">
                     <span class="wwi wwi-edit-other"></span>
                 </div>
             </div>
@@ -155,34 +149,30 @@
                     <span class="fas fa-link"></span>
                 </div>
                 <!-- CLEAR -->
-                <div class="item" @click="action('removeFormat')">
+                <div class="item" @click="removeFormat">
                     <span class="fas fa-remove-format"></span>
                 </div>
                 <!-- STYLE -->
                 <div class="item">
                     <span class="wwi wwi-edit-style"></span>
-
                     <div class="subitems">
                         <div
                             class="item font-style"
-                            v-for="fontStyle in c_fontStyles"
+                            v-for="fontStyle in fontStyles"
                             :key="fontStyle.name"
-                            @click="action('fontStyle:' + fontStyle.className)"
+                            @click="setFontStyle(fontStyle.className)"
                             :style="fontStyle.style"
                             :class="[fontStyle.style.fontSizeClass, fontStyle.style.color == '#ffffff' ? 'white' : '']"
                         >
                             {{ fontStyle.name }}
                         </div>
-                        <div class="item font-style" @click="action('fontStyle:')">
+                        <div class="item font-style" @click="setFontStyle('')">
                             - No style -
                             <br />
                         </div>
-                        <div class="item font-style blue" @click="action('open:DESIGN_FONT_STYLES')">
+                        <div class="item font-style blue" @click="openFontStyles">
                             <span class="wwi wwi-add"></span>
                         </div>
-                        <!-- <div class="item font" @click="action('style:font:more')">
-                            <i>More...</i>
-                        </div>-->
                     </div>
                 </div>
 
@@ -191,18 +181,17 @@
                 <!-- BULLETS -->
                 <div class="item">
                     <span class="fas fa-list-ul"></span>
-
                     <div class="subitems">
-                        <div class="item" @click="action('indent:right')">
+                        <div class="item" @click="setIndent('right')">
                             <span class="fas fa-outdent"></span>
                         </div>
-                        <div class="item" @click="action('indent:left')">
+                        <div class="item" @click="setIndent('left')">
                             <span class="fas fa-indent"></span>
                         </div>
-                        <div class="item" @click="action('list:ordered')">
+                        <div class="item" @click="toggleList('ordered')">
                             <span class="fas fa-list-ol"></span>
                         </div>
-                        <div class="item" @click="action('list:bullet')">
+                        <div class="item" @click="toggleList('bullet')">
                             <span class="fas fa-list-ul"></span>
                         </div>
                     </div>
@@ -210,7 +199,6 @@
                 <!-- LINE SPACE -->
                 <div class="item">
                     <span class="fas fa-text-height"></span>
-
                     <div class="subitems">
                         <div class="item font" @click="setLineHeight(60)">
                             <span>60px</span>
@@ -228,15 +216,14 @@
                             <span>20px</span>
                         </div>
                         <div class="item input">
-                            <input type="text" v-model="d_lineHeight" @click="$event.stopPropagation()" @keydown="checkEnterLineHeight($event)" />
+                            <input type="text" v-model="lineHeight" @keydown.enter="setLineHeight(lineHeight)" />
                         </div>
-                        <div class="item font" @click="action('exec:lineHeight')">- Default -</div>
+                        <div class="item font" @click="setLineHeight()">- Default -</div>
                     </div>
                 </div>
                 <!-- LETTER SPACE -->
                 <div class="item">
                     <span class="fas fa-text-width"></span>
-
                     <div class="subitems">
                         <div class="item font" @click="setLetterSpacing(5)">
                             <span>5px</span>
@@ -254,9 +241,13 @@
                             <span>1px</span>
                         </div>
                         <div class="item input">
-                            <input type="text" v-model="d_letterSpacing" @click="$event.stopPropagation()" @keydown="checkEnterLetterSpacing($event)" />
+                            <input
+                                type="text"
+                                v-model="letterSpacing"
+                                @keydown.enter="setLetterSpacing(letterSpacing)"
+                            />
                         </div>
-                        <div class="item font" @click="action('exec:letterSpacing')">- Default -</div>
+                        <div class="item font" @click="setLetterSpacing()">- Default -</div>
                     </div>
                 </div>
 
@@ -264,33 +255,29 @@
 
                 <!-- HEADER -->
                 <div class="item">
-                    <span :class="getTagClasses()"></span>
-
+                    <span :class="tagClasses"></span>
                     <div class="subitems">
-                        <div class="item" @click="action('prop:tag:h1')">
+                        <div class="item" @click="setTag('h1')">
                             <span class="wwi wwi-tag-h1"></span>
                         </div>
-                        <div class="item" @click="action('prop:tag:h2')">
+                        <div class="item" @click="setTag('h2')">
                             <span class="wwi wwi-tag-h2"></span>
                         </div>
-                        <div class="item" @click="action('prop:tag:h3')">
+                        <div class="item" @click="setTag('h3')">
                             <span class="wwi wwi-tag-h3"></span>
                         </div>
-                        <div class="item" @click="action('prop:tag:h4')">
+                        <div class="item" @click="setTag('h4')">
                             <span class="wwi wwi-tag-h4"></span>
                         </div>
-                        <div class="item" @click="action('prop:tag:div')">
+                        <div class="item" @click="setTag('div')">
                             <span class="fa fa-paragraph"></span>
                         </div>
                     </div>
                 </div>
-
                 <div class="separator"></div>
-
                 <!-- LINE -->
                 <div class="item">
                     <span class="wwi wwi-separator"></span>
-
                     <div class="subitems">
                         <div class="item xsmall" @click="insertLine('25%')">
                             <span class="wwi wwi-separator"></span>
@@ -302,10 +289,10 @@
                             <span class="wwi wwi-separator"></span>
                         </div>
                         <div class="item input">
-                            <input type="text" v-model="d_lineThickness" @click="$event.stopPropagation()" />
+                            <input type="text" v-model="lineThickness" />
                         </div>
                         <div class="item">
-                            <wwManagerColorSelect v-model="d_lineColor" @change="setLineColor($event)"></wwManagerColorSelect>
+                            <wwManagerColorSelect v-model="lineColor"></wwManagerColorSelect>
                         </div>
                     </div>
                 </div>
@@ -315,380 +302,204 @@
                 </div>
             </div>
         </div>
-    </div>
+    </wwEditorWidget>
 </template>
 
 <script>
-import { setTimeout } from 'timers';
+import { openFontSizes, openFonts, openFontStyles } from './popups';
 
 export default {
     name: 'wwTextBar',
     props: {
-        context: Object
+        quill: Object,
+        textTag: String,
+        selectionFormat: Object,
     },
     data() {
         return {
-            show: false,
             expended: false,
-            minDragDist: 0,
-            dragging: false,
-            dragStartPoint: { x: 0, y: 0 },
-            dragStartPosition: { x: 0, y: 0 },
-            position: {
-                top: 0,
-                left: 0
-            },
-            moved: false,
-            customSize: 1.5,
-            defaultFont: '',
-            stopRequestAnimation: false,
-            d_copiedFormat: false,
-            d_letterSpacing: 0,
-            d_lineHeight: 0,
-            d_textColor: null,
-            d_backgroundColor: null,
-            d_lineColor: '#000000',
-            d_lineThickness: 1,
-            d_fontWeight: 400
+            hasCopiedFormat: false,
+            fontWeight: 400,
+            lineHeight: 0,
+            letterSpacing: 0,
+            lineColor: '#000000',
+            lineThickness: 1,
         };
     },
     computed: {
-        c_fonts() {
-            let fonts = wwLib.wwWebsiteData.getInfo().fonts || {};
-            return fonts.list || [];
+        fonts() {
+            const { list = [] } = wwLib.wwWebsiteData.getInfo().fonts || {};
+            return list.map(font => ({ ...font, value: font.name + ', ' + (font.genericName || 'sans-serif') }));
         },
-        c_fontSizes() {
-            let fontSizes = wwLib.wwWebsiteData.getInfo().fontSizes || {};
-            return fontSizes.list || [];
+        fontSizes() {
+            const { list = [] } = wwLib.wwWebsiteData.getInfo().fontSizes || {};
+            return list;
         },
-        c_fontStyles() {
-            let fontStyles = wwLib.wwWebsiteData.getInfo().fontStyles || {};
-            return fontStyles.list || [];
-        }
+        fontStyles() {
+            const { list = [] } = wwLib.wwWebsiteData.getInfo().fontStyles || {};
+            return list;
+        },
+        defaultFont() {
+            const { name } = this.fonts.default || {};
+            return name;
+        },
+        textColor() {
+            const currentColor = this.selectionFormat.color;
+            if (!currentColor) {
+                return '';
+            }
+            return Array.isArray(currentColor) ? currentColor[0] : currentColor;
+        },
+        backgroundColor() {
+            const currentColor = this.selectionFormat.background;
+            if (!currentColor) {
+                return '';
+            }
+            return Array.isArray(currentColor) ? currentColor[0] : currentColor;
+        },
+        tagClasses() {
+            switch (this.textTag) {
+                case 'h1':
+                    return ['wwi', 'wwi-tag-h1'];
+                case 'h2':
+                    return ['wwi', 'wwi-tag-h2'];
+                case 'h3':
+                    return ['wwi', 'wwi-tag-h3'];
+                case 'h4':
+                    return ['wwi', 'wwi-tag-h4'];
+                case 'div':
+                    return ['fa', 'fa-paragraph'];
+                default:
+                    return '';
+            }
+        },
     },
     methods: {
-        insertLine(width) {
-            this.context.insertLine({ width: width, color: this.d_lineColor, height: this.d_lineThickness });
+        setFontWeight(value) {
+            this.fontWeight = value;
+            const fontWeight = value === 700 ? null : value;
+            const bold = value === 700;
+            this.$emit('updateFormat', { fontWeight, bold });
         },
-
-        setLineColor(color) {
-            this.d_lineColor = color;
+        toggleItalic() {
+            this.$emit('updateFormat', { italic: !this.selectionFormat.italic });
+        },
+        toggleUnderline() {
+            this.$emit('updateFormat', { underline: !this.selectionFormat.underline });
+        },
+        setFontSize(name) {
+            const fontSize = name.toLowerCase().replace(/\s/g, '');
+            this.$emit('updateFormat', { fontSize });
+        },
+        openFontSizes() {
+            openFontSizes();
+        },
+        openFonts() {
+            openFonts();
+        },
+        openFontStyles() {
+            openFontStyles();
+        },
+        setFontFamily(fontFamily) {
+            this.$emit('updateFormat', { 'font-family': fontFamily });
+        },
+        setAlign(align) {
+            this.$emit('updateFormat', { align });
+        },
+        setTextColor(color) {
+            this.$emit('updateFormat', { color });
+        },
+        setBackgroundColor(background) {
+            this.$emit('updateFormat', { background });
+        },
+        getCopiedFormat() {
+            try {
+                let copiedFormat = localStorage.getItem('ww-text-copied-format');
+                copiedFormat = JSON.parse(copiedFormat);
+                return copiedFormat;
+            } catch (error) {
+                return null;
+            }
+        },
+        checkIfCopiedFormat() {
+            this.hasCopiedFormat = !!this.getCopiedFormat();
+        },
+        copyOrPasteFormat() {
+            const copiedFormat = this.getCopiedFormat();
+            if (copiedFormat) {
+                this.$emit('setFormat', copiedFormat);
+                localStorage.removeItem('ww-text-copied-format');
+                this.hasCopiedFormat = false;
+            } else {
+                localStorage.setItem('ww-text-copied-format', JSON.stringify(this.selectionFormat));
+                this.hasCopiedFormat = true;
+            }
+        },
+        openMenu() {
+            this.$emit('openMenu');
+        },
+        removeFormat() {
+            this.$emit('removeFormat');
+        },
+        setFontStyle(fontStyle) {
+            this.$emit('updateContent', { fontStyle });
+        },
+        setIndent(direction) {
+            const currentIndent = this.selectionFormat.indent;
+            let newValue = 0;
+            if (currentIndent) {
+                newValue = parseInt(currentIndent.replace('px', ''));
+            }
+            if (direction === 'left') {
+                newValue += 50;
+            } else {
+                newValue -= 50;
+            }
+            newValue = Math.max(newValue, 0);
+            this.$emit('updateFormat', { indent: newValue ? newValue + 'px' : false });
+        },
+        toggleList(value) {
+            const currentValue = this.selectionFormat.list;
+            this.$emit('updateFormat', { list: currentValue === value ? null : value });
+        },
+        setLineHeight(value) {
+            this.lineHeight = value;
+            const lineHeight = value ? `${value}px` : '';
+            this.$emit('updateFormat', { lineHeight });
+        },
+        setLetterSpacing(value) {
+            this.letterSpacing = value;
+            const letterSpacing = value ? `${value}px` : '';
+            this.$emit('updateFormat', { letterSpacing });
+        },
+        insertLine(width) {
+            this.$emit('insertLine', { width, color: this.lineColor, height: this.lineThickness });
+        },
+        setTag(tag) {
+            this.$emit('updateContent', { tag });
         },
 
         getSpacings() {
             try {
-                let format = this.context.quill.getFormat();
+                let format = this.quill.getFormat();
                 if (format.letterSpacing) {
-                    this.d_letterSpacing = parseFloat(format.letterSpacing.replace('px', ''));
+                    this.letterSpacing = parseFloat(format.letterSpacing.replace('px', ''));
                 } else {
-                    this.d_letterSpacing = 0;
+                    this.letterSpacing = 0;
                 }
                 if (format.lineHeight) {
-                    this.d_lineHeight = parseFloat(format.lineHeight.replace('px', ''));
+                    this.lineHeight = parseFloat(format.lineHeight.replace('px', ''));
                 } else {
-                    this.d_lineHeight = 0;
-                }
-            } catch (error) {}
-        },
-
-        getColors() {
-            try {
-                let format = this.context.quill.getFormat();
-                if (format.color) {
-                    this.d_textColor = Array.isArray(format.color) ? format.color[0] : format.color;
-                } else {
-                    this.d_textColor = '';
-                }
-                if (format.background) {
-                    this.d_backgroundColor = Array.isArray(format.background) ? format.background[0] : format.background;
-                } else {
-                    this.d_backgroundColor = '';
+                    this.lineHeight = 0;
                 }
             } catch (error) {
-                console.log(error);
-            }
-        },
-
-        getCopiedFormat() {
-            let copiedFormat = null;
-
-            try {
-                copiedFormat = localStorage.getItem('ww-text-copied-format');
-                copiedFormat = JSON.parse(copiedFormat);
-            } catch (error) {}
-
-            this.d_copiedFormat = copiedFormat ? true : false;
-        },
-
-        copyFormat() {
-            this.action('format');
-
-            setTimeout(this.getCopiedFormat, 100);
-        },
-
-        action(action, event) {
-            this.context.wwTextBarAction(action, event);
-        },
-
-        checkEnterSize(event) {
-            if (event.keyCode == 13) {
-                this.context.wwTextBarAction('style:size:' + this.customSize);
-            }
-        },
-
-        setLetterSpacing(value) {
-            this.d_letterSpacing = value;
-            this.context.wwTextBarAction('exec:letterSpacing' + (this.d_letterSpacing ? ':' + this.d_letterSpacing + 'px' : ''));
-        },
-
-        checkEnterLetterSpacing(event) {
-            if (event.keyCode == 13) {
-                this.setLetterSpacing(this.d_letterSpacing);
-            }
-        },
-
-        setLineHeight(value) {
-            this.d_lineHeight = value;
-            this.context.wwTextBarAction('exec:lineHeight' + (this.d_lineHeight ? ':' + this.d_lineHeight + 'px' : ''));
-        },
-
-        checkEnterLineHeight(event) {
-            if (event.keyCode == 13) {
-                this.setLineHeight(this.d_lineHeight);
-            }
-        },
-
-        setFontWeight(value) {
-            this.d_fontWeight = value;
-            this.context.wwTextBarAction('fontWeight:' + value);
-        },
-
-        checkEnterFontWeight(event) {
-            if (event.keyCode == 13) {
-                this.setFontWeight(this.d_fontWeight);
-            }
-        },
-
-        setTextColor(value) {
-            this.d_textColor = value;
-            this.context.wwTextBarAction('color:' + this.d_textColor);
-        },
-
-        setBackgroundColor(value) {
-            this.d_backgroundColor = value;
-            this.context.wwTextBarAction('exec:background:' + this.d_backgroundColor);
-        },
-
-        getTagClasses() {
-            switch (this.context.wwObject.content.data.tag) {
-                case 'h1':
-                    return ['wwi', 'wwi-tag-h1'];
-                    break;
-                case 'h2':
-                    return ['wwi', 'wwi-tag-h2'];
-                    break;
-                case 'h3':
-                    return ['wwi', 'wwi-tag-h3'];
-                    break;
-                case 'h4':
-                    return ['wwi', 'wwi-tag-h4'];
-                    break;
-                case 'div':
-                    return ['fa', 'fa-paragraph'];
-                    break;
-            }
-        },
-
-        getFont(font) {
-            return font.name + ', ' + (font.genericName || 'sans-serif');
-        },
-
-        // getFontStyle(fontStyle) {
-        //     return fontStyle.name.toLowerCase().replace(/[^a-z]*/g, '');
-        // },
-
-        getFontSizeClass(fontSize) {
-            return fontSize.name.toLowerCase().replace(/\s/g, '');
-        },
-
-        getDefaultFont() {
-            const defaultFont = (wwLib.wwWebsiteData.getInfo().fonts || {}).default || {};
-            return defaultFont.name;
-        },
-
-        /*=============================================m_ÔÔ_m=============================================\
-          DRAG TEXT BAR
-        \================================================================================================*/
-
-        getOrignialPosition() {
-            let width = this.$el.getBoundingClientRect().width;
-            let height = this.$el.getBoundingClientRect().height;
-
-            const w = wwLib.getManagerWindow();
-            const d = wwLib.getManagerDocument();
-
-            //const scrollX = (w.pageXOffset || d.documentElement.scrollLeft) - (d.documentElement.clientLeft || 0);
-            //const scrollY = (w.pageYOffset || d.documentElement.scrollTop) - (d.documentElement.clientTop || 0);
-
-            const wwTextRect = wwLib.wwFrontElements.getRect(this.context.$el);
-            if (!wwTextRect) {
                 return;
             }
-
-            let top = wwTextRect.y - height - 5; //+ scrollY;
-            let left = wwTextRect.x; // + scrollX;
-
-            if (top < 0) {
-                top = wwTextRect.y + wwTextRect.height + 5;
-            }
-
-            const innerWidth = (w.innerWidth || d.documentElement.clientWidth || d.getElementsByTagName('body')[0].clientWidth) - 40;
-
-            if (left + width > innerWidth) {
-                left -= left + width - innerWidth;
-            }
-
-            return {
-                top: top,
-                left: left
-            };
         },
-
-        getCurrentPosition() {
-            if (this.position.left && this.position.top) {
-                return {
-                    top: parseInt(this.position.top),
-                    left: parseInt(this.position.left)
-                };
-            }
-
-            return {
-                top: 0,
-                left: 0
-            };
-        },
-
-        preventClick(event) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            return false;
-        },
-        getEventPosition(event) {
-            var position = { x: 0, y: 0 };
-
-            position.x = event.clientX;
-            position.y = event.clientY;
-
-            return position;
-        },
-        isDragging(event) {
-            return true;
-
-            if (this.dragging) {
-                return true;
-            }
-
-            let currentDragPoint = this.getEventPosition(event);
-
-            let dist = Math.pow(currentDragPoint.x - this.dragStartPoint.x, 2) + Math.pow(currentDragPoint.y - this.dragStartPoint.y, 2);
-
-            if (dist > Math.pow(this.minDragDist, 2)) {
-                this.dragging = true;
-                wwLib.getManagerWindow().addEventListener('click', this.preventClick, true);
-                wwLib.getFrontWindow().addEventListener('click', this.preventClick, true);
-                return true;
-            }
-
-            return false;
-        },
-        updatePosition() {
-            if (this.stopRequestAnimation) {
-                return;
-            }
-
-            if (this.moved) {
-                return;
-            }
-
-            const iframePos = wwLib
-                .getManagerDocument()
-                .querySelector('.iframe')
-                .getBoundingClientRect();
-
-            this.position = {
-                top: this.getOrignialPosition().top + iframePos.top + 'px',
-                left: this.getOrignialPosition().left + iframePos.left + 'px'
-            };
-
-            requestAnimationFrame(this.updatePosition);
-        },
-
-        startDrag(event) {
-            this.dragStartPoint = this.getEventPosition(event);
-            this.dragStartPosition = this.getCurrentPosition();
-
-            wwLib.getManagerWindow().addEventListener('mousemove', this.drag);
-            wwLib.getManagerWindow().addEventListener('mouseup', this.stopDrag);
-
-            wwLib.getFrontWindow().addEventListener('mousemove', this.drag);
-            wwLib.getFrontWindow().addEventListener('mouseup', this.stopDrag);
-        },
-        drag(event) {
-            if (this.isDragging(event)) {
-                this.moved = true;
-                document.body.classList.add('no-select');
-
-                let currentDragPoint = this.getEventPosition(event);
-
-                this.position.left = currentDragPoint.x - this.dragStartPoint.x + this.dragStartPosition.left + 'px';
-                this.position.top = currentDragPoint.y - this.dragStartPoint.y + this.dragStartPosition.top + 'px';
-            }
-        },
-        stopDrag(event) {
-            this.dragging = false;
-
-            document.body.classList.remove('no-select');
-            wwLib.getManagerWindow().removeEventListener('mousemove', this.drag);
-            wwLib.getManagerWindow().removeEventListener('mouseup', this.stopDrag);
-            wwLib.getManagerWindow().removeEventListener('click', this.preventClick, true);
-
-            wwLib.getFrontWindow().removeEventListener('mousemove', this.drag);
-            wwLib.getFrontWindow().removeEventListener('mouseup', this.stopDrag);
-            wwLib.getFrontWindow().removeEventListener('click', this.preventClick, true);
-        }
     },
     mounted() {
-        this.updatePosition();
-
-        this.$nextTick(function() {
-            this.show = true;
-        });
-
-        this.getCopiedFormat();
-        this.getSpacings();
-        this.getColors();
-
-        this.context.quill.on('selection-change', () => {
-            setTimeout(() => {
-                if (this.context.isSelected) {
-                    this.getSpacings();
-                    this.getColors();
-                }
-            }, 200);
-        });
+        this.checkIfCopiedFormat();
     },
-    beforeDestroy() {
-        this.stopRequestAnimation = true;
-
-        wwLib.getManagerWindow().removeEventListener('mousemove', this.drag);
-        wwLib.getManagerWindow().removeEventListener('mouseup', this.stopDrag);
-        wwLib.getManagerWindow().removeEventListener('click', this.preventClick, true);
-
-        wwLib.getFrontWindow().removeEventListener('mousemove', this.drag);
-        wwLib.getFrontWindow().removeEventListener('mouseup', this.stopDrag);
-        wwLib.getFrontWindow().removeEventListener('click', this.preventClick, true);
-    }
 };
 </script>
 
@@ -699,85 +510,10 @@ $ww-orange: #ef811a;
 $ww-blue: #2e85c2;
 
 .ww-text-bar {
-    position: absolute;
     z-index: 50;
-    top: 0;
-    left: 0;
-    opacity: 1;
     display: flex;
-    //box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.3);
     filter: drop-shadow(0 2px 5px rgba(99, 99, 99, 0.5));
     transition: transform 0.2s cubic-bezier(0.35, 0.07, 0.35, 1.65), opacity 0.2s ease;
-
-    /*
-    .handle-container {
-        cursor: move;
-        cursor: grab;
-
-        .handle {
-            display: flex;
-            justify-content: center;
-            width: 30px;
-            color: black;
-            position: relative;
-            flex-direction: column;
-            margin: 30px 0;
-            height: 28px;
-
-            div {
-                flex-basis: 33.33%;
-                position: relative;
-
-                &::after,
-                &::before {
-                    content: "";
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    width: 4px;
-                    height: 4px;
-                    border-radius: 100%;
-                    background-color: #bdbdbd;
-                }
-
-                &::after {
-                    transform: translate(-5px, -50%);
-                }
-
-                &::before {
-                    transform: translate(5px, -50%);
-                }
-            }
-        }
-    }
-    */
-
-    .move {
-        position: absolute;
-        z-index: 1;
-        top: 0;
-        left: 0;
-        transform: translate(-50%, -50%) scale(0.5);
-        opacity: 0;
-        border-radius: 100%;
-        width: 40px;
-        height: 40px;
-        background-color: #ea5e1c;
-        background: linear-gradient(to right, #ea5e1c 0%, #ef811a 100%);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: white;
-        font-size: 20px;
-        transition: 0.3s ease;
-        cursor: move;
-        cursor: grab;
-
-        span {
-            transition: 0.3s ease;
-            transform: rotate(360deg);
-        }
-    }
 
     .content {
         display: flex;
@@ -787,7 +523,6 @@ $ww-blue: #2e85c2;
         .line {
             position: relative;
             display: flex;
-            max-width: 0px;
             flex-direction: row;
             background-color: white;
             padding-left: 20px;
@@ -795,6 +530,7 @@ $ww-blue: #2e85c2;
 
             &.main {
                 border-radius: 3px 50px 50px 3px;
+                max-width: 470px;
             }
 
             &.not-main {
@@ -822,8 +558,6 @@ $ww-blue: #2e85c2;
 
                 min-width: 44px;
                 cursor: pointer;
-                transform: scale(0);
-                opacity: 0;
                 border-radius: 3px;
 
                 &:hover {
@@ -1048,7 +782,6 @@ $ww-blue: #2e85c2;
             .separator {
                 width: 0;
                 position: relative;
-                opacity: 0;
 
                 &::after {
                     content: '';
@@ -1066,35 +799,6 @@ $ww-blue: #2e85c2;
         &.expended {
             .line.not-main {
                 opacity: 1;
-                max-width: 470px;
-
-                .item {
-                    opacity: 1;
-                    transform: scale(1);
-                }
-                .separator {
-                    opacity: 1;
-                    transform: scale(1);
-                }
-            }
-        }
-    }
-
-    &.show {
-        // opacity: 1;
-        // transform: translateY(-110%);
-
-        .move {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
-
-            span {
-                transform: rotate(0deg);
-            }
-        }
-
-        .content {
-            .line.main {
                 max-width: 470px;
 
                 .item {
