@@ -36,7 +36,6 @@ export default {
         },
     },
     props: {
-        uid: Number,
         content: Object,
         /* wwManager: start */
         wwEditorState: Object,

@@ -5,7 +5,7 @@
         "type": "git",
         "url": "https://github.com/weweb-assets/ww-text"
     },
-    "version": "3.0",
+    "version": "1.0.0",
     "license": "MIT",
     "scripts": {
         "build": "weweb-build",

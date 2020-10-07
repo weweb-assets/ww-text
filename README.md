@@ -1,6 +1,6 @@
 # WW-TEXT
 
-This an element for Weweb, to display a text with a rich text editor.
+This is an element for Weweb, to display a text with a rich text editor.
 
 ## Installation
 
