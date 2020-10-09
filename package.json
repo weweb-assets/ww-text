@@ -1,16 +1,15 @@
 {
     "name": "ww-text",
-    "type": "wwobject",
     "repository": {
         "type": "git",
         "url": "https://github.com/weweb-assets/ww-text"
     },
-    "version": "1.0.0",
+    "version": "1.0.1",
     "license": "MIT",
     "scripts": {
-        "build": "weweb-build",
-        "serve": "weweb-serve",
-        "create-config": "weweb-config"
+        "build": "weweb build",
+        "serve": "weweb serve",
+        "create-config": "weweb config"
     },
     "dependencies": {
         "prismjs": "^1.16.0",
@@ -25,6 +24,6 @@
         "eslint-plugin-prettier": "^3.1.4",
         "eslint-plugin-vue": "^6.2.2",
         "prettier": "^2.1.2",
-        "weweb-client": "latest"
+        "@weweb/cli": "latest"
     }
 }
