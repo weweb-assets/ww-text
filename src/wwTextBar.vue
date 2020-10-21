@@ -1,5 +1,5 @@
 <template>
-    <wwEditorWidget movable class="ww-text-bar">
+    <wwEditorWidget movable css-class="ww-text-bar">
         <div class="content" :class="{ expended }">
             <div class="line main">
                 <!-- BOLD -->
