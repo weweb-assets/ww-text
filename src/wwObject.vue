@@ -1,6 +1,11 @@
 <template>
     <component :is="tag" class="ww-text">
-        <wwTextContent v-if="!useEditor" :text="text" :class="content.fontStyle"></wwTextContent>
+        <wwTextContent
+            v-if="!useEditor"
+            :text="text"
+            @click.native.stop.prevent="onTextClick"
+            :class="content.fontStyle"
+        ></wwTextContent>
         <!-- wwManager:start -->
         <wwTextEditor
             v-else
@@ -79,10 +84,18 @@ export default {
         openMenu() {
             this.$emit('openMenu');
         },
+        closeMenu() {
+            this.$emit('closeMenu');
+        },
         async edit() {
             const { html } = (await openEditHTML(this.text)) || {};
             if (html) {
                 this.updateText(html);
+            }
+        },
+        onTextClick() {
+            if (this.wwEditorState.isSelected) {
+                this.closeMenu();
             }
         },
     },

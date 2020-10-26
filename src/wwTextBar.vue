@@ -1,5 +1,5 @@
 <template>
-    <wwEditorWidget movable css-class="ww-text-bar">
+    <wwEditorWidget movable css-class="ww-text-bar" :initialPosition="initialPosition">
         <div class="content" :class="{ expended }">
             <div class="line main">
                 <!-- BOLD -->
@@ -314,6 +314,7 @@ export default {
         quill: Object,
         textTag: String,
         selectionFormat: Object,
+        initialPosition: Object,
     },
     data() {
         return {

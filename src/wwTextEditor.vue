@@ -4,6 +4,7 @@
         <wwTextBar
             :selectionFormat="selectionFormat"
             :textTag="textTag"
+            :initialPosition="textBarInitialPosition"
             @updateFormat="updateFormat"
             @removeFormat="removeFormat"
             @updateContent="updateContent"
@@ -27,13 +28,17 @@ export default {
         textTag: { type: String },
     },
     data() {
-        return { selectionFormat: {} };
+        return { selectionFormat: {}, textBarInitialPosition: { x: 0, y: 0, fromManager: false } };
     },
     mounted() {
         this.quill = new Quill(this.$refs.quill);
         this.quill.pasteHTML(this.text);
         this.synchronizeWithQuill();
         this.quill.on('selection-change', this.synchronizeWithQuill);
+
+        const { top: y, left: x } = this.$el.getBoundingClientRect();
+        this.textBarInitialPosition.x = x;
+        this.textBarInitialPosition.y = y;
     },
     beforeDestroy() {
         this.save();
