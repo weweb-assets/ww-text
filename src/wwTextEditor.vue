@@ -1,6 +1,6 @@
 <template>
     <div class="ww-text-editor">
-        <div ref="quill"></div>
+        <div ref="quill" :style="textStyle"></div>
         <wwTextBar
             :selectionFormat="selectionFormat"
             :textTag="textTag"
@@ -26,6 +26,7 @@ export default {
     props: {
         text: { type: String, required: true },
         textTag: { type: String },
+        textStyle: { type: Object },
     },
     data() {
         return { selectionFormat: {}, textBarInitialPosition: { x: 0, y: 0, fromManager: false } };

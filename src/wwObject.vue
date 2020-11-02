@@ -3,6 +3,7 @@
         <wwTextContent
             v-if="!useEditor"
             :text="text"
+            :style="content.globalStyle"
             @click.native.stop.prevent="onTextClick"
             :class="content.fontStyle"
         ></wwTextContent>
@@ -10,8 +11,8 @@
         <wwTextEditor
             v-else
             :text="text"
-            :textTag="content.tag"
             :class="content.fontStyle"
+            :textStyle="content.globalStyle"
             @updateText="updateText"
             @updateContent="updateContent"
             @openMenu="openMenu"
@@ -39,6 +40,7 @@ export default {
         text: {
             en: 'New text',
         },
+        globalStyle: {},
     },
     props: {
         content: Object,

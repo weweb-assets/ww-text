@@ -6,7 +6,126 @@
             "fr": "Texte"
         },
         "editElementMenu": {
-            "items": [{ "label": { "en": "Options", "fr": "Options" }, "action": "edit" }]
-        }
+            "items": [
+                {
+                    "label": {
+                        "en": "Options",
+                        "fr": "Options"
+                    },
+                    "action": "edit"
+                }
+            ]
+        },
+        "styleOptions": {
+            "transformation": {
+                "label": {
+                    "en": "Transformation",
+                    "fr": "Transformation"
+                },
+                "type": "TextSelect",
+                "options": {
+                    "options": [
+                        { "value": null, "label": "none" },
+                        { "value": "capitalize", "label": "capitalize" },
+                        { "value": "uppercase", "label": "uppercase" },
+                        { "value": "lowercase", "label": "lowercase" }
+                    ]
+                },
+                "path": "globalStyle.textTransform"
+            },
+            "shadows": {
+                "label": {
+                    "en": "Text Shadows",
+                    "fr": "Ombres du texte"
+                },
+                "type": "Shadows",
+                "options": {
+                    "isText": true
+                },
+                "path": "globalStyle.textShadow"
+            },
+            "whiteSpace": {
+                "label": {
+                    "en": "White space",
+                    "fr": "Saut à la ligne"
+                },
+                "type": "TextSelect",
+                "options": {
+                    "options": [
+                        { "value": null, "label": "none" },
+                        { "value": "no-wrap", "label": "nowrap" },
+                        { "value": "pre", "label": "pre" },
+                        { "value": "pre-wrap", "label": "pre-wrap" },
+                        { "value": "pre-line", "label": "pre-line" },
+                        { "value": "break-spaces", "label": "break-spaces" }
+                    ]
+                },
+                "path": "globalStyle.whiteSpace"
+            },
+            "textOverflow": {
+                "label": {
+                    "en": "Text overflow",
+                    "fr": "Text overflow"
+                },
+                "type": "TextSelect",
+                "options": {
+                    "options": [
+                        { "value": null, "label": "none" },
+                        { "value": "clip", "label": "clip" },
+                        { "value": "ellipsis", "label": "ellipsis" }
+                    ]
+                },
+                "path": "globalStyle.whiteSpace"
+            },
+            "lineHeight": {
+                "label": {
+                    "en": "Line height",
+                    "fr": "Hauteur de ligne"
+                },
+                "type": "Length",
+                "options": {
+                    "unitChoices": [{ "value": "px", "label": "px", "min": 0, "max": 100 }]
+                },
+                "path": "globalStyle.lineHeight"
+            },
+            "wordSpacing": {
+                "label": {
+                    "en": "Line height",
+                    "fr": "Hauteur de ligne"
+                },
+                "type": "Length",
+                "options": {
+                    "unitChoices": [{ "value": "px", "label": "px", "min": 0, "max": 100 }]
+                },
+                "path": "globalStyle.wordSpacing"
+            }
+        },
+        "settingsOptions": [
+            {
+                "label": {
+                    "en": "SEO",
+                    "fr": "SEO"
+                },
+                "fields": {
+                    "tag": {
+                        "type": "TextSelect",
+                        "label": {
+                            "en": "Html tag",
+                            "fr": "Tag html"
+                        },
+                        "options": {
+                            "options": [
+                                { "value": "div", "label": "div" },
+                                { "value": "button", "label": "button" },
+                                { "value": "h1", "label": "h1" },
+                                { "value": "h2", "label": "h2" },
+                                { "value": "h3", "label": "h3" },
+                                { "value": "h4", "label": "h4" }
+                            ]
+                        }
+                    }
+                }
+            }
+        ]
     }
 }

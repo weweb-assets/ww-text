@@ -196,31 +196,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- LINE SPACE -->
-                <div class="item">
-                    <span class="fas fa-text-height"></span>
-                    <div class="subitems">
-                        <div class="item font" @click="setLineHeight(60)">
-                            <span>60px</span>
-                        </div>
-                        <div class="item font" @click="setLineHeight(50)">
-                            <span>50px</span>
-                        </div>
-                        <div class="item font" @click="setLineHeight(40)">
-                            <span>40px</span>
-                        </div>
-                        <div class="item font" @click="setLineHeight(30)">
-                            <span>30px</span>
-                        </div>
-                        <div class="item font" @click="setLineHeight(20)">
-                            <span>20px</span>
-                        </div>
-                        <div class="item input">
-                            <input type="text" v-model="lineHeight" @keydown.enter="setLineHeight(lineHeight)" />
-                        </div>
-                        <div class="item font" @click="setLineHeight()">- Default -</div>
-                    </div>
-                </div>
                 <!-- LETTER SPACE -->
                 <div class="item">
                     <span class="fas fa-text-width"></span>
@@ -253,28 +228,6 @@
 
                 <div class="separator"></div>
 
-                <!-- HEADER -->
-                <div class="item">
-                    <span :class="tagClasses"></span>
-                    <div class="subitems">
-                        <div class="item" @click="setTag('h1')">
-                            <span class="wwi wwi-tag-h1"></span>
-                        </div>
-                        <div class="item" @click="setTag('h2')">
-                            <span class="wwi wwi-tag-h2"></span>
-                        </div>
-                        <div class="item" @click="setTag('h3')">
-                            <span class="wwi wwi-tag-h3"></span>
-                        </div>
-                        <div class="item" @click="setTag('h4')">
-                            <span class="wwi wwi-tag-h4"></span>
-                        </div>
-                        <div class="item" @click="setTag('div')">
-                            <span class="fa fa-paragraph"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="separator"></div>
                 <!-- LINE -->
                 <div class="item">
                     <span class="wwi wwi-separator"></span>
@@ -312,7 +265,6 @@ export default {
     name: 'wwTextBar',
     props: {
         quill: Object,
-        textTag: String,
         selectionFormat: Object,
         initialPosition: Object,
     },
@@ -357,22 +309,6 @@ export default {
                 return '';
             }
             return Array.isArray(currentColor) ? currentColor[0] : currentColor;
-        },
-        tagClasses() {
-            switch (this.textTag) {
-                case 'h1':
-                    return ['wwi', 'wwi-tag-h1'];
-                case 'h2':
-                    return ['wwi', 'wwi-tag-h2'];
-                case 'h3':
-                    return ['wwi', 'wwi-tag-h3'];
-                case 'h4':
-                    return ['wwi', 'wwi-tag-h4'];
-                case 'div':
-                    return ['fa', 'fa-paragraph'];
-                default:
-                    return '';
-            }
         },
     },
     methods: {
@@ -463,11 +399,6 @@ export default {
             const currentValue = this.selectionFormat.list;
             this.$emit('updateFormat', { list: currentValue === value ? null : value });
         },
-        setLineHeight(value) {
-            this.lineHeight = value;
-            const lineHeight = value ? `${value}px` : '';
-            this.$emit('updateFormat', { lineHeight });
-        },
         setLetterSpacing(value) {
             this.letterSpacing = value;
             const letterSpacing = value ? `${value}px` : '';
@@ -475,9 +406,6 @@ export default {
         },
         insertLine(width) {
             this.$emit('insertLine', { width, color: this.lineColor, height: this.lineThickness });
-        },
-        setTag(tag) {
-            this.$emit('updateContent', { tag });
         },
 
         getSpacings() {
