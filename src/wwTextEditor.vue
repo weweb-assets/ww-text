@@ -1,9 +1,9 @@
 <template>
     <div class="ww-text-editor">
-        <div ref="quill" :style="textStyle"></div>
+        <div ref="quill" :style="textStyle" @click="closeMenu"></div>
         <wwTextBar
+            v-if="withTextBar"
             :selectionFormat="selectionFormat"
-            :textTag="textTag"
             :initialPosition="textBarInitialPosition"
             @updateFormat="updateFormat"
             @removeFormat="removeFormat"
@@ -25,8 +25,8 @@ export default {
     components: { wwTextBar },
     props: {
         text: { type: String, required: true },
-        textTag: { type: String },
         textStyle: { type: Object },
+        withTextBar: { type: Boolean },
     },
     data() {
         return { selectionFormat: {}, textBarInitialPosition: { x: 0, y: 0, fromManager: false } };
@@ -83,6 +83,9 @@ export default {
         },
         openMenu() {
             this.$emit('openMenu');
+        },
+        closeMenu() {
+            this.$emit('closeMenu');
         },
         insertLine(value) {
             const { index } = this.quill.getSelection();

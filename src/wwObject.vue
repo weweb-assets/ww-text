@@ -1,10 +1,9 @@
 <template>
-    <component :is="tag" class="ww-text">
+    <component :is="tag" class="ww-text" @mousedown="onMouseDown">
         <wwTextContent
             v-if="!useEditor"
             :text="text"
             :style="content.globalStyle"
-            @click.native.stop.prevent="onTextClick"
             :class="content.fontStyle"
         ></wwTextContent>
         <!-- wwManager:start -->
@@ -13,9 +12,11 @@
             :text="text"
             :class="content.fontStyle"
             :textStyle="content.globalStyle"
+            :withTextBar="!this.wwEditorState.isMenuOpen"
             @updateText="updateText"
             @updateContent="updateContent"
             @openMenu="openMenu"
+            @closeMenu="closeMenu"
         ></wwTextEditor>
         <!-- wwManager:end -->
     </component>
@@ -60,9 +61,7 @@ export default {
         useEditor() {
             /* wwManager:start */
             return (
-                this.wwEditorState.editMode === 'CONTENT' &&
-                this.wwEditorState.isSelected &&
-                !this.wwEditorState.isMenuOpen
+                this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION && this.wwEditorState.isSelected
             );
             /* wwManager:end */
             /* wwFront:start */
@@ -95,10 +94,32 @@ export default {
                 this.updateText(html);
             }
         },
-        onTextClick() {
-            if (this.wwEditorState.isSelected) {
-                this.closeMenu();
+        onMouseDown() {
+            if (!this.useEditor) {
+                return;
             }
+            const mouseDownCoords = [event.clientX, event.clientY];
+            let isPrevented = false;
+            function onMouseMove(event) {
+                if (isPrevented) return;
+                const distX = Math.abs(mouseDownCoords[0] - event.clientX);
+                const distY = Math.abs(mouseDownCoords[1] - event.clientY);
+
+                if (distX > 10 || distY > 10) {
+                    console.log('prevent');
+                    wwLib.wwManagerUI.preventNextClick();
+                    isPrevented = true;
+                    stopListening();
+                }
+            }
+            function stopListening() {
+                wwLib.getFrontWindow().removeEventListener('mousemove', onMouseMove);
+                wwLib.getManagerWindow().removeEventListener('mousemove', onMouseMove);
+            }
+            wwLib.getFrontWindow().addEventListener('mousemove', onMouseMove);
+            wwLib.getManagerWindow().addEventListener('mousemove', onMouseMove);
+            wwLib.getFrontWindow().addEventListener('mouseup', stopListening);
+            wwLib.getManagerWindow().addEventListener('mouseup', stopListening);
         },
     },
 };
