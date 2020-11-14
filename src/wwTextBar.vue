@@ -432,7 +432,7 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 $ww-red: #e02a4d;
 $ww-green: #49b9b3;
 $ww-orange: #ef811a;

@@ -75,6 +75,11 @@ export default {
     },
     methods: {
         updateText(newText) {
+            //No update if same text
+            if (wwLib.wwLang.getText(this.content.text) === newText) {
+                return;
+            }
+
             const text = { ...this.content.text };
             wwLib.wwLang.setText(text, newText);
             this.$emit('update', { text });
@@ -145,6 +150,9 @@ h4 {
 
 <style lang="scss">
 .ww-text {
+    .ww-text-element {
+        white-space: pre-wrap;
+    }
     ol,
     ul {
         margin: 0;
