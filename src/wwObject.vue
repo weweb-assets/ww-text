@@ -1,42 +1,21 @@
 <template>
-    <component :is="tag" class="ww-text" @mousedown="onMouseDown">
-        <wwTextContent
-            v-if="!useEditor"
-            :text="text"
-            :style="content.globalStyle"
-            :class="content.fontStyle"
-        ></wwTextContent>
-        <!-- wwManager:start -->
-        <wwTextEditor
-            v-else
-            :text="text"
-            :class="content.fontStyle"
-            :textStyle="content.globalStyle"
-            :withTextBar="!this.wwEditorState.isMenuOpen"
-            @updateText="updateText"
-            @updateContent="updateContent"
-            @openMenu="openMenu"
-            @closeMenu="closeMenu"
-        ></wwTextEditor>
-        <!-- wwManager:end -->
-    </component>
+    <wwEditableText
+        class="ww-text"
+        :tag="content.tag"
+        :disabled="!canEditText"
+        :value="content.text"
+        :textStyle="content.globalStyle"
+        :textClass="content.fontStyle"
+        @input="updateText"
+        @textbar-visibility-changed="onTextbarVisibilityChanged"
+    ></wwEditableText>
 </template>
 
 <script>
-const wwObjRegex = /\[\[wwObject\s*=\s*([^\]]*)\]\]/gi;
-const wwLinkRegex = /\[\[wwLink\s*=\s*([^\|]*)\s*\|\s*text\s*=\s*([^\]]*)\]\]/gi;
-
 import { openEditHTML } from './popups';
-
-import wwTextContent from './wwTextContent.vue';
-import wwTextEditor from './wwTextEditor.vue';
 
 export default {
     name: '__COMPONENT_NAME__',
-    components: {
-        wwTextContent,
-        wwTextEditor,
-    },
     wwDefaultContent: {
         text: {
             en: 'New text',
@@ -50,15 +29,7 @@ export default {
         /* wwManager: end */
     },
     computed: {
-        text() {
-            return (
-                wwLib.wwLang
-                    .getText(this.content.text)
-                    .replace(wwObjRegex, '<span class="ww-object-embed" data-ww-object-id="$1"></span>')
-                    .replace(wwLinkRegex, "<span class='ww-link-inline' data-ww-link='$1'>$2</span>") || '<br/>'
-            );
-        },
-        useEditor() {
+        canEditText() {
             /* wwManager:start */
             return (
                 this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION && this.wwEditorState.isSelected
@@ -69,24 +40,17 @@ export default {
             return false;
             /* wwFront:end */
         },
-        tag() {
-            return this.content.tag || 'div';
-        },
     },
     methods: {
-        updateText(newText) {
-            const text = { ...this.content.text };
-            wwLib.wwLang.setText(text, newText);
+        updateText(text) {
             this.$emit('update', { text });
         },
-        updateContent(update) {
-            this.$emit('update', update);
-        },
-        openMenu() {
-            this.$emit('openMenu');
-        },
-        closeMenu() {
-            this.$emit('closeMenu');
+        onTextbarVisibilityChanged(value) {
+            if (value) {
+                this.$emit('closeMenu');
+            } else {
+                this.$emit('openMenu');
+            }
         },
         async edit() {
             const { html } = (await openEditHTML(this.text)) || {};
@@ -94,128 +58,6 @@ export default {
                 this.updateText(html);
             }
         },
-        onMouseDown() {
-            if (!this.useEditor) {
-                return;
-            }
-            const mouseDownCoords = [event.clientX, event.clientY];
-            let isPrevented = false;
-            function onMouseMove(event) {
-                if (isPrevented) return;
-                const distX = Math.abs(mouseDownCoords[0] - event.clientX);
-                const distY = Math.abs(mouseDownCoords[1] - event.clientY);
-
-                if (distX > 10 || distY > 10) {
-                    console.log('prevent');
-                    wwLib.wwManagerUI.preventNextClick();
-                    isPrevented = true;
-                    stopListening();
-                }
-            }
-            function stopListening() {
-                wwLib.getFrontWindow().removeEventListener('mousemove', onMouseMove);
-                wwLib.getManagerWindow().removeEventListener('mousemove', onMouseMove);
-            }
-            wwLib.getFrontWindow().addEventListener('mousemove', onMouseMove);
-            wwLib.getManagerWindow().addEventListener('mousemove', onMouseMove);
-            wwLib.getFrontWindow().addEventListener('mouseup', stopListening);
-            wwLib.getManagerWindow().addEventListener('mouseup', stopListening);
-        },
     },
 };
 </script>
-
-<style lang="scss" scoped>
-.ww-text {
-    display: inline-block;
-    width: 100%;
-    overflow-wrap: break-word;
-    -webkit-line-break: after-white-space;
-    outline: none;
-}
-h1,
-h2,
-h3,
-h4 {
-    font-size: inherit;
-    font-weight: inherit;
-    margin: 0;
-}
-</style>
-
-<style lang="scss">
-.ww-text {
-    ol,
-    ul {
-        margin: 0;
-    }
-
-    a {
-        text-decoration: none;
-        color: inherit;
-    }
-    p {
-        margin: 0;
-        white-space: pre-wrap;
-    }
-
-    .ww-object,
-    .ww-object-embed {
-        font-size: initial;
-        font-weight: initial;
-        line-height: initial;
-        letter-spacing: initial;
-        white-space: initial;
-        vertical-align: middle;
-        display: inline-block;
-    }
-
-    .ww-object-wrapper {
-        display: inline-block;
-    }
-
-    .ww-link-inline {
-        position: relative;
-
-        &:before {
-            content: '';
-            position: absolute;
-            border: 1px dashed #2e86c2;
-            top: -2px;
-            left: -2px;
-            bottom: -2px;
-            right: -2px;
-            pointer-events: none;
-        }
-
-        &:after {
-            content: attr(data-link);
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            transform: translateY(-100%);
-            padding: 2px;
-            background-color: #2e86c2;
-            display: none;
-            font-size: 9px;
-            color: white;
-            white-space: nowrap;
-        }
-
-        &:hover {
-            &:after {
-                display: block;
-            }
-        }
-    }
-}
-
-.ww-text-link {
-    text-decoration: none;
-    color: inherit;
-}
-
-.ql-clipboard {
-    display: none;
-}
-</style>

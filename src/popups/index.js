@@ -15,27 +15,3 @@ export async function openEditHTML(text) {
         return null;
     }
 }
-
-export async function openFontSizes() {
-    try {
-        return await wwLib.wwPopups.open({ firstPage: 'DESIGN_FONT_SIZES' });
-    } catch (error) {
-        return;
-    }
-}
-
-export async function openFonts() {
-    try {
-        return await wwLib.wwPopups.open({ firstPage: 'DESIGN_FONTS' });
-    } catch (error) {
-        return;
-    }
-}
-
-export async function openFontStyles() {
-    try {
-        return await wwLib.wwPopups.open({ firstPage: 'DESIGN_FONT_STYLES' });
-    } catch (error) {
-        return;
-    }
-}

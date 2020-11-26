@@ -15,14 +15,3 @@ wwLib.wwPopups.addStory('WWTEXT_HTML', {
         },
     },
 });
-
-wwLib.wwPopups.addStory('WWTEXT_LINKS', {
-    title: {
-        en: 'Link',
-        fr: 'Lien',
-    },
-    type: 'wwPopupLinks',
-    storyData: {
-        links: ['EXTERNAL', 'INTERNAL', 'SECTION', 'DOWNLOAD', 'CLOSE_POPUP'],
-    },
-});
