@@ -1,5 +1,8 @@
 {
     "componentPath": "./src/wwObject.vue",
+    "options": {
+        "autoByContent": true
+    },
     "editor": {
         "label": {
             "en": "Text",
@@ -43,39 +46,6 @@
                     "isText": true
                 },
                 "path": "globalStyle.textShadow"
-            },
-            "whiteSpace": {
-                "label": {
-                    "en": "White space",
-                    "fr": "Saut à la ligne"
-                },
-                "type": "TextSelect",
-                "options": {
-                    "options": [
-                        { "value": null, "label": "none" },
-                        { "value": "no-wrap", "label": "nowrap" },
-                        { "value": "pre", "label": "pre" },
-                        { "value": "pre-wrap", "label": "pre-wrap" },
-                        { "value": "pre-line", "label": "pre-line" },
-                        { "value": "break-spaces", "label": "break-spaces" }
-                    ]
-                },
-                "path": "globalStyle.whiteSpace"
-            },
-            "textOverflow": {
-                "label": {
-                    "en": "Text overflow",
-                    "fr": "Text overflow"
-                },
-                "type": "TextSelect",
-                "options": {
-                    "options": [
-                        { "value": null, "label": "none" },
-                        { "value": "clip", "label": "clip" },
-                        { "value": "ellipsis", "label": "ellipsis" }
-                    ]
-                },
-                "path": "globalStyle.whiteSpace"
             },
             "lineHeight": {
                 "label": {
