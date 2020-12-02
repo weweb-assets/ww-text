@@ -6,9 +6,10 @@
         :value="content.text"
         :textStyle="content.globalStyle"
         :textClass="content.fontStyle"
-        :create-link="createLink"
         :links="content.links"
         @input="updateText"
+        @add-link="addLink"
+        @remove-link="removeLink"
         @textbar-visibility-changed="onTextbarVisibilityChanged"
     ></wwEditableText>
 </template>
@@ -60,29 +61,13 @@ export default {
                 this.updateText(html);
             }
         },
-        async createLink() {
-            try {
-                const result = await wwLib.wwPopupSidebars.open({
-                    firstPage: 'CREATE_LINK',
-                });
-                if (!result) return null;
-                const id = wwLib.wwUtils.getUid();
-                this.$emit('update', { links: { ...this.content.links, [id]: result } });
-                switch (result.type) {
-                    case 'external': {
-                        return { id, label: result.href };
-                    }
-                    case 'internal': {
-                        return { id, label: result.pageId };
-                    }
-                    case 'action': {
-                        return { id, label: 'Button action' };
-                    }
-                }
-                return { id: 'pouet-0', label: 'Beautiful link' };
-            } catch (err) {
-                return null;
-            }
+        async addLink({ id, value }) {
+            this.$emit('update', { links: { ...this.content.links, [id]: value } });
+        },
+        async removeLink(id) {
+            const links = { ...this.content.links };
+            delete links[id];
+            this.$emit('update', { links });
         },
     },
 };
