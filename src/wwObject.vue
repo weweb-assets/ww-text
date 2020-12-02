@@ -6,7 +6,10 @@
         :value="content.text"
         :textStyle="content.globalStyle"
         :textClass="content.fontStyle"
+        :links="content.links"
         @input="updateText"
+        @add-link="addLink"
+        @remove-link="removeLink"
         @textbar-visibility-changed="onTextbarVisibilityChanged"
     ></wwEditableText>
 </template>
@@ -57,6 +60,14 @@ export default {
             if (html) {
                 this.updateText(html);
             }
+        },
+        async addLink({ id, value }) {
+            this.$emit('update', { links: { ...this.content.links, [id]: value } });
+        },
+        async removeLink(id) {
+            const links = { ...this.content.links };
+            delete links[id];
+            this.$emit('update', { links });
         },
     },
 };
