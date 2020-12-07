@@ -8,18 +8,28 @@
             "en": "Text",
             "fr": "Texte"
         },
-        "editElementMenu": {
+        "menuOptions": {
             "items": [
                 {
-                    "label": {
-                        "en": "Options",
-                        "fr": "Options"
-                    },
-                    "action": "edit"
+                    "name": "Typography",
+                    "quick": [{ "type": "custom-style", "name": "fontStyle" }],
+                    "icon": "Size"
+                },
+                {
+                    "name": "Tag",
+                    "quick": [{ "type": "custom-settings", "name": "tag" }],
+                    "icon": "H3"
                 }
             ]
         },
         "styleOptions": {
+            "fontStyle": {
+                "type": "Typography",
+                "label": {
+                    "en": "Style",
+                    "fr": "Style"
+                }
+            },
             "transformation": {
                 "label": {
                     "en": "Transformation",
