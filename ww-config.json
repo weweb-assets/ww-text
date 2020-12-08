@@ -32,8 +32,8 @@
             },
             "transformation": {
                 "label": {
-                    "en": "Transformation",
-                    "fr": "Transformation"
+                    "en": "Character case",
+                    "fr": "Character case"
                 },
                 "type": "TextSelect",
                 "options": {
