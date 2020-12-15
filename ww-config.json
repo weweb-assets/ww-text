@@ -1,8 +1,6 @@
 {
     "componentPath": "./src/wwObject.vue",
-    "options": {
-        "autoByContent": true
-    },
+    "options": {},
     "editor": {
         "label": {
             "en": "Text",
