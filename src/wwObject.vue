@@ -15,7 +15,9 @@
 </template>
 
 <script>
+/* wwManager:start */
 import { openEditHTML } from './popups';
+/* wwManager:end */
 
 export default {
     name: '__COMPONENT_NAME__',
@@ -55,12 +57,14 @@ export default {
                 this.$emit('openMenu');
             }
         },
+        /* wwManager:start */
         async edit() {
             const { html } = (await openEditHTML(this.text)) || {};
             if (html) {
                 this.updateText(html);
             }
         },
+        /* wwManager:end */
         async addLink({ id, value }) {
             this.$emit('update', { links: { ...this.content.links, [id]: value } });
         },
