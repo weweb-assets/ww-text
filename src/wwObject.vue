@@ -10,7 +10,6 @@
         @input="updateText"
         @add-link="addLink"
         @remove-link="removeLink"
-        @textbar-visibility-changed="onTextbarVisibilityChanged"
     ></wwEditableText>
 </template>
 
@@ -49,13 +48,6 @@ export default {
     methods: {
         updateText(text) {
             this.$emit('update', { text });
-        },
-        onTextbarVisibilityChanged(value) {
-            if (value) {
-                this.$emit('closeMenu');
-            } else {
-                this.$emit('openMenu');
-            }
         },
         /* wwManager:start */
         async edit() {
