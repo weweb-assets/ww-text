@@ -4,7 +4,7 @@
         :tag="content.tag"
         :disabled="!canEditText"
         :value="content.text"
-        :textStyle="content.globalStyle"
+        :textStyle="textStyle"
         :links="content.links"
         @input="updateText"
         @add-link="addLink"
@@ -23,6 +23,7 @@ export default {
         text: {
             en: 'New text',
         },
+        fontSize: wwLib.responsive('16px'),
         globalStyle: {},
     },
     props: {
@@ -42,6 +43,9 @@ export default {
             // eslint-disable-next-line no-unreachable
             return false;
             /* wwFront:end */
+        },
+        textStyle() {
+            return { ...this.content.globalStyle, fontSize: this.content.fontSize };
         },
     },
     methods: {
