@@ -37,7 +37,7 @@
                     "en": "Font family",
                     "fr": "Font"
                 },
-                "path": "globalStyle.fontFamily"
+                "path": "fontFamily"
             },
             "textAlign": {
                 "type": "TextRadioGroup",
@@ -62,7 +62,7 @@
                     "en": "Alignement",
                     "fr": "Alignement"
                 },
-                "path": "globalStyle.textAlign"
+                "path": "textAlign"
             },
             "textColor": {
                 "type": "Color",
@@ -73,7 +73,7 @@
                 "options": {
                     "nullable": true
                 },
-                "path": "globalStyle.color"
+                "path": "color"
             },
             "bgColor": {
                 "type": "Color",
@@ -84,7 +84,7 @@
                 "options": {
                     "nullable": true
                 },
-                "path": "globalStyle.backgroundColor"
+                "path": "backgroundColor"
             },
             "transformation": {
                 "label": {
@@ -100,7 +100,7 @@
                         { "value": "lowercase", "label": "lowercase" }
                     ]
                 },
-                "path": "globalStyle.textTransform"
+                "path": "textTransform"
             },
             "shadows": {
                 "label": {
@@ -111,7 +111,7 @@
                 "options": {
                     "isText": true
                 },
-                "path": "globalStyle.textShadow"
+                "path": "textShadow"
             },
             "lineHeight": {
                 "label": {
@@ -122,7 +122,7 @@
                 "options": {
                     "unitChoices": [{ "value": "px", "label": "px", "min": 0, "max": 100 }]
                 },
-                "path": "globalStyle.lineHeight"
+                "path": "lineHeight"
             },
             "wordSpacing": {
                 "label": {
@@ -133,7 +133,7 @@
                 "options": {
                     "unitChoices": [{ "value": "px", "label": "px", "min": 0, "max": 100 }]
                 },
-                "path": "globalStyle.wordSpacing"
+                "path": "wordSpacing"
             }
         },
         "settingsOptions": [

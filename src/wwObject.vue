@@ -24,7 +24,14 @@ export default {
             en: 'New text',
         },
         fontSize: wwLib.responsive('16px'),
-        globalStyle: {},
+        fontFamily: wwLib.responsive(''),
+        textAlign: wwLib.responsive(''),
+        textColor: wwLib.responsive(''),
+        bgColor: wwLib.responsive(''),
+        transformation: wwLib.responsive(''),
+        shadows: wwLib.responsive(''),
+        lineHeight: wwLib.responsive(''),
+        wordSpacing: wwLib.responsive(''),
     },
     props: {
         content: Object,
@@ -45,7 +52,7 @@ export default {
             /* wwFront:end */
         },
         textStyle() {
-            return { ...this.content.globalStyle, fontSize: this.content.fontSize };
+            return { ...this.content };
         },
     },
     methods: {
