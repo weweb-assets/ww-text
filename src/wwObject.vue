@@ -5,7 +5,6 @@
         :disabled="!canEditText"
         :value="content.text"
         :textStyle="content.globalStyle"
-        :textClass="content.fontStyle"
         :links="content.links"
         @input="updateText"
         @add-link="addLink"

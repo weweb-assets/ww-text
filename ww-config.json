@@ -11,7 +11,7 @@
                 {
                     "name": "Font size",
                     "quick": [{ "type": "custom-style", "name": "fontSize" }],
-                    "icon": "Size"
+                    "icon": "sizing"
                 },
                 {
                     "name": "Tag",
@@ -32,11 +32,39 @@
                 },
                 "path": "globalStyle.fontSize"
             },
+            "fontFamily": {
+                "type": "FontFamily",
+                "label": {
+                    "en": "Font family",
+                    "fr": "Font"
+                },
+                "path": "globalStyle.fontFamily"
+            },
+            "textAlign": {
+                "type": "TextSelect",
+                "options": {
+                    "options": [
+                        { "value": null, "label": "none" },
+                        { "value": "left", "label": "Left" },
+                        { "value": "right", "label": "Right" },
+                        { "value": "center", "label": "Center" },
+                        { "value": "justify", "label": "Justify" }
+                    ]
+                },
+                "label": {
+                    "en": "Alignement",
+                    "fr": "Alignement"
+                },
+                "path": "globalStyle.textAlign"
+            },
             "textColor": {
                 "type": "Color",
                 "label": {
                     "en": "Text color",
                     "fr": "Couleur du texte"
+                },
+                "options": {
+                    "nullable": true
                 },
                 "path": "globalStyle.color"
             },
@@ -45,6 +73,9 @@
                 "label": {
                     "en": "Background color",
                     "fr": "Couleur du background"
+                },
+                "options": {
+                    "nullable": true
                 },
                 "path": "globalStyle.backgroundColor"
             },
