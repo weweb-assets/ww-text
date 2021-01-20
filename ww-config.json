@@ -36,8 +36,7 @@
                 "label": {
                     "en": "Font family",
                     "fr": "Font"
-                },
-                "path": "fontFamily"
+                }
             },
             "textAlign": {
                 "type": "TextRadioGroup",
@@ -61,10 +60,9 @@
                 "label": {
                     "en": "Alignement",
                     "fr": "Alignement"
-                },
-                "path": "textAlign"
+                }
             },
-            "textColor": {
+            "color": {
                 "type": "Color",
                 "label": {
                     "en": "Text color",
@@ -72,10 +70,9 @@
                 },
                 "options": {
                     "nullable": true
-                },
-                "path": "color"
+                }
             },
-            "bgColor": {
+            "backgroundColor": {
                 "type": "Color",
                 "label": {
                     "en": "Background color",
@@ -83,10 +80,9 @@
                 },
                 "options": {
                     "nullable": true
-                },
-                "path": "backgroundColor"
+                }
             },
-            "transformation": {
+            "textTransform": {
                 "label": {
                     "en": "Character case",
                     "fr": "Character case"
@@ -99,10 +95,9 @@
                         { "value": "uppercase", "label": "uppercase" },
                         { "value": "lowercase", "label": "lowercase" }
                     ]
-                },
-                "path": "textTransform"
+                }
             },
-            "shadows": {
+            "textShadow": {
                 "label": {
                     "en": "Text Shadows",
                     "fr": "Ombres du texte"
@@ -110,8 +105,7 @@
                 "type": "Shadows",
                 "options": {
                     "isText": true
-                },
-                "path": "textShadow"
+                }
             },
             "lineHeight": {
                 "label": {
@@ -121,8 +115,7 @@
                 "type": "Length",
                 "options": {
                     "unitChoices": [{ "value": "px", "label": "px", "min": 0, "max": 100 }]
-                },
-                "path": "lineHeight"
+                }
             },
             "wordSpacing": {
                 "label": {
@@ -132,8 +125,7 @@
                 "type": "Length",
                 "options": {
                     "unitChoices": [{ "value": "px", "label": "px", "min": 0, "max": 100 }]
-                },
-                "path": "wordSpacing"
+                }
             }
         },
         "settingsOptions": [

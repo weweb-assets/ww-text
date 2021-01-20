@@ -26,10 +26,10 @@ export default {
         fontSize: wwLib.responsive('16px'),
         fontFamily: wwLib.responsive(''),
         textAlign: wwLib.responsive(''),
-        textColor: wwLib.responsive(''),
-        bgColor: wwLib.responsive(''),
-        transformation: wwLib.responsive(''),
-        shadows: wwLib.responsive(''),
+        color: wwLib.responsive(''),
+        backgroundColor: wwLib.responsive(''),
+        textTransform: wwLib.responsive(''),
+        textShadow: wwLib.responsive(''),
         lineHeight: wwLib.responsive(''),
         wordSpacing: wwLib.responsive(''),
     },
@@ -52,7 +52,17 @@ export default {
             /* wwFront:end */
         },
         textStyle() {
-            return { ...this.content };
+            return {
+                fontSize: this.content.fontSize,
+                fontFamily: this.content.fontFamily,
+                textAlign: this.content.textAlign,
+                color: this.content.color,
+                backgroundColor: this.content.backgroundColor,
+                textTransform: this.content.textTransform,
+                textShadow: this.content.textShadow,
+                lineHeight: this.content.lineHeight,
+                wordSpacing: this.content.wordSpacing,
+            };
         },
     },
     methods: {
