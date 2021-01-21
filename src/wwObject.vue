@@ -9,6 +9,7 @@
         @input="updateText"
         @add-link="addLink"
         @remove-link="removeLink"
+        @textbar-visibility-changed="onTextbarVisibilityChanged"
     ></wwEditableText>
 </template>
 
@@ -84,6 +85,9 @@ export default {
             const links = { ...this.content.links };
             delete links[id];
             this.$emit('update', { links });
+        },
+        onTextbarVisibilityChanged(visibility) {
+            this.$emit('change-menu-visibility', !visibility);
         },
     },
 };
