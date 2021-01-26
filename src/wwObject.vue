@@ -44,7 +44,9 @@ export default {
         canEditText() {
             /* wwManager:start */
             return (
-                this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION && this.wwEditorState.isSelected
+                this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION &&
+                this.wwEditorState.isSelected &&
+                !this.isTextBinded
             );
             /* wwManager:end */
             /* wwFront:start */
@@ -52,6 +54,11 @@ export default {
             return false;
             /* wwFront:end */
         },
+        /* wwManager:start */
+        isTextBinded() {
+            return this.wwEditorState.bindedProps['text-fr'] || this.wwEditorState.bindedProps['text-en'];
+        },
+        /* wwManager:end */
         textStyle() {
             return {
                 fontSize: this.content.fontSize,

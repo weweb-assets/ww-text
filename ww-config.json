@@ -154,6 +154,32 @@
                     }
                 }
             }
-        ]
+        ],
+        "otherOptions": {
+            "text-en": {
+                "type": "Textarea",
+                "label": {
+                    "en": "Text en",
+                    "fr": "Texte en"
+                },
+                "bindable": true,
+                "options": {
+                    "row": 20
+                },
+                "path": "text.en"
+            },
+            "text-fr": {
+                "type": "Textarea",
+                "label": {
+                    "en": "Text fr",
+                    "fr": "Texte fr"
+                },
+                "bindable": true,
+                "options": {
+                    "row": 20
+                },
+                "path": "text.fr"
+            }
+        }
     }
 }
