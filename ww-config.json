@@ -38,6 +38,27 @@
                     "fr": "Font"
                 }
             },
+            "fontWeight": {
+                "label": {
+                    "en": "Font weight",
+                    "fr": "Graisse"
+                },
+                "type": "TextSelect",
+                "options": {
+                    "options": [
+                        { "value": null, "label": { "en": "Default", "fr": "Par défaut" } },
+                        { "value": 100, "label": { "en": "100 - Thin" } },
+                        { "value": 200, "label": { "en": "200 - Extra Light" } },
+                        { "value": 300, "label": { "en": "300 - Light" } },
+                        { "value": 400, "label": { "en": "400 - Normal" } },
+                        { "value": 500, "label": { "en": "500 - Medium" } },
+                        { "value": 600, "label": { "en": "600 - Semi Bold" } },
+                        { "value": 700, "label": { "en": "700 - Bold" } },
+                        { "value": 800, "label": { "en": "800 - Extra Bold" } },
+                        { "value": 900, "label": { "en": "900 - Black" } }
+                    ]
+                }
+            },
             "textAlign": {
                 "type": "TextRadioGroup",
                 "options": {
@@ -125,27 +146,6 @@
                 "type": "Length",
                 "options": {
                     "unitChoices": [{ "value": "px", "label": "px", "min": 0, "max": 100 }]
-                }
-            },
-            "fontWeight": {
-                "label": {
-                    "en": "Font weight",
-                    "fr": "Graisse"
-                },
-                "type": "TextSelect",
-                "options": {
-                    "options": [
-                        { "value": null, "label": { "en": "Default", "fr": "Par défaut" } },
-                        { "value": 100, "label": { "en": "100 - Thin" } },
-                        { "value": 200, "label": { "en": "200 - Extra Light" } },
-                        { "value": 300, "label": { "en": "300 - Light" } },
-                        { "value": 400, "label": { "en": "400 - Normal" } },
-                        { "value": 500, "label": { "en": "500 - Medium" } },
-                        { "value": 600, "label": { "en": "600 - Semi Bold" } },
-                        { "value": 700, "label": { "en": "700 - Bold" } },
-                        { "value": 800, "label": { "en": "800 - Extra Bold" } },
-                        { "value": 900, "label": { "en": "900 - Black" } }
-                    ]
                 }
             }
         },
