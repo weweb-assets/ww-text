@@ -164,12 +164,13 @@
                         },
                         "options": {
                             "options": [
-                                { "value": "div", "label": "div" },
-                                { "value": "button", "label": "button" },
+                                { "value": "p", "label": "p" },
                                 { "value": "h1", "label": "h1" },
                                 { "value": "h2", "label": "h2" },
                                 { "value": "h3", "label": "h3" },
-                                { "value": "h4", "label": "h4" }
+                                { "value": "h4", "label": "h4" },
+                                { "value": "button", "label": "button" },
+                                { "value": "div", "label": "div" }
                             ]
                         }
                     }

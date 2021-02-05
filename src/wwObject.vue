@@ -24,6 +24,7 @@ export default {
         text: {
             en: 'New text',
         },
+        tag: 'p',
         fontSize: wwLib.responsive('16px'),
         fontFamily: wwLib.responsive(''),
         textAlign: wwLib.responsive(''),
