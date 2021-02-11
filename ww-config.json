@@ -89,6 +89,7 @@
                     "en": "Text color",
                     "fr": "Couleur du texte"
                 },
+                "bindable": true,
                 "options": {
                     "nullable": true
                 }
@@ -99,6 +100,7 @@
                     "en": "Background color",
                     "fr": "Couleur du background"
                 },
+                "bindable": true,
                 "options": {
                     "nullable": true
                 }
