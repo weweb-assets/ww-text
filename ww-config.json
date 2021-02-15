@@ -97,8 +97,8 @@
             "backgroundColor": {
                 "type": "Color",
                 "label": {
-                    "en": "Background color",
-                    "fr": "Couleur du background"
+                    "en": "Text Background",
+                    "fr": "Background du Texte"
                 },
                 "bindable": true,
                 "options": {
