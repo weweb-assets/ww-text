@@ -58,7 +58,7 @@ export default {
         },
         /* wwManager:start */
         isTextBinded() {
-            return this.wwEditorState.bindedProps['text-fr'] || this.wwEditorState.bindedProps['text-en'];
+            return this.wwEditorState.bindedProps['text'];
         },
         /* wwManager:end */
         textStyle() {
