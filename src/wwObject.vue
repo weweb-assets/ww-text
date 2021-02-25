@@ -3,7 +3,7 @@
         class="ww-text"
         :tag="content.tag"
         :disabled="!canEditText"
-        :value="content.text"
+        :value="internalText"
         :textStyle="textStyle"
         :links="content.links"
         @input="updateText"
@@ -38,6 +38,7 @@ export default {
     },
     props: {
         content: Object,
+        wwElementState: Object,
         /* wwManager: start */
         wwEditorState: Object,
         /* wwManager: end */
@@ -48,7 +49,8 @@ export default {
             return (
                 this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION &&
                 this.wwEditorState.isSelected &&
-                !this.isTextBinded
+                !this.isTextBinded &&
+                !this.wwElementState.props.text
             );
             /* wwManager:end */
             /* wwFront:start */
@@ -74,6 +76,9 @@ export default {
                 wordSpacing: this.content.wordSpacing,
                 fontWeight: this.content.fontWeight,
             };
+        },
+        internalText() {
+            return this.wwElementState.props.text || this.content.text;
         },
     },
     methods: {
