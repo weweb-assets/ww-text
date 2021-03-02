@@ -48,7 +48,7 @@ export default {
             /* wwManager:start */
             return (
                 this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION &&
-                this.wwEditorState.isSelected &&
+                this.wwEditorState.isDoubleSelected &&
                 !this.isTextBinded &&
                 !this.wwElementState.props.text
             );
