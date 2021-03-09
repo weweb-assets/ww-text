@@ -9,7 +9,6 @@
         @input="updateText"
         @add-link="addLink"
         @remove-link="removeLink"
-        @textbar-visibility-changed="onTextbarVisibilityChanged"
     ></wwEditableText>
 </template>
 
@@ -81,6 +80,21 @@ export default {
             return this.wwElementState.props.text || this.content.text;
         },
     },
+    /* wwEditor:start */
+    watch: {
+        canEditText() {
+            const bordersStyle = {
+                width: 'calc(100% + 8px)',
+                height: 'calc(100% + 8px)',
+                top: '-4px',
+                left: '-4px',
+                border: '4px solid var(--ww-color-blue-200)',
+            };
+            this.$emit('change-menu-visibility', this.wwEditorState.isSelected && !this.canEditText);
+            this.$emit('change-borders-style', this.canEditText ? bordersStyle : {});
+        },
+    },
+    /* wwEditor:end */
     methods: {
         updateText(text) {
             this.$emit('update', { text });
@@ -100,9 +114,6 @@ export default {
             const links = { ...this.content.links };
             delete links[id];
             this.$emit('update', { links });
-        },
-        onTextbarVisibilityChanged(visibility) {
-            this.$emit('change-menu-visibility', !visibility);
         },
     },
 };
