@@ -21,6 +21,13 @@
             ]
         },
         "styleOptions": {
+            "font": {
+                "type": "Typography",
+                "label": {
+                    "en": "Typography",
+                    "fr": "Typography"
+                }
+            },
             "fontSize": {
                 "type": "Length",
                 "label": {
@@ -57,6 +64,16 @@
                         { "value": 800, "label": { "en": "800 - Extra Bold" } },
                         { "value": 900, "label": { "en": "900 - Black" } }
                     ]
+                }
+            },
+            "lineHeight": {
+                "label": {
+                    "en": "Line height",
+                    "fr": "Hauteur de ligne"
+                },
+                "type": "Length",
+                "options": {
+                    "unitChoices": [{ "value": "px", "label": "px", "min": 0, "max": 100 }]
                 }
             },
             "textAlign": {
@@ -130,16 +147,7 @@
                     "isText": true
                 }
             },
-            "lineHeight": {
-                "label": {
-                    "en": "Line height",
-                    "fr": "Hauteur de ligne"
-                },
-                "type": "Length",
-                "options": {
-                    "unitChoices": [{ "value": "px", "label": "px", "min": 0, "max": 100 }]
-                }
-            },
+
             "wordSpacing": {
                 "label": {
                     "en": "Word spacing",

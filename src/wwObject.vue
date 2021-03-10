@@ -15,6 +15,7 @@
 <script>
 /* wwManager:start */
 import { openEditHTML } from './popups';
+import { getConfig } from './config.js';
 /* wwManager:end */
 
 export default {
@@ -34,7 +35,13 @@ export default {
         lineHeight: wwLib.allowState(wwLib.responsive('')),
         wordSpacing: wwLib.allowState(wwLib.responsive('')),
         fontWeight: wwLib.allowState(wwLib.responsive('')),
+        font: wwLib.allowState(wwLib.responsive(null)),
     },
+    /* wwEditor: start */
+    wwEditorConfiguration({ content }) {
+        return getConfig(content);
+    },
+    /* wwEditor: end */
     props: {
         content: Object,
         wwElementState: Object,
@@ -64,16 +71,20 @@ export default {
         /* wwManager:end */
         textStyle() {
             return {
-                fontSize: this.content.fontSize,
-                fontFamily: this.content.fontFamily,
+                ...(this.content.font
+                    ? { font: this.content.font }
+                    : {
+                          fontSize: this.content.fontSize,
+                          fontFamily: this.content.fontFamily,
+                          lineHeight: this.content.lineHeight,
+                          fontWeight: this.content.fontWeight,
+                      }),
                 textAlign: this.content.textAlign,
                 color: this.content.color,
                 backgroundColor: this.content.backgroundColor,
                 textTransform: this.content.textTransform,
                 textShadow: this.content.textShadow,
-                lineHeight: this.content.lineHeight,
                 wordSpacing: this.content.wordSpacing,
-                fontWeight: this.content.fontWeight,
             };
         },
         internalText() {
@@ -82,6 +93,22 @@ export default {
     },
     /* wwEditor:start */
     watch: {
+        'content.font': {
+            async handler(newVal, oldVal) {
+                if (this.wwEditorState.isACopy) {
+                    return;
+                }
+                if (!newVal && oldVal) {
+                    const defaultValue = wwLib.getStyleFromToken(oldVal);
+                    const typo = wwLib.getTypoFromToken(defaultValue);
+                    this.$emit('update-effect', typo);
+                } else if (newVal && newVal !== oldVal) {
+                    const defaultValue = wwLib.getStyleFromToken(newVal);
+                    const typo = wwLib.getTypoFromToken(defaultValue);
+                    this.$emit('update-effect', typo);
+                }
+            },
+        },
         canEditText() {
             const bordersStyle = {
                 width: 'calc(100% + 8px)',
