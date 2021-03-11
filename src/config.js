@@ -1,32 +1,86 @@
-function getTypoOptions(disabled) {
-    return {
-        fontSize: {
-            options: {
-                disabled,
+function getTypoOptions(content) {
+    const options = {
+        font: {
+            type: 'Typography',
+            label: {
+                en: 'Typography',
+                fr: 'Typography',
             },
-        },
-        fontFamily: {
             options: {
-                disabled,
-            },
-        },
-        fontWeight: {
-            options: {
-                disabled,
-            },
-        },
-        lineHeight: {
-            options: {
-                disabled,
+                initialValue: {
+                    fontSize: content.fontSize,
+                    fontFamily: content.fontFamily,
+                    fontWeight: content.fontWeight,
+                    lineHeight: content.lineHeight,
+                },
             },
         },
     };
+    if (!content.font) {
+        Object.assign(options, {
+            fontSize: {
+                type: 'Length',
+                label: {
+                    en: 'Size',
+                    fr: 'Taille',
+                },
+                options: {
+                    unitChoices: [{ value: 'px', label: 'px', min: 1, max: 100 }],
+                },
+            },
+            fontFamily: {
+                type: 'FontFamily',
+                label: {
+                    en: 'Font family',
+                    fr: 'Font',
+                },
+            },
+            fontWeight: {
+                label: {
+                    en: 'Font weight',
+                    fr: 'Graisse',
+                },
+                type: 'TextSelect',
+                options: {
+                    options: [
+                        { value: null, label: { en: 'Default', fr: 'Par défaut' } },
+                        { value: 100, label: { en: '100 - Thin' } },
+                        { value: 200, label: { en: '200 - Extra Light' } },
+                        { value: 300, label: { en: '300 - Light' } },
+                        { value: 400, label: { en: '400 - Normal' } },
+                        { value: 500, label: { en: '500 - Medium' } },
+                        { value: 600, label: { en: '600 - Semi Bold' } },
+                        { value: 700, label: { en: '700 - Bold' } },
+                        { value: 800, label: { en: '800 - Extra Bold' } },
+                        { value: 900, label: { en: '900 - Black' } },
+                    ],
+                },
+            },
+            lineHeight: {
+                label: {
+                    en: 'Line height',
+                    fr: 'Hauteur de ligne',
+                },
+                type: 'Length',
+                options: {
+                    unitChoices: [
+                        { value: 'px', label: 'px', min: 0, max: 100 },
+                        { value: '%', label: '%', min: 0, max: 100 },
+                        { value: 'em', label: 'em', min: 0, max: 100 },
+                        { value: 'normal', label: 'auto', default: true },
+                    ],
+                },
+            },
+        });
+    }
+
+    return options;
 }
 
 export function getConfig(content) {
     return {
         styleOptions: {
-            ...getTypoOptions(!!content.font),
+            ...getTypoOptions(content),
             textAlign: {
                 type: 'TextRadioGroup',
                 options: {
