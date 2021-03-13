@@ -18,7 +18,6 @@ import { openEditHTML } from './popups';
 /* wwManager:end */
 
 export default {
-    name: '__COMPONENT_NAME__',
     wwDefaultContent: {
         text: {
             en: 'New text',
@@ -92,6 +91,18 @@ export default {
             };
             this.$emit('change-menu-visibility', this.wwEditorState.isSelected && !this.canEditText);
             this.$emit('change-borders-style', this.canEditText ? bordersStyle : {});
+        },
+        'wwEditorState.isDoubleSelected'(newVal, oldVal) {
+            if (newVal && !oldVal && this.isTextBinded) {
+                wwLib.wwNotification.open({
+                    text: {
+                        en: 'Binded texts cannot be edited.',
+                        fr: 'Les textes bindés ne peuvent pas être édités.',
+                    },
+                    color: 'purple',
+                    duration: 3000,
+                });
+            }
         },
     },
     /* wwEditor:end */
