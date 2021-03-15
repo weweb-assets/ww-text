@@ -6,15 +6,6 @@
             "en": "Text",
             "fr": "Texte"
         },
-        "menuOptions": {
-            "items": [
-                {
-                    "name": "Tag",
-                    "quick": [{ "type": "custom-settings", "name": "tag" }],
-                    "icon": "H3"
-                }
-            ]
-        },
         "settingsOptions": [
             {
                 "label": {

@@ -79,6 +79,14 @@ function getTypoOptions(content) {
 
 export function getConfig(content) {
     return {
+        menuOptions: {
+            quick: {
+                label: { en: 'Edit layout' },
+                sections: content.font
+                    ? ['tag', 'font']
+                    : ['tag', 'font', 'fontSize', 'fontFamily', 'fontWeight', 'lineHeight'],
+            },
+        },
         styleOptions: {
             ...getTypoOptions(content),
             textAlign: {
