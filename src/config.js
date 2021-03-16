@@ -81,7 +81,6 @@ export function getConfig(content) {
     return {
         menuOptions: {
             quick: {
-                label: { en: 'Edit layout' },
                 sections: content.font
                     ? ['tag', 'font']
                     : ['tag', 'font', 'fontSize', 'fontFamily', 'fontWeight', 'lineHeight'],
