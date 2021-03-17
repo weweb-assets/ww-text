@@ -81,9 +81,7 @@ export function getConfig(content) {
     return {
         menuOptions: {
             quick: {
-                sections: content.font
-                    ? ['tag', 'font']
-                    : ['tag', 'font', 'fontSize', 'fontFamily', 'fontWeight', 'lineHeight'],
+                sections: ['tag', 'font'],
             },
         },
         styleOptions: {
