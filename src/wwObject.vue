@@ -69,9 +69,15 @@ export default {
         },
         /* wwManager:end */
         textStyle() {
-            return {
+            const style = {
                 ...(this.content.font
-                    ? { font: this.content.font }
+                    ? {
+                          fontSize: 'unset',
+                          fontFamily: 'unset',
+                          lineHeight: 'unset',
+                          fontWeight: 'unset',
+                          font: this.content.font,
+                      }
                     : {
                           fontSize: this.content.fontSize,
                           fontFamily: this.content.fontFamily,
@@ -85,6 +91,8 @@ export default {
                 textShadow: this.content.textShadow,
                 wordSpacing: this.content.wordSpacing,
             };
+
+            return style;
         },
         internalText() {
             return this.wwElementState.props.text || this.content.text;
