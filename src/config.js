@@ -82,6 +82,7 @@ export function getConfig(content) {
         menuOptions: {
             quick: {
                 sections: ['tag', 'font'],
+                bind: [{ prop: 'text', label: { en: 'Bind text' } }],
             },
         },
         styleOptions: {
