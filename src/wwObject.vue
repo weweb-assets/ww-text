@@ -34,7 +34,7 @@ export default {
         lineHeight: wwLib.allowState(wwLib.responsive('')),
         wordSpacing: wwLib.allowState(wwLib.responsive('')),
         fontWeight: wwLib.allowState(wwLib.responsive('')),
-        font: wwLib.allowState(wwLib.responsive(null)),
+        font: wwLib.allowState(wwLib.responsive('')),
     },
     /* wwEditor: start */
     wwEditorConfiguration({ content }) {
