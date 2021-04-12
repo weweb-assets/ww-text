@@ -1,7 +1,7 @@
 <template>
     <wwEditableText
         class="ww-text"
-        :tag="content.tag"
+        :tag="tag"
         :disabled="!canEditText"
         :value="internalText"
         :textStyle="textStyle"
@@ -96,6 +96,13 @@ export default {
         },
         internalText() {
             return this.wwElementState.props.text || this.content.text;
+        },
+        tag() {
+            if (this.wwElementState.isInsideLink && this.content.tag === 'button') {
+                return 'div';
+            } else {
+                return this.content.tag;
+            }
         },
     },
     /* wwEditor:start */
