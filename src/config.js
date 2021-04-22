@@ -85,6 +85,9 @@ export function getConfig(content) {
                 bind: [{ prop: 'text', label: { en: 'Bind text' } }],
             },
         },
+        additionalInfo: {
+            topRight: content.tag === 'button' ? 'btn' : content.tag,
+        },
         styleOptions: {
             ...getTypoOptions(content),
             textAlign: {
