@@ -5,7 +5,7 @@
         :disabled="!canEditText"
         :value="internalText"
         :textStyle="textStyle"
-        :links="content.links"
+        :links="links"
         @input="updateText"
         @add-link="addLink"
         @remove-link="removeLink"
@@ -44,6 +44,7 @@ export default {
     props: {
         content: Object,
         wwElementState: Object,
+        wwFrontState: Object,
         /* wwManager: start */
         wwEditorState: Object,
         /* wwManager: end */
@@ -104,6 +105,20 @@ export default {
                 return this.content.tag;
             }
         },
+        links() {
+            if (this.content.links) {
+                const links = { ...this.content.links, ...this.content.links[this.wwFrontState.lang] };
+                // Horrible hack to handle the fact that old data are not under lang key
+                Object.keys(links).forEach(key => {
+                    if (key.length <= 4) {
+                        delete links[key];
+                    }
+                });
+                return links;
+            } else {
+                return {};
+            }
+        },
     },
     /* wwEditor:start */
     watch: {
@@ -161,11 +176,20 @@ export default {
         },
         /* wwManager:end */
         async addLink({ id, value }) {
-            this.$emit('update', { links: { ...this.content.links, [id]: value } });
+            const links = { ...this.content.links };
+            this.$emit('update', {
+                links: {
+                    ...links,
+                    [this.wwFrontState.lang]: { ...links[this.wwFrontState.lang], [id]: value },
+                },
+            });
         },
         async removeLink(id) {
             const links = { ...this.content.links };
             delete links[id];
+            if (links[this.wwFrontState.lang]) {
+                delete links[this.wwFrontState.lang][id];
+            }
             this.$emit('update', { links });
         },
     },
