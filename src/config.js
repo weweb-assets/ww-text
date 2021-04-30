@@ -85,8 +85,14 @@ export function getConfig(content) {
                 bind: [{ prop: 'text', label: { en: 'Bind text' } }],
             },
         },
-        additionalInfo: {
-            topRight: content.tag === 'button' ? 'btn' : content.tag,
+        infoTag: {
+            color: 'var(--ww-color-blue-500)',
+            text: content.tag === 'button' ? 'btn' : content.tag,
+            action: () => {
+                wwLib.wwSearchBar.executeAction({
+                    actions: wwLib.wwSearchBar.getEditSidebarActions('settings', 'custom-0'),
+                });
+            },
         },
         styleOptions: {
             ...getTypoOptions(content),
