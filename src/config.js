@@ -87,7 +87,7 @@ export function getConfig(content) {
         },
         infoTag: {
             color: 'var(--ww-color-blue-500)',
-            text: content.tag === 'button' ? 'btn' : content.tag,
+            text: content.tag === 'button' ? 'BTN' : content.tag.toUpperCase(),
             action: () => {
                 wwLib.wwSearchBar.executeAction({
                     actions: wwLib.wwSearchBar.getEditSidebarActions('settings', 'custom-0'),
