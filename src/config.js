@@ -87,6 +87,7 @@ export function getConfig(content) {
         },
         infoTag: {
             color: 'var(--ww-color-blue-500)',
+            backgroundColor: 'var(--ww-color-blue-100)',
             text: content.tag === 'button' ? 'BTN' : content.tag.toUpperCase(),
             action: () => {
                 wwLib.wwSearchBar.executeAction({
