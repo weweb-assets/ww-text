@@ -21,13 +21,13 @@
                         },
                         "options": {
                             "options": [
-                                { "value": "p", "label": "p" },
-                                { "value": "h1", "label": "h1" },
-                                { "value": "h2", "label": "h2" },
-                                { "value": "h3", "label": "h3" },
-                                { "value": "h4", "label": "h4" },
-                                { "value": "button", "label": "button" },
-                                { "value": "div", "label": "div" }
+                                { "value": "p", "label": "P" },
+                                { "value": "h1", "label": "H1" },
+                                { "value": "h2", "label": "H2" },
+                                { "value": "h3", "label": "H3" },
+                                { "value": "h4", "label": "H4" },
+                                { "value": "button", "label": "Button" },
+                                { "value": "div", "label": "Div" }
                             ]
                         }
                     }
