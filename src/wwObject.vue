@@ -217,5 +217,10 @@ export default {
             this.$emit('update', { links });
         },
     },
+    /* wwEditor:start */
+    mounted(){
+        this.checkListTags(this.content.text);
+    }
+    /* wwEditor:end */
 };
 </script>
