@@ -122,6 +122,9 @@ export default {
     },
     /* wwEditor:start */
     watch: {
+        'content.text'() {
+            this.checkListTags(this.content.text);
+        },
         'content.font': {
             async handler(newVal, oldVal) {
                 if (this.wwEditorState.isACopy) {
@@ -172,6 +175,27 @@ export default {
             const { html } = (await openEditHTML(this.text)) || {};
             if (html) {
                 this.updateText(html);
+            }
+        },
+        checkListTags(text) {
+            if (this.content.tag === 'p' && text && text[wwLib.wwLang.lang] && text[wwLib.wwLang.lang]) {
+                const notAllowedInP = ['<ul', '<li', '<ol'];
+                const isInP = notAllowedInP.reduce(
+                    (isInText, el) => isInText || text[wwLib.wwLang.lang].indexOf(el) !== -1,
+                    false
+                );
+                if (isInP) {
+                    wwLib.wwNotification.open({
+                        text: {
+                            en: `Lists are not allowed in a <b>P</b> tag.<br/>The tag of this text has been changed to <b>DIV</b>.`,
+                            fr:
+                                'Les listes ne sont pas autorisées dans une balise <b>P</b>.<br/>La balise de ce texte a été changée en <b>DIV</b>.',
+                        },
+                        color: 'blue',
+                        duration: 3000,
+                    });
+                    this.$emit('update', { tag: 'div' });
+                }
             }
         },
         /* wwManager:end */
