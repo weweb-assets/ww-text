@@ -3,10 +3,10 @@
         class="ww-text"
         :tag="tag"
         :disabled="!canEditText"
-        :value="internalText"
+        :modelValue="internalText"
         :textStyle="textStyle"
         :links="links"
-        @input="updateText"
+        @update:modelValue="updateText"
         @add-link="addLink"
         @remove-link="removeLink"
     ></wwEditableText>
@@ -14,7 +14,6 @@
 
 <script>
 /* wwManager:start */
-import { openEditHTML } from './popups';
 import { getConfig } from './config.js';
 /* wwManager:end */
 
@@ -49,6 +48,7 @@ export default {
         wwEditorState: Object,
         /* wwManager: end */
     },
+    emits: ['update', 'update-effect', 'change-menu-visibility', 'change-borders-style'],
     computed: {
         canEditText() {
             /* wwManager:start */
@@ -171,12 +171,6 @@ export default {
             this.$emit('update', { text });
         },
         /* wwManager:start */
-        async edit() {
-            const { html } = (await openEditHTML(this.text)) || {};
-            if (html) {
-                this.updateText(html);
-            }
-        },
         checkListTags(text) {
             if (this.content.tag === 'p' && text && text[wwLib.wwLang.lang] && text[wwLib.wwLang.lang]) {
                 const notAllowedInP = ['<ul', '<li', '<ol'];
@@ -187,9 +181,8 @@ export default {
                 if (isInP) {
                     wwLib.wwNotification.open({
                         text: {
-                            en: `Lists are not allowed in a <b>P</b> tag.<br/>The tag of this text has been changed to <b>DIV</b>.`,
-                            fr:
-                                'Les listes ne sont pas autorisées dans une balise <b>P</b>.<br/>La balise de ce texte a été changée en <b>DIV</b>.',
+                            en: 'Lists are not allowed in a <b>P</b> tag.<br/>The tag of this text has been changed to <b>DIV</b>.',
+                            fr: 'Les listes ne sont pas autorisées dans une balise <b>P</b>.<br/>La balise de ce texte a été changée en <b>DIV</b>.',
                         },
                         color: 'blue',
                         duration: 3000,
@@ -218,9 +211,9 @@ export default {
         },
     },
     /* wwEditor:start */
-    mounted(){
+    mounted() {
         this.checkListTags(this.content.text);
-    }
+    },
     /* wwEditor:end */
 };
 </script>
