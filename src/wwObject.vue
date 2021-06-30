@@ -3,8 +3,8 @@
         class="ww-text"
         :tag="tag"
         :disabled="!canEditText"
-        :modelValue="internalText"
-        :textStyle="textStyle"
+        :model-value="internalText"
+        :text-style="textStyle"
         :links="links"
         @update:modelValue="updateText"
         @add-link="addLink"
@@ -48,7 +48,7 @@ export default {
         wwEditorState: Object,
         /* wwManager: end */
     },
-    emits: ['update', 'update-effect', 'change-menu-visibility', 'change-borders-style'],
+    emits: ['update:content', 'update:content:effect', 'change-menu-visibility', 'change-borders-style'],
     computed: {
         canEditText() {
             /* wwManager:start */
@@ -133,11 +133,11 @@ export default {
                 if (!newVal && oldVal) {
                     const defaultValue = wwLib.getStyleFromToken(oldVal);
                     const typo = wwLib.getTypoFromToken(defaultValue);
-                    this.$emit('update-effect', typo);
+                    this.$emit('update:content:effect', typo);
                 } else if (newVal && newVal !== oldVal) {
                     const defaultValue = wwLib.getStyleFromToken(newVal);
                     const typo = wwLib.getTypoFromToken(defaultValue);
-                    this.$emit('update-effect', typo);
+                    this.$emit('update:content:effect', typo);
                 }
             },
         },
@@ -165,10 +165,14 @@ export default {
             }
         },
     },
+    /* wwEditor:start */
+    mounted() {
+        this.checkListTags(this.content.text);
+    },
     /* wwEditor:end */
     methods: {
         updateText(text) {
-            this.$emit('update', { text });
+            this.$emit('update:content', { text });
         },
         /* wwManager:start */
         checkListTags(text) {
@@ -187,14 +191,14 @@ export default {
                         color: 'blue',
                         duration: 3000,
                     });
-                    this.$emit('update', { tag: 'div' });
+                    this.$emit('update:content', { tag: 'div' });
                 }
             }
         },
         /* wwManager:end */
         async addLink({ id, value }) {
             const links = { ...this.content.links };
-            this.$emit('update', {
+            this.$emit('update:content', {
                 links: {
                     ...links,
                     [this.wwFrontState.lang]: { ...links[this.wwFrontState.lang], [id]: value },
@@ -207,12 +211,8 @@ export default {
             if (links[this.wwFrontState.lang]) {
                 delete links[this.wwFrontState.lang][id];
             }
-            this.$emit('update', { links });
+            this.$emit('update:content', { links });
         },
-    },
-    /* wwEditor:start */
-    mounted() {
-        this.checkListTags(this.content.text);
     },
     /* wwEditor:end */
 };
