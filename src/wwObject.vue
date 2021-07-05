@@ -55,7 +55,7 @@ export default {
             return (
                 this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION &&
                 this.wwEditorState.isDoubleSelected &&
-                !this.isTextBinded &&
+                !this.isTextBound &&
                 !this.wwElementState.props.text
             );
             /* wwManager:end */
@@ -65,8 +65,8 @@ export default {
             /* wwFront:end */
         },
         /* wwManager:start */
-        isTextBinded() {
-            return this.wwEditorState.bindedProps['text'];
+        isTextBound() {
+            return this.wwEditorState.boundProps['text'];
         },
         /* wwManager:end */
         textStyle() {
@@ -153,7 +153,7 @@ export default {
             this.$emit('change-borders-style', this.canEditText ? bordersStyle : {});
         },
         'wwEditorState.isDoubleSelected'(newVal, oldVal) {
-            if (newVal && !oldVal && this.isTextBinded) {
+            if (newVal && !oldVal && this.isTextBound) {
                 wwLib.wwNotification.open({
                     text: {
                         en: 'Binded texts cannot be edited.',
