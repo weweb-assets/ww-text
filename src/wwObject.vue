@@ -41,11 +41,11 @@ export default {
     },
     /* wwEditor: end */
     props: {
-        content: Object,
-        wwElementState: Object,
-        wwFrontState: Object,
+        content: { type: Object, required: true },
+        wwElementState: { type: Object, required: true },
+        wwFrontState: { type: Object, required: true },
         /* wwManager: start */
-        wwEditorState: Object,
+        wwEditorState: { type: Object, required: true },
         /* wwManager: end */
     },
     emits: ['update:content', 'update:content:effect', 'change-menu-visibility', 'change-borders-style'],
