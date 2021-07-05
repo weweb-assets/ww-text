@@ -156,7 +156,7 @@ export default {
             if (newVal && !oldVal && this.isTextBound) {
                 wwLib.wwNotification.open({
                     text: {
-                        en: 'Binded texts cannot be edited.',
+                        en: 'Bound texts cannot be edited.',
                         fr: 'Les textes bindés ne peuvent pas être édités.',
                     },
                     color: 'purple',
