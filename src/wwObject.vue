@@ -3,10 +3,10 @@
         class="ww-text"
         :tag="tag"
         :disabled="!canEditText"
-        :value="internalText"
-        :textStyle="textStyle"
+        :model-value="internalText"
+        :text-style="textStyle"
         :links="links"
-        @input="updateText"
+        @update:modelValue="updateText"
         @add-link="addLink"
         @remove-link="removeLink"
     ></wwEditableText>
@@ -14,7 +14,6 @@
 
 <script>
 /* wwManager:start */
-import { openEditHTML } from './popups';
 import { getConfig } from './config.js';
 /* wwManager:end */
 
@@ -42,20 +41,21 @@ export default {
     },
     /* wwEditor: end */
     props: {
-        content: Object,
-        wwElementState: Object,
-        wwFrontState: Object,
+        content: { type: Object, required: true },
+        wwElementState: { type: Object, required: true },
+        wwFrontState: { type: Object, required: true },
         /* wwManager: start */
-        wwEditorState: Object,
+        wwEditorState: { type: Object, required: true },
         /* wwManager: end */
     },
+    emits: ['update:content', 'update:content:effect', 'change-menu-visibility', 'change-borders-style'],
     computed: {
         canEditText() {
             /* wwManager:start */
             return (
                 this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION &&
                 this.wwEditorState.isDoubleSelected &&
-                !this.isTextBinded &&
+                !this.isTextBound &&
                 !this.wwElementState.props.text
             );
             /* wwManager:end */
@@ -65,8 +65,8 @@ export default {
             /* wwFront:end */
         },
         /* wwManager:start */
-        isTextBinded() {
-            return this.wwEditorState.bindedProps['text'];
+        isTextBound() {
+            return this.wwEditorState.boundProps['text'];
         },
         /* wwManager:end */
         textStyle() {
@@ -133,11 +133,11 @@ export default {
                 if (!newVal && oldVal) {
                     const defaultValue = wwLib.getStyleFromToken(oldVal);
                     const typo = wwLib.getTypoFromToken(defaultValue);
-                    this.$emit('update-effect', typo);
+                    this.$emit('update:content:effect', typo);
                 } else if (newVal && newVal !== oldVal) {
                     const defaultValue = wwLib.getStyleFromToken(newVal);
                     const typo = wwLib.getTypoFromToken(defaultValue);
-                    this.$emit('update-effect', typo);
+                    this.$emit('update:content:effect', typo);
                 }
             },
         },
@@ -153,7 +153,7 @@ export default {
             this.$emit('change-borders-style', this.canEditText ? bordersStyle : {});
         },
         'wwEditorState.isDoubleSelected'(newVal, oldVal) {
-            if (newVal && !oldVal && this.isTextBinded) {
+            if (newVal && !oldVal && this.isTextBound) {
                 wwLib.wwNotification.open({
                     text: {
                         en: 'Binded texts cannot be edited.',
@@ -165,18 +165,16 @@ export default {
             }
         },
     },
+    /* wwEditor:start */
+    mounted() {
+        this.checkListTags(this.content.text);
+    },
     /* wwEditor:end */
     methods: {
         updateText(text) {
-            this.$emit('update', { text });
+            this.$emit('update:content', { text });
         },
         /* wwManager:start */
-        async edit() {
-            const { html } = (await openEditHTML(this.text)) || {};
-            if (html) {
-                this.updateText(html);
-            }
-        },
         checkListTags(text) {
             if (this.content.tag === 'p' && text && text[wwLib.wwLang.lang] && text[wwLib.wwLang.lang]) {
                 const notAllowedInP = ['<ul', '<li', '<ol'];
@@ -187,21 +185,20 @@ export default {
                 if (isInP) {
                     wwLib.wwNotification.open({
                         text: {
-                            en: `Lists are not allowed in a <b>P</b> tag.<br/>The tag of this text has been changed to <b>DIV</b>.`,
-                            fr:
-                                'Les listes ne sont pas autorisées dans une balise <b>P</b>.<br/>La balise de ce texte a été changée en <b>DIV</b>.',
+                            en: 'Lists are not allowed in a <b>P</b> tag.<br/>The tag of this text has been changed to <b>DIV</b>.',
+                            fr: 'Les listes ne sont pas autorisées dans une balise <b>P</b>.<br/>La balise de ce texte a été changée en <b>DIV</b>.',
                         },
                         color: 'blue',
                         duration: 3000,
                     });
-                    this.$emit('update', { tag: 'div' });
+                    this.$emit('update:content', { tag: 'div' });
                 }
             }
         },
         /* wwManager:end */
         async addLink({ id, value }) {
             const links = { ...this.content.links };
-            this.$emit('update', {
+            this.$emit('update:content', {
                 links: {
                     ...links,
                     [this.wwFrontState.lang]: { ...links[this.wwFrontState.lang], [id]: value },
@@ -214,13 +211,9 @@ export default {
             if (links[this.wwFrontState.lang]) {
                 delete links[this.wwFrontState.lang][id];
             }
-            this.$emit('update', { links });
+            this.$emit('update:content', { links });
         },
     },
-    /* wwEditor:start */
-    mounted(){
-        this.checkListTags(this.content.text);
-    }
     /* wwEditor:end */
 };
 </script>
