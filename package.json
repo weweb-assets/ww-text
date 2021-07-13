@@ -8,8 +8,7 @@
     "license": "MIT",
     "scripts": {
         "build": "weweb build",
-        "serve": "weweb serve",
-        "create-config": "weweb config"
+        "serve": "weweb serve"
     },
     "dependencies": {},
     "devDependencies": {

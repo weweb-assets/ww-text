@@ -13,9 +13,9 @@
 </template>
 
 <script>
-/* wwManager:start */
+/* wwEditor:start */
 import { getConfig } from './config.js';
-/* wwManager:end */
+/* wwEditor:end */
 
 export default {
     wwDefaultContent: {
@@ -35,40 +35,40 @@ export default {
         fontWeight: wwLib.allowState(wwLib.responsive('')),
         font: wwLib.allowState(wwLib.responsive('')),
     },
-    /* wwEditor: start */
+    /* wwEditor:start */
     wwEditorConfiguration({ content }) {
         return getConfig(content);
     },
-    /* wwEditor: end */
+    /* wwEditor:end */
     props: {
         content: { type: Object, required: true },
         wwElementState: { type: Object, required: true },
         wwFrontState: { type: Object, required: true },
-        /* wwManager: start */
+        /* wwEditor:start */
         wwEditorState: { type: Object, required: true },
-        /* wwManager: end */
+        /* wwEditor:end */
     },
     emits: ['update:content', 'update:content:effect', 'change-menu-visibility', 'change-borders-style'],
     computed: {
         canEditText() {
-            /* wwManager:start */
+            /* wwEditor:start */
             return (
                 this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION &&
                 this.wwEditorState.isDoubleSelected &&
                 !this.isTextBound &&
                 !this.wwElementState.props.text
             );
-            /* wwManager:end */
+            /* wwEditor:end */
             /* wwFront:start */
             // eslint-disable-next-line no-unreachable
             return false;
             /* wwFront:end */
         },
-        /* wwManager:start */
+        /* wwEditor:start */
         isTextBound() {
             return this.wwEditorState.boundProps['text'];
         },
-        /* wwManager:end */
+        /* wwEditor:end */
         textStyle() {
             const style = {
                 ...(this.content.font
@@ -174,7 +174,7 @@ export default {
         updateText(text) {
             this.$emit('update:content', { text });
         },
-        /* wwManager:start */
+        /* wwEditor:start */
         checkListTags(text) {
             if (this.content.tag === 'p' && text && text[wwLib.wwLang.lang] && text[wwLib.wwLang.lang]) {
                 const notAllowedInP = ['<ul', '<li', '<ol'];
@@ -195,7 +195,7 @@ export default {
                 }
             }
         },
-        /* wwManager:end */
+        /* wwEditor:end */
         async addLink({ id, value }) {
             const links = { ...this.content.links };
             this.$emit('update:content', {
