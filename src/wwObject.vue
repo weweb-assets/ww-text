@@ -165,6 +165,7 @@ export default {
             }
         },
     },
+    /* wwEditor:end */
     /* wwEditor:start */
     mounted() {
         this.checkListTags(this.content.text);
@@ -214,6 +215,5 @@ export default {
             this.$emit('update:content', { links });
         },
     },
-    /* wwEditor:end */
 };
 </script>
