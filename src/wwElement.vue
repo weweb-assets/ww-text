@@ -13,10 +13,6 @@
 </template>
 
 <script>
-/* wwEditor:start */
-import { getConfig } from './config.js';
-/* wwEditor:end */
-
 export default {
     wwDefaultContent: {
         text: {
@@ -35,11 +31,6 @@ export default {
         fontWeight: wwLib.allowState(wwLib.responsive('')),
         font: wwLib.allowState(wwLib.responsive('')),
     },
-    /* wwEditor:start */
-    wwEditorConfiguration({ content }) {
-        return getConfig(content);
-    },
-    /* wwEditor:end */
     props: {
         content: { type: Object, required: true },
         wwElementState: { type: Object, required: true },
@@ -48,7 +39,9 @@ export default {
         wwEditorState: { type: Object, required: true },
         /* wwEditor:end */
     },
+    /* wwEditor:start */
     emits: ['update:content', 'update:content:effect', 'change-menu-visibility', 'change-borders-style'],
+    /* wwEditor:end */
     computed: {
         canEditText() {
             /* wwEditor:start */
