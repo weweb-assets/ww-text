@@ -37,6 +37,7 @@ export default {
             },
             bindable: true,
             multiLang: true,
+            noEdit: true,
         },
         font: {
             label: {
