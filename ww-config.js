@@ -38,6 +38,9 @@ export default {
             bindable: true,
             multiLang: true,
             noEdit: true,
+            defaultValue: {
+                en: 'New text',
+            },
         },
         font: {
             label: {
@@ -61,7 +64,6 @@ export default {
                 en: 'Size',
                 fr: 'Taille',
             },
-            defaultValue: '16px',
             type: 'Length',
             options: {
                 unitChoices: [{ value: 'px', label: 'px', min: 1, max: 100 }],
@@ -69,6 +71,7 @@ export default {
             responsive: true,
             states: true,
             hidden: content => content.font,
+            defaultValue: '16px',
         },
         fontFamily: {
             label: {
@@ -234,6 +237,7 @@ export default {
                     { value: 'div', label: 'Div' },
                 ],
             },
+            defaultValue: 'p',
         },
     },
 };

@@ -14,23 +14,6 @@
 
 <script>
 export default {
-    wwDefaultContent: {
-        text: {
-            en: 'New text',
-        },
-        tag: 'p',
-        textAlign: wwLib.responsive(''),
-        fontSize: wwLib.allowState(wwLib.responsive('16px')),
-        fontFamily: wwLib.allowState(wwLib.responsive('')),
-        color: wwLib.allowState(wwLib.responsive('')),
-        backgroundColor: wwLib.allowState(wwLib.responsive('')),
-        textTransform: wwLib.allowState(wwLib.responsive('')),
-        textShadow: wwLib.allowState(wwLib.responsive('')),
-        lineHeight: wwLib.allowState(wwLib.responsive('')),
-        wordSpacing: wwLib.allowState(wwLib.responsive('')),
-        fontWeight: wwLib.allowState(wwLib.responsive('')),
-        font: wwLib.allowState(wwLib.responsive('')),
-    },
     props: {
         content: { type: Object, required: true },
         wwElementState: { type: Object, required: true },
