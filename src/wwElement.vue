@@ -153,7 +153,7 @@ export default {
         },
         /* wwEditor:start */
         checkListTags(text) {
-            if (this.content.tag === 'p' && text && text[wwLib.wwLang.lang] && text[wwLib.wwLang.lang]) {
+            if (this.content.tag === 'p' && text && text[wwLib.wwLang.lang] && text[wwLib.wwLang.lang].indexOf) {
                 const notAllowedInP = ['<ul', '<li', '<ol'];
                 const isInP = notAllowedInP.reduce(
                     (isInText, el) => isInText || text[wwLib.wwLang.lang].indexOf(el) !== -1,

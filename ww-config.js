@@ -239,5 +239,8 @@ export default {
             },
             defaultValue: 'p',
         },
+        links: {
+            hidden: true,
+        },
     },
 };
