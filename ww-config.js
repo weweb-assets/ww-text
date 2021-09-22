@@ -31,13 +31,12 @@ export default {
                 en: 'Text',
                 fr: 'Texte',
             },
-            type: 'Textarea',
+            type: 'Info',
             options: {
-                row: 20,
+                text: { en: 'Click text to edit' },
             },
             bindable: true,
             multiLang: true,
-            noEdit: { en: 'Click text to edit' },
             defaultValue: {
                 en: 'New text',
             },
