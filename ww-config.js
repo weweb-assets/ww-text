@@ -37,7 +37,7 @@ export default {
             },
             bindable: true,
             multiLang: true,
-            noEdit: true,
+            noEdit: { en: 'Click text to edit' },
             defaultValue: {
                 en: 'New text',
             },
