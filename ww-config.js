@@ -90,7 +90,7 @@ export default {
             type: 'TextSelect',
             options: {
                 options: [
-                    { value: null, label: { en: 'Default', fr: 'Par défaut' } },
+                    { value: null, label: { en: 'Default', fr: 'Par défaut' }, default: true },
                     { value: 100, label: { en: '100 - Thin' } },
                     { value: 200, label: { en: '200 - Extra Light' } },
                     { value: 300, label: { en: '300 - Light' } },
@@ -183,7 +183,7 @@ export default {
             type: 'TextSelect',
             options: {
                 options: [
-                    { value: null, label: 'none' },
+                    { value: null, label: 'none', default: true },
                     { value: 'capitalize', label: 'Capitalize' },
                     { value: 'uppercase', label: 'UPPERCASE' },
                     { value: 'lowercase', label: 'lowercase' },
