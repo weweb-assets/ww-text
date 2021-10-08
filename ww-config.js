@@ -23,7 +23,7 @@ export default {
         }),
     },
     options: {
-        lazyHydrate: true,
+        hyperlink: true,
     },
     properties: {
         text: {
