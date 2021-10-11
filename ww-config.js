@@ -232,7 +232,6 @@ export default {
                     { value: 'h3', label: 'H3' },
                     { value: 'h4', label: 'H4' },
                     { value: 'button', label: 'Button' },
-                    { value: 'a', label: 'A' },
                     { value: 'div', label: 'Div' },
                 ],
             },
