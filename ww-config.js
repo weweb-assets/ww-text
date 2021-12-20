@@ -126,7 +126,7 @@ export default {
         },
         textAlign: {
             label: {
-                en: 'Alignement',
+                en: 'Alignment',
                 fr: 'Alignement',
             },
             type: 'TextRadioGroup',
