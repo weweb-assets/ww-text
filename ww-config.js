@@ -106,6 +106,7 @@ export default {
                     { value: 900, label: { en: '900 - Black' } },
                 ],
             },
+            defaultValue: null,
             responsive: true,
             states: true,
             hidden: content => content.font,
@@ -181,6 +182,60 @@ export default {
             responsive: true,
             states: true,
         },
+        textDecoration: {
+            label: {
+                en: 'Text decoration',
+                fr: 'Text decoration',
+            },
+            type: 'TextSelect',
+            options: {
+                options: [
+                    { value: 'none', label: { en: 'None', fr: 'None' }, default: true },
+                    { value: 'underline', label: { en: 'Underline' } },
+                    { value: 'overline', label: { en: 'Overline' } },
+                    { value: 'line-through', label: { en: 'Line-through' } },
+                ],
+            },
+            defaultValue: 'none',
+            bindable: true,
+            responsive: true,
+            states: true,
+        },
+        textDecorationStyle: {
+            label: {
+                en: 'Decoration style',
+                fr: 'Decoration style',
+            },
+            type: 'TextSelect',
+            options: {
+                options: [
+                    { value: 'solid', label: { en: 'Solid' }, default: true },
+                    { value: 'double', label: { en: 'Double' } },
+                    { value: 'dotted', label: { en: 'Dotted' } },
+                    { value: 'dashed', label: { en: 'Dashed' } },
+                    { value: 'wavy', label: { en: 'Wavy' } },
+                ],
+            },
+            defaultValue: 'solid',
+            responsive: true,
+            bindable: true,
+            states: true,
+            hidden: content => content.textDecoration === 'none',
+        },
+        textDecorationColor: {
+            label: {
+                en: 'Decoration color',
+                fr: 'Decoration color',
+            },
+            type: 'Color',
+            options: {
+                nullable: true,
+            },
+            responsive: true,
+            bindable: true,
+            states: true,
+            hidden: content => content.textDecoration === 'none',
+        },
         textTransform: {
             label: {
                 en: 'Character case',
@@ -196,6 +251,7 @@ export default {
                     { value: 'lowercase', label: 'lowercase' },
                 ],
             },
+            defaultValue: null,
             responsive: true,
             states: true,
         },
@@ -207,6 +263,18 @@ export default {
             type: 'Shadows',
             options: {
                 isText: true,
+            },
+            responsive: true,
+            states: true,
+        },
+        latterSpacing: {
+            label: {
+                en: 'Letter spacing',
+                fr: 'Espacement des lettres',
+            },
+            type: 'Length',
+            options: {
+                unitChoices: [{ value: 'px', label: 'px', min: 0, max: 100 }],
             },
             responsive: true,
             states: true,
