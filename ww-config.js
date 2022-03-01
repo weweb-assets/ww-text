@@ -275,7 +275,7 @@ export default {
             options: {
                 unitChoices: [{ value: 'px', label: 'px', min: 0, max: 100 }],
             },
-            defaultValue: 0,
+            defaultValue: '0px',
             responsive: true,
             states: true,
         },
@@ -288,7 +288,7 @@ export default {
             options: {
                 unitChoices: [{ value: 'px', label: 'px', min: 0, max: 100 }],
             },
-            defaultValue: 0,
+            defaultValue: '0px',
             responsive: true,
             states: true,
         },
