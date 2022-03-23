@@ -40,6 +40,7 @@ export default {
             defaultValue: {
                 en: 'New text',
             },
+            hidden: (content, sidePanelContent, boundProps, wwProps) => !!(wwProps && wwProps.text),
         },
         font: {
             label: {
