@@ -170,19 +170,6 @@ export default {
             responsive: true,
             states: true,
         },
-        backgroundColor: {
-            label: {
-                en: 'Text Background',
-                fr: 'Background du Texte',
-            },
-            type: 'Color',
-            options: {
-                nullable: true,
-            },
-            bindable: true,
-            responsive: true,
-            states: true,
-        },
         textDecoration: {
             label: {
                 en: 'Text decoration',
