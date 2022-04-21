@@ -63,7 +63,6 @@ export default {
                       }),
                 textAlign: this.content.textAlign,
                 color: this.content.color,
-                backgroundColor: this.content.backgroundColor,
                 textTransform: this.content.textTransform,
                 textShadow: this.content.textShadow,
                 letterSpacing: this.content.letterSpacing,
