@@ -1,3 +1,3 @@
 <template>
-    <wwText></wwText>
+    <wwTextElement></wwTextElement>
 </template>
