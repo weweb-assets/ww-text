@@ -1,5 +1,5 @@
 export default {
-    inherit: 'ww-text',
+    inherit: ['ww-text'],
     editor: {
         label: {
             en: 'Text',
