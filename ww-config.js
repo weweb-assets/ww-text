@@ -5,12 +5,6 @@ export default {
             fr: 'Texte',
         },
         icon: 'type',
-        menuOptions: {
-            quick: {
-                sections: ['tag', 'font'],
-                bind: [{ prop: 'text', label: { en: 'Bind text' } }],
-            },
-        },
         infoTag: content => ({
             color: 'var(--ww-color-blue-500)',
             backgroundColor: 'var(--ww-color-blue-100)',
