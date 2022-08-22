@@ -218,6 +218,25 @@ export default {
             states: true,
             hidden: content => content.textDecoration === 'none',
         },
+        nowrap: {
+            label: {
+                en: 'No-wrap',
+            },
+            type: 'OnOff',
+            defaultValue: false,
+            responsive: true,
+            states: true,
+        },
+        ellipsis: {
+            hidden: content => !content.nowrap,
+            label: {
+                en: 'Ellipsis',
+            },
+            type: 'OnOff',
+            defaultValue: false,
+            responsive: true,
+            states: true,
+        },
         textTransform: {
             label: {
                 en: 'Character case',
