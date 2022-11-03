@@ -35,6 +35,22 @@ export default {
                 en: 'New text',
             },
             hidden: (content, sidePanelContent, boundProps, wwProps) => !!(wwProps && wwProps.text),
+            /* wwEditor:start */
+            bindingValidation: {
+                tooltip: 'Anything that can be interpreted as a text (string, number, boolean, etc)',
+                validations: [
+                    {
+                        type: 'string',
+                    },
+                    {
+                        type: 'boolean',
+                    },
+                    {
+                        type: 'number',
+                    },
+                ],
+            },
+            /* wwEditor:end */
         },
         font: {
             label: {
@@ -163,6 +179,13 @@ export default {
             bindable: true,
             responsive: true,
             states: true,
+            /* wwEditor:start */
+            bindingValidation: {
+                cssSupports: 'color',
+                type: 'string',
+                tooltip: 'A string that represents a color code: `"rebeccapurple" | "#00ff00" | "rgb(214, 122, 127)"`',
+            },
+            /* wwEditor:end */
         },
         textDecoration: {
             label: {
@@ -182,6 +205,12 @@ export default {
             bindable: true,
             responsive: true,
             states: true,
+            /* wwEditor:start */
+            bindingValidation: {
+                type: 'string',
+                tooltip: 'A string between these options: `"none" | "underline" | "overline" | "line-through"`',
+            },
+            /* wwEditor:end */
         },
         textDecorationStyle: {
             label: {
@@ -203,6 +232,12 @@ export default {
             bindable: true,
             states: true,
             hidden: content => content.textDecoration === 'none',
+            /* wwEditor:start */
+            bindingValidation: {
+                type: 'string',
+                tooltip: 'A string between these options: `"solid" | "double" | "dotted" | "dashed" | "wavy"`',
+            },
+            /* wwEditor:end */
         },
         textDecorationColor: {
             label: {
@@ -217,6 +252,13 @@ export default {
             bindable: true,
             states: true,
             hidden: content => content.textDecoration === 'none',
+            /* wwEditor:start */
+            bindingValidation: {
+                cssSupports: 'color',
+                type: 'string',
+                tooltip: 'A string that represents a color code: `"rebeccapurple" | "#00ff00" | "rgb(214, 122, 127)"`',
+            },
+            /* wwEditor:end */
         },
         nowrap: {
             label: {
