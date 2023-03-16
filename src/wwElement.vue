@@ -6,6 +6,7 @@
         :model-value="internalText"
         :text-style="textStyle"
         :links="links"
+        :sanitize="content.sanitize"
         @update:modelValue="updateText"
         @add-link="addLink"
         @remove-link="removeLink"
