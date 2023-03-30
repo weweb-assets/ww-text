@@ -5,7 +5,7 @@ export default {
             en: 'Text',
             fr: 'Texte',
         },
-        icon: 'type',
+        icon: 'typography',
         infoTag: content => ({
             color: 'var(--ww-color-blue-500)',
             backgroundColor: 'var(--ww-color-blue-100)',
