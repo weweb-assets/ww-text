@@ -8,7 +8,7 @@ export default {
         content: { type: Object, required: true },
         wwElementState: { type: Object, required: true },
     },
-    emits: ['update-content'],
+    emits: ['update-content', 'update:content:effect'],
     computed: {
         tag() {
             if (this.wwElementState.isInsideLink && this.content.tag === 'button') {
