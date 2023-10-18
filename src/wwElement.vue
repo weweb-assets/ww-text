@@ -43,8 +43,16 @@ export default {
                 if (isInP) {
                     wwLib.wwNotification.open({
                         text: {
-                            en: 'Lists are not allowed in a <b>P</b> tag.<br/>The tag of this text has been changed to <b>DIV</b>.',
-                            fr: 'Les listes ne sont pas autorisées dans une balise <b>P</b>.<br/>La balise de ce texte a été changée en <b>DIV</b>.',
+                            en: `<div>
+                                    <div>Lists are not allowed in a <b>P</b> tag.</div>
+                                    <div>The tag of this text has been changed to <b>DIV</b>.</div>
+                                </div>
+                                `,
+                            fr: `<div>
+                                    <div>Les listes ne sont pas autorisées dans une balise <b>P</b>.</div>
+                                    <div>La balise de ce texte a été changée en <b>DIV</b>.</div>
+                                </div>
+                                `,
                         },
                         color: 'blue',
                         duration: 3000,
