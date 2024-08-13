@@ -1,5 +1,5 @@
 <template>
-    <wwText :tag="tag" :text="text"></wwText>
+    <wwText :tag="tag" :text="text" v-bind="properties"></wwText>
 </template>
 
 <script>
@@ -9,13 +9,13 @@ export default {
         wwElementState: { type: Object, required: true },
     },
     emits: ['update-content', 'update:content:effect'],
+    setup() {
+        const { hasLink, tag, properties } = wwLib.wwElement.useLink();
+        return { hasLink, linkTag: tag, properties };
+    },
     computed: {
         tag() {
-            if (this.wwElementState.isInsideLink && this.content.tag === 'button') {
-                return 'div';
-            } else {
-                return this.content.tag;
-            }
+            return this.hasLink ? this.linkTag : this.content.tag;
         },
         text() {
             return this.wwElementState.props.text;
