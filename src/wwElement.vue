@@ -1,5 +1,5 @@
 <template>
-    <wwText :tag="tag" :text="text" v-bind="properties"></wwText>
+    <wwText :tag="tag" :text="text" v-bind="properties" :class="{ '-link': hasLink }"></wwText>
 </template>
 
 <script>
@@ -65,3 +65,9 @@ export default {
     },
 };
 </script>
+
+<style lang="scss" scoped>
+.-link {
+    cursor: pointer;
+}
+</style>
