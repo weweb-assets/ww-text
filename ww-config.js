@@ -17,6 +17,9 @@ export default {
             },
         }),
     },
+    options: {
+        linkable: true,
+    },
     properties: {
         tag: {
             label: {

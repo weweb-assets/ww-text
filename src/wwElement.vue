@@ -1,5 +1,5 @@
 <template>
-    <wwText :tag="tag" :text="text"></wwText>
+    <wwText :tag="tag" :text="text" v-bind="properties" :class="{ '-link': hasLink && !isEditing }"></wwText>
 </template>
 
 <script>
@@ -7,18 +7,28 @@ export default {
     props: {
         content: { type: Object, required: true },
         wwElementState: { type: Object, required: true },
+        /* wwEditor:start */
+        wwEditorState: { type: Object, required: true },
+        /* wwEditor:end */
     },
     emits: ['update-content', 'update:content:effect'],
+    setup() {
+        const { hasLink, tag, properties } = wwLib.wwElement.useLink();
+        return { hasLink, linkTag: tag, properties };
+    },
     computed: {
         tag() {
-            if (this.wwElementState.isInsideLink && this.content.tag === 'button') {
-                return 'div';
-            } else {
-                return this.content.tag;
-            }
+            return this.hasLink ? this.linkTag : this.content.tag;
         },
         text() {
             return this.wwElementState.props.text;
+        },
+        isEditing() {
+            /* wwEditor:start */
+            return this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION;
+            /* wwEditor:end */
+            // eslint-disable-next-line no-unreachable
+            return false;
         },
     },
     /* wwEditor:start */
@@ -65,3 +75,9 @@ export default {
     },
 };
 </script>
+
+<style lang="scss" scoped>
+.-link {
+    cursor: pointer;
+}
+</style>
