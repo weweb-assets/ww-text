@@ -7,8 +7,6 @@ export default {
         },
         icon: 'text',
         infoTag: content => ({
-            color: 'var(--ww-color-blue-500)',
-            backgroundColor: 'var(--ww-color-blue-100)',
             text: content.tag === 'button' ? 'BTN' : content.tag && content.tag.toUpperCase(),
             action: () => {
                 wwLib.wwSearchBar.executeAction({
