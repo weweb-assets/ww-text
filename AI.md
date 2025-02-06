@@ -19,3 +19,5 @@ Events: none
 Variables: none
 
 Children: none
+
+Note: For binding the text props, use binding in each language (e.g., `{ "en": {"__wwtype":...}, "fr": {"__wwtype":...} }`). Available languages can be found in Page Info variable.
