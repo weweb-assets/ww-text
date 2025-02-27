@@ -20,4 +20,4 @@ Variables: none
 
 Children: none
 
-Note: For binding the text props, use binding in each language (e.g., `{ "en": {"__wwtype":...}, "fr": {"__wwtype":...} }`). Available languages can be found in Page Info variable.
+Note: For binding the text props, use binding in each language (e.g., `"text": { "en": {"wwFormula":...}, "fr": {"wwFormula":...} }`). Available languages can be found in Page Info variable.
