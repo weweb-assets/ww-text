@@ -18,6 +18,6 @@ Events: none
 
 Variables: none
 
-Children: none
+Slots: none
 
 Note: Available languages can be found in Page Info variable.
