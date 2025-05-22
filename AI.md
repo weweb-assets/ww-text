@@ -1,5 +1,5 @@
 ---
-name: ww-text
+name: test-marc
 description: HTML text component with multi-language support
 keywords:
   - text
