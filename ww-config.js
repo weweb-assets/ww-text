@@ -19,6 +19,7 @@ export default {
     },
     options: {
         linkable: true,
+        displayAllowedValues: ['block', 'inline-block', 'inline'],
     },
     properties: {
         tag: {
