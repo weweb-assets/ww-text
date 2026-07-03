@@ -31,7 +31,8 @@
         "h4",
         "button",
         "div",
-        "span"
+        "span",
+        "label"
       ],
       "defaultValue": "p"
     },
