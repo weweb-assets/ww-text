@@ -1,5 +1,42 @@
+function getTextSurfaceCss(content) {
+    const css = [];
+
+    if (content.backgroundColor) {
+        css.push({ property: '--ww-text-background-color', value: content.backgroundColor });
+    }
+
+    css.push(
+        {
+            property: '--ww-text-white-space',
+            value: content._mapValue('_ww-text_nowrap', 'white-space', {
+                trueValue: 'nowrap',
+                falseValue: 'initial',
+            }),
+        },
+        {
+            property: '--ww-text-overflow',
+            value: content._mapValue('_ww-text_nowrap', 'overflow', {
+                trueValue: 'hidden',
+                falseValue: 'initial',
+            }),
+        },
+        {
+            property: '--ww-text-text-overflow',
+            value: content._mapValue('_ww-text_ellipsis', 'text-overflow', {
+                trueValue: 'ellipsis',
+                falseValue: 'initial',
+            }),
+        }
+    );
+
+    return css;
+}
+
 export default {
     inherit: ['ww-text'],
+    css({ content }) {
+        return getTextSurfaceCss(content);
+    },
     editor: {
         label: {
             en: 'Text',
