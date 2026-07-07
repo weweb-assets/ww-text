@@ -1,4 +1,4 @@
-function getTextSurfaceCss(content) {
+function getTextSurfaceCss(content, style) {
     const css = [];
 
     if (content.backgroundColor) {
@@ -26,6 +26,10 @@ function getTextSurfaceCss(content) {
                 trueValue: 'ellipsis',
                 falseValue: 'initial',
             }),
+        },
+        {
+            property: '--ww-element-transition',
+            value: style.transition,
         }
     );
 
@@ -34,8 +38,8 @@ function getTextSurfaceCss(content) {
 
 export default {
     inherit: ['ww-text'],
-    css({ content }) {
-        return getTextSurfaceCss(content);
+    css({ content, style }) {
+        return getTextSurfaceCss(content, style);
     },
     editor: {
         label: {
