@@ -1,10 +1,6 @@
 function getTextSurfaceCss(content, style) {
     const css = [];
 
-    if (content.backgroundColor) {
-        css.push({ property: '--ww-text-background-color', value: content.backgroundColor });
-    }
-
     css.push(
         {
             property: '--ww-text-white-space',
