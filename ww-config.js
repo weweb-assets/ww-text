@@ -1,6 +1,10 @@
 function getTextSurfaceCss(content, style) {
     const css = [];
 
+    // TODO(WW-3544): Reintroduce Text Background only with an explicit compatibility plan.
+    // The legacy inline engine ignored content.backgroundColor. Exporting it here applies the
+    // value to every component inheriting ww-text, notably making some existing button labels
+    // unreadable when their text color and legacy text background contain the same color.
     css.push(
         {
             property: '--ww-text-white-space',
